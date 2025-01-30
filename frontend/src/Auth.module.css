@@ -1,0 +1,88 @@
+.loginContainer {
+  border-radius: 24px;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.loginContent {
+  background-color: #262626;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 12px;
+}
+
+.loginForm {
+  border-radius: 0;
+  display: flex;
+  width: 406px;
+  max-width: 100%;
+  flex-direction: column;
+}
+
+.welcomeText {
+  border-radius: 54px;
+  color: #fff;
+  letter-spacing: 0;
+  font: 700 32px/40px Roboto;
+  padding: 16px 24px 16px 16px;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0;
+}
+
+.inputLabel {
+  color: #fff;
+  letter-spacing: 0.15px;
+  font: 500 16px/24px Roboto;
+  margin-bottom: 8px;
+}
+
+.inputField {
+  border-radius: 24px;
+  background-color: #454545;
+  height: 40px;
+  padding: 8px 16px;
+  color: #fff;
+  border: none;
+}
+
+.button {
+  border: none;
+  cursor: pointer;
+  font: 500 14px/20px Roboto;
+  letter-spacing: 0.1px;
+}
+
+.signInButton {
+  border-radius: 30px;
+  background-color: #fff;
+  color: #000;
+  padding: 15px 30px;
+  align-self: flex-end;
+  font-weight: 700;
+  margin-top: 26px;
+}
+
+@media (max-width: 991px) {
+  .loginContent {
+    max-width: 100%;
+    padding: 100px 0;
+  }
+
+  .welcomeText {
+    padding-right: 20px;
+  }
+
+  .signInButton {
+    padding: 0 20px;
+  }
+}

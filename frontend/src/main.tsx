@@ -1,16 +1,5 @@
-import React from 'react'
-import "./index.css";
-import {createRoot} from 'react-dom/client'
-import "./Auth.module.css";
+import { createRoot } from 'react-dom/client'
+import App from '@/App'
+import '@/index.css'
 
-import { LoginForm } from './LoginForm'
-
-const container = document.getElementById('root')
-
-const root = createRoot(container!)
-
-root.render(
-    <React.StrictMode>
-        <LoginForm/>
-    </React.StrictMode>
-)
+createRoot(document.getElementById("root")!).render(<App />);

@@ -3,9 +3,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Bookmark, FileText, Infinity, Settings, Trash2 } from "lucide-react";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+// Add these props to handle view switching
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  currentView?: string;
+  onViewChange?: (view: string) => void;
+}
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, currentView = "passwords", onViewChange }: SidebarProps) {
   return (
     <div className={cn("border-r bg-[#1E1E1E]", className)}>
       <div className="flex h-[60px] items-center px-6 border-b border-border">
@@ -17,29 +21,45 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="space-y-1">
-            <Button variant="secondary" className="w-full justify-start text-sm h-9">
+            <Button 
+              variant={currentView === "passwords" ? "secondary" : "ghost"}
+              className="w-full justify-start text-sm h-9"
+              onClick={() => onViewChange?.("passwords")}
+            >
               <FileText className="mr-2 h-4 w-4" />
               All Passwords
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-sm h-9">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-sm h-9"
+            >
               <Bookmark className="mr-2 h-4 w-4" />
               Bookmark
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-sm h-9">
+            {/* Update the Generator button to handle clicks and show active state */}
+            <Button 
+              variant={currentView === "generator" ? "secondary" : "ghost"}
+              className="w-full justify-start text-sm h-9"
+              onClick={() => onViewChange?.("generator")}
+            >
               <Infinity className="mr-2 h-4 w-4" />
               Generator
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-sm h-9">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-sm h-9"
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Trash
             </Button>
           </div>
         </div>
+        {/* Rest of the Sidebar code remains the same */}
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">
             VAULTS
           </h2>
-          <ScrollArea className="h-[300px] px-1">
+          <ScrollArea className="px-1">
             <div className="space-y-1">
               <h3 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">SCHOOL</h3>
               {['KMUTT', 'MIT', 'CU'].map((vault) => (

@@ -45,7 +45,7 @@ export function PasswordGenerator() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 flex flex-col p-6">
       <div className="space-y-2">
         <Label>Generated Password</Label>
         <div className="flex gap-2">

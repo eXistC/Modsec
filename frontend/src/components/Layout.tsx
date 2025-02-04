@@ -1,6 +1,7 @@
 import { Sidebar } from "./Sidebar";
 import { PasswordList } from "./PasswordList";
 import { PasswordEditor } from "./PasswordEditor";
+import { PasswordGenerator } from "./PasswordGenerator";
 
 export function Layout() {
   return (
@@ -11,7 +12,8 @@ export function Layout() {
           <PasswordList />
         </div>
         <div>
-          <PasswordEditor />
+          {/* <PasswordEditor /> */}
+          <PasswordGenerator />
         </div>
       </div>
     </div>

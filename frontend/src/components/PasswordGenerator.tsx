@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Copy, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export function PasswordGenerator() {
@@ -22,14 +22,16 @@ export function PasswordGenerator() {
     const numbers = "0123456789";
     const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
 
-    let chars = lowercase;
+    let chars = lowercase; // Always include lowercase for better security
     if (options.uppercase) chars += uppercase;
     if (options.numbers) chars += numbers;
     if (options.symbols) chars += symbols;
 
     let generatedPassword = "";
+    const array = new Uint32Array(length);
+    crypto.getRandomValues(array);
     for (let i = 0; i < length; i++) {
-      generatedPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+      generatedPassword += chars.charAt(array[i] % chars.length);
     }
 
     setPassword(generatedPassword);

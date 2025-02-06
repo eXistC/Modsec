@@ -96,25 +96,27 @@ export function PasswordEditor() {
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Username</label>
-            <Input 
-              placeholder="example@gmail.com" 
-              className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-              value={formData.username}
-              onChange={handleChange('username')}
-              readOnly={!isEditing}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Password</label>
-            <Input 
-              type="password" 
-              className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono`}
-              value={formData.password}
-              onChange={handleChange('password')}
-              readOnly={!isEditing}
-            />
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Username</label>
+              <Input 
+                placeholder="example@gmail.com" 
+                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+                value={formData.username}
+                onChange={handleChange('username')}
+                readOnly={!isEditing}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Password</label>
+              <Input 
+                type="password" 
+                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono`}
+                value={formData.password}
+                onChange={handleChange('password')}
+                readOnly={!isEditing}
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Notes</label>

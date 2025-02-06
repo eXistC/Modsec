@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Bookmark, FileText, Infinity, Settings, Trash2 } from "lucide-react";
+import { VaultsList } from "@/components/VaultsList";
 
 // Add these props to handle view switching
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -54,46 +54,7 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
             </Button>
           </div>
         </div>
-        {/* Rest of the Sidebar code remains the same */}
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">
-            VAULTS
-          </h2>
-          <ScrollArea className="px-1">
-            <div className="space-y-1">
-              <h3 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">SCHOOL</h3>
-              {['KMUTT', 'MIT', 'CU'].map((vault) => (
-                <Button
-                  key={vault}
-                  variant="ghost"
-                  className="w-full justify-start pl-8 text-sm h-9 font-normal"
-                >
-                  {vault}
-                </Button>
-              ))}
-              <h3 className="mt-4 mb-2 px-4 text-xs font-semibold text-muted-foreground">SCHOOL</h3>
-              {['KMUTT', 'MIT', 'CU'].map((vault) => (
-                <Button
-                  key={vault + '2'}
-                  variant="ghost"
-                  className="w-full justify-start pl-8 text-sm h-9 font-normal"
-                >
-                  {vault}
-                </Button>
-              ))}
-              <h3 className="mt-4 mb-2 px-4 text-xs font-semibold text-muted-foreground">SCHOOL</h3>
-              {['KMUTT', 'MIT', 'CU'].map((vault) => (
-                <Button
-                  key={vault + '3'}
-                  variant="ghost"
-                  className="w-full justify-start pl-8 text-sm h-9 font-normal"
-                >
-                  {vault}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
+        <VaultsList/>
       </div>
     </div>
   );

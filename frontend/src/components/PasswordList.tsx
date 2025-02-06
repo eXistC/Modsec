@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark } from "lucide-react";
+import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck } from "lucide-react";
+import { useState } from "react";
 
 interface PasswordEntry {
   id: string;
@@ -37,7 +38,6 @@ const mockPasswords: PasswordEntry[] = [
     title: "Not mine",
     cardNumber: "1234 12XX XXXX 1234",
   },
-  // Repeat entries to match the mockup
   {
     id: "5",
     type: "note",
@@ -58,6 +58,26 @@ const mockPasswords: PasswordEntry[] = [
 ];
 
 export function PasswordList() {
+  const [passwords, setPasswords] = useState<PasswordEntry[]>(mockPasswords);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const toggleBookmark = (id: string) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPasswords(prev =>
+      prev.map(entry =>
+        entry.id === id
+          ? { ...entry, isBookmarked: !entry.isBookmarked }
+          : entry
+      )
+    );
+  };
+
+  const filteredPasswords = passwords.filter(entry =>
+    entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    entry.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    entry.cardNumber?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="h-full bg-[#1E1E1E]">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
@@ -73,22 +93,26 @@ export function PasswordList() {
           <Input 
             className="pl-9 bg-secondary border-0" 
             placeholder="Search..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
       <ScrollArea className="h-[calc(100vh-140px)]">
         <div className="space-y-1 p-2">
-          {mockPasswords.map((entry) => (
+          {filteredPasswords.map((entry) => (
             <Button
               key={entry.id}
               variant="ghost"
-              className="w-full justify-start p-3 h-auto relative group"
+              className="w-full justify-start p-3 h-auto relative group hover:bg-secondary/40 transition-colors duration-200"
             >
-              <div className="flex items-start gap-3 w-full">
-                {entry.type === "website" && <Globe className="h-5 w-5 mt-0.5" />}
-                {entry.type === "identity" && <User className="h-5 w-5 mt-0.5" />}
-                {entry.type === "card" && <CreditCard className="h-5 w-5 mt-0.5" />}
-                {entry.type === "note" && <Pen className="h-5 w-5 mt-0.5" />}
+              <div className="flex items-center gap-3 w-full min-h-[40px]">
+                <div className="flex-shrink-0">
+                  {entry.type === "website" && <Globe className="h-5 w-5" />}
+                  {entry.type === "identity" && <User className="h-5 w-5" />}
+                  {entry.type === "card" && <CreditCard className="h-5 w-5" />}
+                  {entry.type === "note" && <Pen className="h-5 w-5" />}
+                </div>
                 <div className="text-left flex-1">
                   <div className="font-medium text-sm">{entry.title}</div>
                   {entry.username && (
@@ -102,9 +126,28 @@ export function PasswordList() {
                     </div>
                   )}
                 </div>
-                {entry.isBookmarked && (
-                  <Bookmark className="h-4 w-4 text-muted-foreground absolute right-3" />
-                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 absolute right-3 top-1/2 -translate-y-1/2
+                    transition-all duration-300 ease-spring
+                    ${entry.isBookmarked 
+                      ? 'opacity-100 scale-100' 
+                      : 'opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100'}`}
+                  onClick={toggleBookmark(entry.id)}
+                >
+                  {entry.isBookmarked ? (
+                    <BookmarkCheck 
+                      className="h-4 w-4 text-primary transform transition-all duration-300 
+                        ease-spring hover:scale-110 active:scale-95" 
+                    />
+                  ) : (
+                    <Bookmark 
+                      className="h-4 w-4 transform transition-all duration-300 
+                        ease-spring hover:scale-110 active:scale-95" 
+                    />
+                  )}
+                </Button>
               </div>
             </Button>
           ))}

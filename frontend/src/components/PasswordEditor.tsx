@@ -1,20 +1,76 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bookmark, Globe, MoreVertical } from "lucide-react";
+import { Bookmark, Globe, MoreVertical, Pencil } from "lucide-react";
+import { useState } from "react";
 
 export function PasswordEditor() {
+  const initialData = {
+    name: "Darkweb.onion",
+    username: "Example@gmail.com",
+    password: "••••••••••••••••",
+    notes: "This is totally a legit site"
+  };
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState(initialData);
+
+  const handleSave = () => {
+    setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleDiscard = () => {
+    setFormData(initialData);
+    setIsEditing(false);
+  };
+
+  const handleChange = (field: keyof typeof formData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+  };
+
   return (
     <div className="h-full bg-background">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
-        <h1 className="text-lg font-normal">Editing</h1>
+        <h1 className="text-lg font-normal">{isEditing ? 'Editing' : 'Viewing'}</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="bg-secondary hover:bg-secondary/80">
-            Save
-          </Button>
-          <Button variant="ghost" size="sm">
-            Discard
-          </Button>
+          {isEditing ? (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-secondary hover:bg-secondary/80"
+                onClick={handleSave}
+              >
+                Save
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleDiscard}
+              >
+                Discard
+              </Button>
+            </>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-secondary hover:bg-secondary/80"
+              onClick={handleEdit}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <Bookmark className="h-4 w-4" />
           </Button>
@@ -33,8 +89,10 @@ export function PasswordEditor() {
               </div>
               <Input 
                 placeholder="darkweb.onion" 
-                className="bg-secondary border-0"
-                value="Darkweb.onion"
+                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+                value={formData.name}
+                onChange={handleChange('name')}
+                readOnly={!isEditing}
               />
             </div>
           </div>
@@ -42,24 +100,30 @@ export function PasswordEditor() {
             <label className="text-sm font-medium text-muted-foreground">Username</label>
             <Input 
               placeholder="example@gmail.com" 
-              className="bg-secondary border-0"
-              value="Example@gmail.com"
+              className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+              value={formData.username}
+              onChange={handleChange('username')}
+              readOnly={!isEditing}
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Password</label>
             <Input 
               type="password" 
-              className="bg-secondary border-0 font-mono"
-              value="••••••••••••••••"
+              className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono`}
+              value={formData.password}
+              onChange={handleChange('password')}
+              readOnly={!isEditing}
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Notes</label>
             <Textarea 
               placeholder="Add notes..." 
-              className="bg-secondary border-0 min-h-[100px]"
-              value="This is totally a legit site"
+              className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[100px]`}
+              value={formData.notes}
+              onChange={handleChange('notes')}
+              readOnly={!isEditing}
             />
           </div>
           <div className="pt-4 text-xs text-muted-foreground space-y-1">

@@ -16,13 +16,18 @@ export function PasswordGenerator() {
   });
   const [password, setPassword] = useState("");
 
+  // Add useEffect to watch for changes
+  useEffect(() => {
+    generatePassword();
+  }, [length, options]);
+
   const generatePassword = () => {
     const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const lowercase = "abcdefghijklmnopqrstuvwxyz";
     const numbers = "0123456789";
-    const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    const symbols = "!@#$%^&*_+-|.";
 
-    let chars = lowercase; // Always include lowercase for better security
+    let chars = lowercase;
     if (options.uppercase) chars += uppercase;
     if (options.numbers) chars += numbers;
     if (options.symbols) chars += symbols;
@@ -47,13 +52,13 @@ export function PasswordGenerator() {
   return (
     <div className="space-y-6 flex flex-col p-6">
       <div className="space-y-2">
-        <Label>Generated Password</Label>
+        <Label>Password Generator</Label>
         <div className="flex gap-2">
           <Input
             value={password}
             readOnly
             className="font-mono"
-            placeholder="Click generate to create password"
+            placeholder="Generated Password here"
           />
           <Button
             variant="outline"
@@ -82,7 +87,7 @@ export function PasswordGenerator() {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label htmlFor="uppercase">Include Uppercase</Label>
+          <Label htmlFor="uppercase">Include Uppercase (ABCDEFG)</Label>
           <Switch
             id="uppercase"
             checked={options.uppercase}
@@ -92,7 +97,7 @@ export function PasswordGenerator() {
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label htmlFor="numbers">Include Numbers</Label>
+          <Label htmlFor="numbers">Include Numbers (0123456789)</Label>
           <Switch
             id="numbers"
             checked={options.numbers}
@@ -102,7 +107,7 @@ export function PasswordGenerator() {
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label htmlFor="symbols">Include Symbols</Label>
+          <Label htmlFor="symbols">Include Symbols (!@#$%^&*_+-|.)</Label>
           <Switch
             id="symbols"
             checked={options.symbols}

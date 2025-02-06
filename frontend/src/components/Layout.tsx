@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { PasswordList } from "./PasswordList";
 import { PasswordEditor } from "./PasswordEditor";
 import { PasswordGenerator } from "./PasswordGenerator";
+import PasswordGeneratorOverlay from "./PasswordGeneratorOverlay";
 
 export function Layout() {
   // Add state to track which view is active
@@ -19,6 +20,7 @@ export function Layout() {
         <div>
           {/* Show either PasswordEditor or PasswordGenerator based on currentView */}
           {currentView === "generator" ? <PasswordGenerator /> : <PasswordEditor />}
+          {/* <PasswordGeneratorOverlay /> */}
         </div>
       </div>
     </div>

@@ -30,7 +30,6 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
@@ -39,7 +38,7 @@ func (a *App) SimplePOC(title string) {
 	runtime.WindowSetTitle(a.ctx, title)
 }
 
-func (a *App) emailToSHA256(email string) string {
+func (a *App) EmailToSHA256(email string) string {
 	// This function turn email Sinto sha256
 	// which will be used as salt in the future. or maybe store in database
 	// Input as string
@@ -74,7 +73,7 @@ func (a *App) PBKDF2Function(password, salt string, iterations, keyLength int) s
 	return hex.EncodeToString(key)
 }
 
-func generateRandomBytes(size int) ([]byte, error) {
+func GenerateRandomBytes(size int) ([]byte, error) {
 	// Create a byte slice to hold the random bytes
 	// This function will be used with generateIV and generateSessionkey
 	// Input: size(int)
@@ -90,19 +89,19 @@ func generateRandomBytes(size int) ([]byte, error) {
 	return randomBytes, nil
 }
 
-func (a *App) generateIV() ([]byte, error) {
-	// Request: generateRandomBytes function
+func (a *App) GenerateIV() ([]byte, error) {
+	// Request: GenerateRandomBytes function
 	//
-	return generateRandomBytes(12) // Returns raw 12 byte (96)
+	return GenerateRandomBytes(12) // Returns raw 12 byte (96)
 }
 
-func (a *App) generateSessionKey() ([]byte, error) {
-	// Request: generateRandomBytes function
+func (a *App) GenerateSessionKey() ([]byte, error) {
+	// Request: GenerateRandomBytes function
 	//
-	return generateRandomBytes(32) // Returns raw 32 byte (256)
+	return GenerateRandomBytes(32) // Returns raw 32 byte (256)
 }
 
-func (a *App) encryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
+func (a *App) EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: plaintext(byte) Key 32(byte) IV 12(byte)
 	// Output: byte, Error
@@ -124,7 +123,7 @@ func (a *App) encryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte,
 }
 
 // decryptAES256GCM decrypts ciphertext using AES-256 GCM with a provided nonce.
-func (a *App) decryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) {
+func (a *App) DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: ciphertext(byte) Key 32(byte) IV 12(byte)
 	// Output: byte, Error

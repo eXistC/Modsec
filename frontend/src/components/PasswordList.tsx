@@ -37,8 +37,8 @@ export function PasswordList({
       (currentView === "bookmarks" ? entry.isBookmarked : true) &&
       // Then apply search filter
       (entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       entry.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       entry.cardNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
+       (entry.type === "website" && entry.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+       (entry.type === "card" && entry.cardNumber.toLowerCase().includes(searchQuery.toLowerCase())))
     );
 
 
@@ -93,18 +93,15 @@ export function PasswordList({
                   {entry.type === "memo" && (
                     <File className="h-5 w-5" />
                   )}
-                  {entry.type === "note" && (
-                    <Pen className="h-5 w-5" />
-                  )}
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-medium text-sm">{entry.title}</div>
-                  {entry.username && (
+                  {entry.type === "website" && entry.username && (
                     <div className="text-sm text-muted-foreground">
                       {entry.username}
                     </div>
                   )}
-                  {entry.cardNumber && (
+                  {entry.type === "card" && entry.cardNumber && (
                     <div className="text-sm text-muted-foreground font-mono">
                       {maskCardNumber(entry.cardNumber)}
                     </div>

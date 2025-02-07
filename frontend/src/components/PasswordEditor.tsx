@@ -2,20 +2,63 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Bookmark, Globe, MoreVertical, Pencil } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export function PasswordEditor() {
-  const initialData = {
-    name: "Darkweb.onion",
-    username: "Example@gmail.com",
-    password: "••••••••••••••••",
-    notes: "This is totally a legit site"
+interface PasswordEntry {
+  id: string;
+  type: "website" | "identity" | "card" | "note";
+  title: string;
+  username?: string;
+  cardNumber?: string;
+  isBookmarked?: boolean;
+  notes?: string;
+}
+
+interface PasswordEditorProps {
+  password?: PasswordEntry;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onSave?: (data: Partial<PasswordEntry>) => void;
+  onToggleBookmark?: (id: string) => void;
+}
+
+export function PasswordEditor({ 
+  password, 
+  isOpen = false, 
+  onClose, 
+  onSave,
+  onToggleBookmark 
+}: PasswordEditorProps) {
+  const initialData = password ? {
+    name: password.title,
+    username: password.username || '',
+    password: '••••••••••••••••', // You might want to handle actual password differently
+    notes: password.notes || ''
+  } : {
+    name: '',
+    username: '',
+    password: '',
+    notes: ''
   };
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(initialData);
 
+  // Reset form data when password changes
+  useEffect(() => {
+    setFormData(initialData);
+    setIsEditing(false);
+  }, [password]);
+
   const handleSave = () => {
+    if (onSave) {
+      onSave({
+        ...password,
+        title: formData.name,
+        username: formData.username,
+        notes: formData.notes
+      });
+    }
     setIsEditing(false);
   };
 
@@ -36,6 +79,14 @@ export function PasswordEditor() {
       [field]: e.target.value
     }));
   };
+
+  const handleBookmarkToggle = () => {
+    if (password && onToggleBookmark) {
+      onToggleBookmark(password.id);
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
     <div className="h-full bg-background">
@@ -71,8 +122,13 @@ export function PasswordEditor() {
               Edit
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Bookmark className="h-4 w-4" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={handleBookmarkToggle}
+          >
+            <Bookmark className={`h-4 w-4 ${password?.isBookmarked ? 'text-primary' : ''}`} />
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreVertical className="h-4 w-4" />

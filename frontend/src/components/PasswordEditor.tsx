@@ -1,9 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff } from "lucide-react";
+import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import { PasswordEntry } from "@/types/password";
+import { Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CardFields } from './ItemTypes/CardFields';
+import { CryptoFields } from './ItemTypes/CryptoFields';
+import { IdentityFields } from './ItemTypes/IdentityFields';
+import { WebsiteFields } from './ItemTypes/WebsiteFields';
 
 interface PasswordEditorProps {
   password: PasswordEntry;
@@ -60,6 +66,10 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       case "card":
         return <CreditCard className="h-5 w-5" />;
       case "note":
+        return <Pen className="h-5 w-5" />;
+      case "crypto":
+        return <Wallet className="h-5 w-5" />;
+      case "memo":
         return <Pen className="h-5 w-5" />;
     }
   };
@@ -148,58 +158,38 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               </div>
             )}
             {formData.type === "website" && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Password</label>
-                <div className="relative">
-                  <Input 
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter password" 
-                    className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono ${isEditing ? '' : 'pr-10'}`}
-                    value={formData.password || ''}
-                    onChange={handleChange('password')}
-                    onFocus={() => {
-                      if (isEditing) {
-                        setShowPassword(true);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (isEditing) {
-                        setShowPassword(false);
-                      }
-                    }}
-                    readOnly={!isEditing}
-                  />
-                  {!isEditing && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                      tabIndex={-1}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground/70" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground/70" />
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </div>
+              <WebsiteFields
+                formData={formData as WebsiteEntry}
+                isEditing={isEditing}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+                handleChange={handleChange}
+              />
             )}
-            {formData.cardNumber && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Card Number</label>
-                <Input 
-                  type={showPassword ? "text" : "password"}
-                  className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono cursor-pointer`}
-                  value={formData.cardNumber}
-                  onChange={handleChange('cardNumber')}
-                  onClick={handlePasswordClick}
-                  readOnly={!isEditing}
-                />
-              </div>
+            {formData.type === "card" && (
+              <CardFields
+                formData={formData as CardEntry}
+                isEditing={isEditing}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+                handleChange={handleChange}
+              />
+            )}
+            {formData.type === "crypto" && (
+              <CryptoFields
+                formData={formData as CryptoEntry}
+                isEditing={isEditing}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+                handleChange={handleChange}
+              />
+            )}
+            {formData.type === "identity" && (
+              <IdentityFields
+                formData={formData as IdentityEntry}
+                isEditing={isEditing}
+                handleChange={handleChange}
+              />
             )}
           </div>
           {formData.notes && (

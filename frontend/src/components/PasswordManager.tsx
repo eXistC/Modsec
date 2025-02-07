@@ -8,26 +8,56 @@ const mockPasswords: PasswordEntry[] = [
     id: "1",
     type: "website",
     title: "GitHub",
+    website: "github.com",
     username: "user@example.com",
+    email: "user@example.com",
     password: "myGithubPassword123",
     isBookmarked: false,
-    notes: "GitHub account"
+    notes: "GitHub account for work"
   },
   {
     id: "2",
-    type: "identity",
-    title: "Personal ID",
-    username: "John Doe",
+    type: "card",
+    title: "Main Credit Card",
+    cardHolderName: "John Doe",
+    cardNumber: "4532 1234 5678 9012",
+    validFrom: "01/23",
+    expirationDate: "01/25",
+    cvv: "123",
     isBookmarked: true,
-    notes: "Personal identification"
+    notes: "Personal credit card"
   },
   {
     id: "3",
-    type: "card",
-    title: "Main Credit Card",
-    cardNumber: "1234 1234 1234 1234",
+    type: "crypto",
+    title: "Bitcoin Wallet",
+    walletAddress: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+    password: "strongPassword123",
+    recoveryPhrase: "witch collapse practice feed shame open despair creek road again ice least",
     isBookmarked: false,
-    notes: "Main credit card"
+    notes: "Main BTC wallet"
+  },
+  {
+    id: "4",
+    type: "identity",
+    title: "Personal ID",
+    initial: "Mr",
+    firstName: "John",
+    lastName: "Doe",
+    phoneNumber: "+1234567890",
+    gender: "male",
+    birthDay: "1990-01-01",
+    occupation: "Software Engineer",
+    address: "123 Main St, City, Country",
+    isBookmarked: false,
+    notes: "Personal identification details"
+  },
+  {
+    id: "5",
+    type: "memo",
+    title: "Server Credentials",
+    notes: "SSH: user@server.com\nPort: 22\nKey location: ~/.ssh/id_rsa",
+    isBookmarked: true
   }
 ];
 

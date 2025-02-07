@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck } from "lucide-react";
+import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck, Wallet, File, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { PasswordEntry } from "@/types/password";
 
@@ -67,15 +67,30 @@ export function PasswordList({
             <Button
               key={entry.id}
               variant="ghost"
-              className="w-full justify-start p-3 h-auto relative group hover:bg-secondary/40 transition-colors duration-200"
+              className="w-full justify-start p-3 h-auto relative group 
+                hover:bg-secondary/40 transition-colors duration-200"
               onClick={() => onSelectPassword?.(entry)}
             >
               <div className="flex items-center gap-3 w-full min-h-[40px]">
                 <div className="flex-shrink-0">
-                  {entry.type === "website" && <Globe className="h-5 w-5" />}
-                  {entry.type === "identity" && <User className="h-5 w-5" />}
-                  {entry.type === "card" && <CreditCard className="h-5 w-5" />}
-                  {entry.type === "note" && <Pen className="h-5 w-5" />}
+                  {entry.type === "website" && (
+                    <Globe className="h-5 w-5" />
+                  )}
+                  {entry.type === "identity" && (
+                    <User className="h-5 w-5" />
+                  )}
+                  {entry.type === "card" && (
+                    <CreditCard className="h-5 w-5" />
+                  )}
+                  {entry.type === "crypto" && (
+                    <Wallet className="h-5 w-5" />
+                  )}
+                  {entry.type === "memo" && (
+                    <File className="h-5 w-5" />
+                  )}
+                  {entry.type === "note" && (
+                    <Pen className="h-5 w-5" />
+                  )}
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-medium text-sm">{entry.title}</div>
@@ -94,27 +109,33 @@ export function PasswordList({
                   variant="ghost"
                   size="icon"
                   className={`h-8 w-8 absolute right-3 top-1/2 -translate-y-1/2
-                    transition-all duration-300 ease-spring
+                    transition-opacity duration-200
                     ${entry.isBookmarked 
-                      ? 'opacity-100 scale-100' 
-                      : 'opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100'}`}
+                      ? 'opacity-100' 
+                      : 'opacity-0 group-hover:opacity-100'}`}
                   onClick={toggleBookmark(entry.id)}
                 >
                   {entry.isBookmarked ? (
                     <BookmarkCheck 
-                      className="h-4 w-4 text-primary transform transition-all duration-300 
-                        ease-spring hover:scale-110 active:scale-95" 
+                      className="h-4 w-4 text-primary transition-colors duration-200
+                        hover:text-primary/80" 
                     />
                   ) : (
                     <Bookmark 
-                      className="h-4 w-4 transform transition-all duration-300 
-                        ease-spring hover:scale-110 active:scale-95" 
+                      className="h-4 w-4 transition-colors duration-200
+                        hover:text-primary/60" 
                     />
                   )}
                 </Button>
               </div>
             </Button>
           ))}
+          {filteredPasswords.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+              <AlertCircle className="h-8 w-8 mb-2" />
+              <p className="text-sm">No items found</p>
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>

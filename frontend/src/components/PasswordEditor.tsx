@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
-import { PasswordEntry } from "@/types/password";
+import { CardEntry, CryptoEntry, IdentityEntry, PasswordEntry, WebsiteEntry } from "@/types/password";
 import { Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardFields } from './ItemTypes/CardFields';
@@ -145,14 +145,14 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
             </div>
           </div>
           <div className="space-y-3">
-            {formData.username && (
+            {formData.type === "website" && (formData as WebsiteEntry).username && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">Username</label>
                 <Input 
                   placeholder="Enter username" 
                   className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-                  value={formData.username}
-                  onChange={handleChange('username')}
+                  value={(formData as WebsiteEntry).username}
+                  onChange={e => setFormData(prev => ({...(prev as WebsiteEntry), username: e.target.value}))}
                   readOnly={!isEditing}
                 />
               </div>

@@ -83,17 +83,6 @@ export function WebsiteFields({
           )}
         </div>
       </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">Notes</label>
-        <Textarea 
-          placeholder="Add notes..." 
-          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[100px]`}
-          value={formData.notes}
-          onChange={handleChange('notes')}
-          readOnly={!isEditing}
-        />
-      </div>
     </>
   );
 }

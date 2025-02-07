@@ -13,6 +13,11 @@ export interface PasswordListProps {
   onToggleBookmark: (id: string) => void;
 }
 
+// Add this helper function at the top of the file, after imports
+const maskCardNumber = (cardNumber: string) => {
+  return `•••• •••• •••• ${cardNumber.slice(-4)}`;
+};
+
 export function PasswordList({ 
   currentView, 
   onSelectPassword,
@@ -100,8 +105,8 @@ export function PasswordList({
                     </div>
                   )}
                   {entry.cardNumber && (
-                    <div className="text-sm text-muted-foreground">
-                      {entry.cardNumber}
+                    <div className="text-sm text-muted-foreground font-mono">
+                      {maskCardNumber(entry.cardNumber)}
                     </div>
                   )}
                 </div>

@@ -30,8 +30,9 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
               All Passwords
             </Button>
             <Button 
-              variant="ghost" 
+              variant={currentView === "bookmarks" ? "secondary" : "ghost"} 
               className="w-full justify-start text-sm h-9"
+              onClick={() => onViewChange?.("bookmarks")}
             >
               <Bookmark className="mr-2 h-4 w-4" />
               Bookmark

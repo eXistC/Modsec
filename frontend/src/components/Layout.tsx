@@ -15,7 +15,7 @@ export function Layout() {
         {/* Pass the current view and a function to change it to Sidebar */}
         <Sidebar currentView={currentView} onViewChange={setCurrentView} />
         <div className="border-r border-border">
-          <PasswordList />
+          <PasswordList currentView={currentView} />
         </div>
         <div>
           {/* Show either PasswordEditor or PasswordGenerator based on currentView */}

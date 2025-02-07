@@ -57,7 +57,12 @@ const mockPasswords: PasswordEntry[] = [
   },
 ];
 
-export function PasswordList() {
+// Add currentView to component props
+interface PasswordListProps {
+  currentView?: string;
+}
+
+export function PasswordList({ currentView = "passwords" }: PasswordListProps) {
   const [passwords, setPasswords] = useState<PasswordEntry[]>(mockPasswords);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -72,16 +77,22 @@ export function PasswordList() {
     );
   };
 
-  const filteredPasswords = passwords.filter(entry =>
-    entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    entry.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    entry.cardNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPasswords = passwords
+    .filter(entry => 
+      // First apply bookmark filter if we're in bookmarks view
+      (currentView === "bookmarks" ? entry.isBookmarked : true) &&
+      // Then apply search filter
+      (entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       entry.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       entry.cardNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
 
   return (
     <div className="h-full bg-[#1E1E1E]">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
-        <h2 className="text-sm font-normal">All Vaults</h2>
+        <h2 className="text-sm font-normal">
+          {currentView === "bookmarks" ? "Bookmarks" : "All Vaults"}
+        </h2>
         <Button size="sm" variant="outline" className="bg-secondary hover:bg-secondary/80">
           <Plus className="mr-2 h-4 w-4" />
           New Item

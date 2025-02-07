@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Copy, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export function PasswordGenerator() {
   const [generatorType, setGeneratorType] = useState<"password" | "username">("password");
@@ -132,36 +132,30 @@ export function PasswordGenerator() {
 
       {generatorType === "username" && (
         <div className="space-y-4 bg-background/50 p-4 rounded-lg border">
-          <div className="flex items-center justify-between mb-4">
-            <Label htmlFor="usernameType">Username Style</Label>
-            <div className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id="random"
+          <Tabs 
+            value={usernameType} 
+            onValueChange={(value) => setUsernameType(value as "random" | "gmail")}
+            className="w-full"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <Label>Username Style</Label>
+              <TabsList className="grid w-[200px] grid-cols-2 bg-accent">
+                <TabsTrigger 
                   value="random"
-                  checked={usernameType === "random"}
-                  onChange={(e) => setUsernameType(e.target.value as "random" | "gmail")}
-                  className="accent-primary"
-                />
-                <Label htmlFor="random">Random</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id="gmail"
+                  className="data-[state=active]:bg-secondary"
+                >
+                  Random
+                </TabsTrigger>
+                <TabsTrigger 
                   value="gmail"
-                  checked={usernameType === "gmail"}
-                  onChange={(e) => setUsernameType(e.target.value as "random" | "gmail")}
-                  className="accent-primary"
-                />
-                <Label htmlFor="gmail">Email</Label>
-              </div>
+                  className="data-[state=active]:bg-secondary"
+                >
+                  Email
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </div>
 
-          {usernameType === "gmail" && (
-            <div className="space-y-4">
+            <TabsContent value="gmail" className="space-y-4 mt-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="emailProvider">Email Provider</Label>
                 <Input
@@ -171,9 +165,12 @@ export function PasswordGenerator() {
                   placeholder="@example.com"
                   className="font-mono"
                 />
+                <p className="text-sm text-muted-foreground">
+                  Enter your email provider (e.g. @gmail.com, @outlook.com)
+                </p>
               </div>
-            </div>
-          )}
+            </TabsContent>
+          </Tabs>
         </div>
       )}
 

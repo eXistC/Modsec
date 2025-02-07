@@ -35,12 +35,22 @@ export function CryptoFields({
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Password</label>
         <div className="relative">
-          <Input 
+        <Input 
             type={showPassword ? "text" : "password"}
-            placeholder="Enter password"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10`}
+            placeholder="Enter password" 
+            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono ${isEditing ? '' : 'pr-10'}`}
             value={formData.password || ''}
             onChange={handleChange('password')}
+            onFocus={() => {
+              if (isEditing) {
+                setShowPassword(true);
+              }
+            }}
+            onBlur={() => {
+              if (isEditing) {
+                setShowPassword(false);
+              }
+            }}
             readOnly={!isEditing}
           />
           {!isEditing && (
@@ -67,9 +77,22 @@ export function CryptoFields({
         <div className="relative">
           <Textarea
             placeholder="Enter recovery phrase"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10 min-h-[80px]`}
+            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono ${isEditing ? '' : 'pr-10'} min-h-[80px]`}
             value={formData.recoveryPhrase}
             onChange={handleChange('recoveryPhrase')}
+            style={{ 
+              WebkitTextSecurity: (!isEditing || !showPassword) ? 'disc' : 'none'
+            } as React.CSSProperties}
+            onFocus={() => {
+              if (isEditing) {
+                setShowPassword(true);
+              }
+            }}
+            onBlur={() => {
+              if (isEditing) {
+                setShowPassword(false);
+              }
+            }}
             readOnly={!isEditing}
           />
           {!isEditing && (

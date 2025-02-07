@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/pbkdf2"
 )
 
@@ -33,8 +34,13 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
-func emailToSHA256(email string) string {
-	// This function turn email into sha256
+
+func (a *App) SimplePOC(title string) {
+	runtime.WindowSetTitle(a.ctx, title)
+}
+
+func (a *App) emailToSHA256(email string) string {
+	// This function turn email Sinto sha256
 	// which will be used as salt in the future. or maybe store in database
 	// Input as string
 	// Output as string
@@ -51,7 +57,7 @@ func emailToSHA256(email string) string {
 	return hex.EncodeToString(emailHash[:])
 }
 
-func PBKDF2Function(password, salt string, iterations, keyLength int) string {
+func (a *App) PBKDF2Function(password, salt string, iterations, keyLength int) string {
 	// This function is for PBKDF2
 	// It use SHA256 to do the hashing and the number of iteration can be control
 	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
@@ -84,19 +90,19 @@ func generateRandomBytes(size int) ([]byte, error) {
 	return randomBytes, nil
 }
 
-func generateIV() ([]byte, error) {
+func (a *App) generateIV() ([]byte, error) {
 	// Request: generateRandomBytes function
 	//
 	return generateRandomBytes(12) // Returns raw 12 byte (96)
 }
 
-func generateSessionKey() ([]byte, error) {
+func (a *App) generateSessionKey() ([]byte, error) {
 	// Request: generateRandomBytes function
 	//
 	return generateRandomBytes(32) // Returns raw 32 byte (256)
 }
 
-func encryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
+func (a *App) encryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: plaintext(byte) Key 32(byte) IV 12(byte)
 	// Output: byte, Error
@@ -118,7 +124,7 @@ func encryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
 }
 
 // decryptAES256GCM decrypts ciphertext using AES-256 GCM with a provided nonce.
-func decryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) {
+func (a *App) decryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: ciphertext(byte) Key 32(byte) IV 12(byte)
 	// Output: byte, Error
@@ -141,7 +147,6 @@ func decryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) 
 	return plaintext, nil
 }
 
-// func main() {
 // 	var myPassword string = "Whatsup"
 // 	var myEmail string = "soMeth!ng@email.com"
 // 	var myMessage string = "Something wong"
@@ -190,4 +195,3 @@ func decryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) 
 // 	}
 // 	Translate = string(Deciphertext)
 // 	fmt.Println("Decrypting successful", Translate)
-// }

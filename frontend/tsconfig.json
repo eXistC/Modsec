@@ -21,6 +21,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".", // Add this line
     "paths": {      // Add this block
+      "@/wailsjs/*": ["./wailsjs/*"],
       "@/*": ["./src/*"], // Example alias for the `src` directory
       "components/*": ["./src/components/*"], // Example alias for components
       "utils/*": ["./src/utils/*"] // Example alias for utilities

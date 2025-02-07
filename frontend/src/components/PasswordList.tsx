@@ -3,14 +3,64 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck } from "lucide-react";
 import { useState } from "react";
-import { PasswordEntry } from "@/types/password";
+import { SimplePOC } from "@/wailsjs/go/main/App"// For testing
 
-// Export the interface separately
-export interface PasswordListProps {
-  currentView: string;
-  onSelectPassword: (password: PasswordEntry) => void;
-  passwords: PasswordEntry[];
-  onToggleBookmark: (id: string) => void;
+interface PasswordEntry {
+  id: string;
+  type: "website" | "identity" | "card" | "note";
+  title: string;
+  username?: string;
+  cardNumber?: string;
+  isBookmarked?: boolean;
+}
+
+const mockPasswords: PasswordEntry[] = [
+  {
+    id: "1",
+    type: "website",
+    title: "Darkweb.onion",
+    username: "example@gmail.com",
+    isBookmarked: true,
+  },
+  {
+    id: "2",
+    type: "note",
+    title: "Note of something",
+  },
+  {
+    id: "3",
+    type: "identity",
+    title: "English Name",
+    username: "Mr. Sum Think Wong",
+  },
+  {
+    id: "4",
+    type: "card",
+    title: "Not mine",
+    cardNumber: "1234 12XX XXXX 1234",
+  },
+  {
+    id: "5",
+    type: "note",
+    title: "Note of something",
+  },
+  {
+    id: "6",
+    type: "identity",
+    title: "English Name",
+    username: "Mr. Sum Think Wong",
+  },
+  {
+    id: "7",
+    type: "card",
+    title: "Not mine",
+    cardNumber: "1234 12XX XXXX 1234",
+  },
+];
+
+// Add currentView to component props
+interface PasswordListProps {
+  currentView?: string;
 }
 
 export function PasswordList({ 
@@ -36,6 +86,8 @@ export function PasswordList({
        entry.cardNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
+
+
   return (
     <div className="h-full bg-[#1E1E1E]">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
@@ -55,6 +107,7 @@ export function PasswordList({
             placeholder="Search..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            //onClick={SimplePOC()}
           />
         </div>
       </div>

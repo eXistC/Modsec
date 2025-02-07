@@ -9,6 +9,7 @@ const mockPasswords: PasswordEntry[] = [
     type: "website",
     title: "GitHub",
     username: "user@example.com",
+    password: "myGithubPassword123",
     isBookmarked: false,
     notes: "GitHub account"
   },
@@ -24,7 +25,7 @@ const mockPasswords: PasswordEntry[] = [
     id: "3",
     type: "card",
     title: "Main Credit Card",
-    cardNumber: "**** **** **** 1234",
+    cardNumber: "1234 1234 1234 1234",
     isBookmarked: false,
     notes: "Main credit card"
   }

@@ -3,7 +3,9 @@ export interface PasswordEntry {
   type: "website" | "identity" | "card" | "note";
   title: string;
   username?: string;
+  password?: string;
   cardNumber?: string;
   isBookmarked?: boolean;
   notes?: string;
+
 }

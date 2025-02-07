@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bookmark, FileText, Infinity, Settings, Trash2 } from "lucide-react";
-import { VaultsList } from "@/components/VaultsList";
+import { CatList } from "@/components/CatList";
 
 // Add these props to handle view switching
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -55,7 +55,7 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
             </Button>
           </div>
         </div>
-        <VaultsList/>
+        <CatList/>
       </div>
     </div>
   );

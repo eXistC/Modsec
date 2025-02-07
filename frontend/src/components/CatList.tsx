@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 
-export function VaultsList() {
+export function CatList() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const categories = [

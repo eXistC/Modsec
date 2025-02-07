@@ -31,7 +31,7 @@ export function Layout() {
             />
           )}
         </div>
-        <div className="border-l border-border">
+        <div className="border-0 border-border">
           {selectedPassword && (
             <PasswordEditor
               password={selectedPassword}

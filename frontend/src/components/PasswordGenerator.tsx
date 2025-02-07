@@ -132,21 +132,24 @@ export function PasswordGenerator() {
 
       {generatorType === "username" && (
         <div className="space-y-4 bg-background/50 p-4 rounded-lg border">
-          <Tabs 
-            value={usernameType} 
-            onValueChange={(value) => setUsernameType(value as "random" | "gmail")}
-            className="w-full"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <Label>Username Style</Label>
-              <TabsList className="grid w-[200px] grid-cols-2 bg-accent">
-                <TabsTrigger 
+          <div className="flex items-center justify-between mb-4">
+            <Label htmlFor="usernameType">Username Style</Label>
+            <div className="flex gap-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="random"
                   value="random"
-                  className="data-[state=active]:bg-secondary"
-                >
-                  Random
-                </TabsTrigger>
-                <TabsTrigger 
+                  checked={usernameType === "random"}
+                  onChange={(e) => setUsernameType(e.target.value as "random" | "gmail")}
+                  className="accent-primary"
+                />
+                <Label htmlFor="random">Random</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="gmail"
                   value="gmail"
                   className="data-[state=active]:bg-secondary"
                 >
@@ -154,7 +157,6 @@ export function PasswordGenerator() {
                 </TabsTrigger>
               </TabsList>
             </div>
-          </Tabs>
 
           {usernameType === "gmail" && (
             <div className="space-y-4">

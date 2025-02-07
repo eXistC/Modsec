@@ -142,19 +142,6 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               />
             </div>
           </div>
-          <div className="space-y-3">
-            {formData.type === "website" && (formData as WebsiteEntry).username && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Username</label>
-                <Input 
-                  placeholder="Enter username" 
-                  className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-                  value={(formData as WebsiteEntry).username}
-                  onChange={e => setFormData(prev => ({...(prev as WebsiteEntry), username: e.target.value}))}
-                  readOnly={!isEditing}
-                />
-              </div>
-            )}
             {formData.type === "website" && (
               <WebsiteFields
                 formData={formData as WebsiteEntry}
@@ -204,6 +191,5 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
           )}
         </div>
       </div>
-    </div>
   );
 }

@@ -1,74 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bookmark, Globe, MoreVertical, Pencil } from "lucide-react";
+import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
-
-interface PasswordEntry {
-  id: string;
-  type: "website" | "identity" | "card" | "note";
-  title: string;
-  username?: string;
-  cardNumber?: string;
-  isBookmarked?: boolean;
-  notes?: string;
-}
+import { PasswordEntry } from "@/types/password";
 
 interface PasswordEditorProps {
-  password?: PasswordEntry;
-  isOpen?: boolean;
-  onClose?: () => void;
-  onSave?: (data: Partial<PasswordEntry>) => void;
-  onToggleBookmark?: (id: string) => void;
+  password: PasswordEntry;
+  isOpen: boolean;
 }
 
-export function PasswordEditor({ 
-  password, 
-  isOpen = false, 
-  onClose, 
-  onSave,
-  onToggleBookmark 
-}: PasswordEditorProps) {
-  const initialData = password ? {
-    name: password.title,
-    username: password.username || '',
-    password: '••••••••••••••••', // You might want to handle actual password differently
-    notes: password.notes || ''
-  } : {
-    name: '',
-    username: '',
-    password: '',
-    notes: ''
-  };
-
+export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(initialData);
+  const [formData, setFormData] = useState(password);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Reset form data when password changes
   useEffect(() => {
-    setFormData(initialData);
+    setFormData(password);
     setIsEditing(false);
+    setShowPassword(false);
   }, [password]);
 
   const handleSave = () => {
-    if (onSave) {
-      onSave({
-        ...password,
-        title: formData.name,
-        username: formData.username,
-        notes: formData.notes
-      });
-    }
     setIsEditing(false);
   };
 
   const handleEdit = () => {
     setIsEditing(true);
+    setShowPassword(false);
   };
 
   const handleDiscard = () => {
-    setFormData(initialData);
+    setFormData(password);
     setIsEditing(false);
+    setShowPassword(false);
+  };
+
+  const handlePasswordClick = () => {
+    if (isEditing) {
+      setShowPassword(!showPassword);
+    }
   };
 
   const handleChange = (field: keyof typeof formData) => (
@@ -80,9 +51,16 @@ export function PasswordEditor({
     }));
   };
 
-  const handleBookmarkToggle = () => {
-    if (password && onToggleBookmark) {
-      onToggleBookmark(password.id);
+  const getIcon = () => {
+    switch (password.type) {
+      case "website":
+        return <Globe className="h-5 w-5" />;
+      case "identity":
+        return <User className="h-5 w-5" />;
+      case "card":
+        return <CreditCard className="h-5 w-5" />;
+      case "note":
+        return <Pen className="h-5 w-5" />;
     }
   };
 
@@ -126,9 +104,13 @@ export function PasswordEditor({
             variant="ghost" 
             size="icon" 
             className="h-8 w-8"
-            onClick={handleBookmarkToggle}
+            onClick={() => console.log("Toggle bookmark")}
           >
-            <Bookmark className={`h-4 w-4 ${password?.isBookmarked ? 'text-primary' : ''}`} />
+            {password.isBookmarked ? (
+              <Bookmark className="h-4 w-4 text-primary" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreVertical className="h-4 w-4" />
@@ -141,53 +123,97 @@ export function PasswordEditor({
             <label className="text-sm font-medium text-muted-foreground">Item name</label>
             <div className="flex gap-3">
               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-secondary">
-                <Globe className="h-5 w-5" />
+                {getIcon()}
               </div>
               <Input 
-                placeholder="darkweb.onion" 
+                placeholder="Enter item name" 
                 className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-                value={formData.name}
-                onChange={handleChange('name')}
+                value={formData.title}
+                onChange={handleChange('title')}
                 readOnly={!isEditing}
               />
             </div>
           </div>
           <div className="space-y-3">
+            {formData.username && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Username</label>
+                <Input 
+                  placeholder="Enter username" 
+                  className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+                  value={formData.username}
+                  onChange={handleChange('username')}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+            {formData.type === "website" && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Password</label>
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter password" 
+                    className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono ${isEditing ? '' : 'pr-10'}`}
+                    value={formData.password || ''}
+                    onChange={handleChange('password')}
+                    onFocus={() => {
+                      if (isEditing) {
+                        setShowPassword(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (isEditing) {
+                        setShowPassword(false);
+                      }
+                    }}
+                    readOnly={!isEditing}
+                  />
+                  {!isEditing && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground/70" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground/70" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+            {formData.cardNumber && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Card Number</label>
+                <Input 
+                  type={showPassword ? "text" : "password"}
+                  className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono cursor-pointer`}
+                  value={formData.cardNumber}
+                  onChange={handleChange('cardNumber')}
+                  onClick={handlePasswordClick}
+                  readOnly={!isEditing}
+                />
+              </div>
+            )}
+          </div>
+          {formData.notes && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Username</label>
-              <Input 
-                placeholder="example@gmail.com" 
-                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-                value={formData.username}
-                onChange={handleChange('username')}
+              <label className="text-sm font-medium text-muted-foreground">Notes</label>
+              <Textarea 
+                placeholder="Add notes..." 
+                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[100px]`}
+                value={formData.notes}
+                onChange={handleChange('notes')}
                 readOnly={!isEditing}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Password</label>
-              <Input 
-                type="password" 
-                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono`}
-                value={formData.password}
-                onChange={handleChange('password')}
-                readOnly={!isEditing}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Notes</label>
-            <Textarea 
-              placeholder="Add notes..." 
-              className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[100px]`}
-              value={formData.notes}
-              onChange={handleChange('notes')}
-              readOnly={!isEditing}
-            />
-          </div>
-          <div className="pt-4 text-xs text-muted-foreground space-y-1">
-            <div className="text-center">Modified: 13/09/2024, 7:52:30</div>
-            <div className="text-center">Created: 11/09/2024, 19:14:00</div>
-          </div>
+          )}
         </div>
       </div>
     </div>

@@ -42,7 +42,7 @@ export function PasswordList({
     <div className="h-full bg-[#1E1E1E]">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
         <h2 className="text-sm font-normal">
-          {currentView === "bookmarks" ? "Bookmarks" : "All Vaults"}
+          {currentView === "bookmarks" ? "Bookmarks" : "All Passwords"}
         </h2>
         <Button size="sm" variant="outline" className="bg-secondary hover:bg-secondary/80">
           <Plus className="mr-2 h-4 w-4" />

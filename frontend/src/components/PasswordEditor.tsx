@@ -129,8 +129,8 @@ export function PasswordEditor() {
             />
           </div>
           <div className="pt-4 text-xs text-muted-foreground space-y-1">
-            <div>Modified: 13/09/2024, 7:52:30</div>
-            <div>Created: 11/09/2024, 19:14:00</div>
+            <div className="text-center">Modified: 13/09/2024, 7:52:30</div>
+            <div className="text-center">Created: 11/09/2024, 19:14:00</div>
           </div>
         </div>
       </div>

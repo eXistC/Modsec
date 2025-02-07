@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Copy, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function PasswordGenerator() {
   const [generatorType, setGeneratorType] = useState<"password" | "username">("password");
@@ -154,8 +154,10 @@ export function PasswordGenerator() {
                 </TabsTrigger>
               </TabsList>
             </div>
+          </Tabs>
 
-            <TabsContent value="gmail" className="space-y-4 mt-4">
+          {usernameType === "gmail" && (
+            <div className="space-y-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="emailProvider">Email Provider</Label>
                 <Input
@@ -165,12 +167,9 @@ export function PasswordGenerator() {
                   placeholder="@example.com"
                   className="font-mono"
                 />
-                <p className="text-sm text-muted-foreground">
-                  Enter your email provider (e.g. @gmail.com, @outlook.com)
-                </p>
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
         </div>
       )}
 

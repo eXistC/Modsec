@@ -3,14 +3,24 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck } from "lucide-react";
 import { useState } from "react";
-import { PasswordEntry } from "@/types/password";
+import { SimplePOC } from "@/wailsjs/go/main/App"// For testing
 
-// Export the interface separately
-export interface PasswordListProps {
-  currentView: string;
-  onSelectPassword: (password: PasswordEntry) => void;
+interface PasswordEntry {
+  id: string;
+  type: "website" | "identity" | "card" | "note";
+  title: string;
+  username?: string;
+  cardNumber?: string;
+  isBookmarked?: boolean;
+  notes?: string;
+}
+
+// Update the PasswordListProps interface with all required props
+interface PasswordListProps {
+  currentView?: string;
+  onSelectPassword?: (password: PasswordEntry) => void;
   passwords: PasswordEntry[];
-  onToggleBookmark: (id: string) => void;
+  onToggleBookmark?: (id: string) => void;
 }
 
 export function PasswordList({ 
@@ -36,6 +46,8 @@ export function PasswordList({
        entry.cardNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
+
+
   return (
     <div className="h-full bg-[#1E1E1E]">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
@@ -55,6 +67,7 @@ export function PasswordList({
             placeholder="Search..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            //onClick={SimplePOC()}
           />
         </div>
       </div>

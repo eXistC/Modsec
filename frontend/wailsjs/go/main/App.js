@@ -5,3 +5,11 @@
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
+
+export function PBKDF2Function(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['PBKDF2Function'](arg1, arg2, arg3, arg4);
+}
+
+export function SimplePOC(arg1) {
+  return window['go']['main']['App']['SimplePOC'](arg1);
+}

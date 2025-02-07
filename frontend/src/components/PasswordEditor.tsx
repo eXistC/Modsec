@@ -48,7 +48,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     }
   };
 
-  const handleChange = (field: keyof typeof formData) => (
+  const handleChange = <T extends typeof formData>(field: keyof T) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData(prev => ({
@@ -65,8 +65,6 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
         return <User className="h-5 w-5" />;
       case "card":
         return <CreditCard className="h-5 w-5" />;
-      case "note":
-        return <Pen className="h-5 w-5" />;
       case "crypto":
         return <Wallet className="h-5 w-5" />;
       case "memo":

@@ -5,23 +5,21 @@ import { PasswordGenerator } from "./PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
 import { LoginPage } from "./LoginPage";
 import { PasswordEntry } from "../types/password";
+import { useAuth } from '@/context/AuthContext';
 
 export function Layout() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [currentView, setCurrentView] = useState("passwords");
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
-
-  const handleLogin = (masterPassword: string) => {
-    // Authen Logic Here
-    setIsAuthenticated(true);
-  };
 
   const handleSelectPassword = (password: PasswordEntry) => {
     setSelectedPassword(password);
   };
 
   if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={function (masterPassword: string): void {
+      throw new Error("Function not implemented.");
+    } } />;
   }
 
   return (

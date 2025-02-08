@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bookmark, FileText, Infinity, Settings, Trash2 } from "lucide-react";
 import { CatList } from "@/components/CatList";
+import { SettingsDropdown } from "./ui/SettingsDropdown";
+import { useAuth } from "@/context/AuthContext";
 
 // Add these props to handle view switching
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,13 +12,27 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Sidebar({ className, currentView = "passwords", onViewChange }: SidebarProps) {
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    try {
+      logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Optionally show an error toast/notification here
+    }
+  };
+
   return (
     <div className={cn("border-r bg-[#1E1E1E]", className)}>
       <div className="flex h-[60px] items-center px-6 border-b border-border">
         <span className="text-sm">example@gmail.com</span>
-        <Button variant="ghost" size="icon" className="ml-auto h-8 w-8">
-          <Settings className="h-4 w-4" />
-        </Button>
+        <div className="ml-auto">
+          <SettingsDropdown 
+            variant="settings"
+            onLogout={handleLogout}
+          />
+        </div>
       </div>
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">

@@ -10,6 +10,7 @@ import { CardFields } from './ItemTypes/CardFields';
 import { CryptoFields } from './ItemTypes/CryptoFields';
 import { IdentityFields } from './ItemTypes/IdentityFields';
 import { WebsiteFields } from './ItemTypes/WebsiteFields';
+import { SettingsDropdown } from "./ui/SettingsDropdown";
 
 interface PasswordEditorProps {
   password: PasswordEntry;
@@ -55,6 +56,11 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       ...prev,
       [field]: e.target.value
     }));
+  };
+
+  const handleDelete = () => {
+    // Add delete logic here
+    console.log("Deleting item...");
   };
 
   const getIcon = () => {
@@ -120,9 +126,10 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               <Bookmark className="h-4 w-4" />
             )}
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          <SettingsDropdown 
+            variant="more"
+            onDelete={handleDelete}
+          />
         </div>
       </div>
       <div className="p-6">

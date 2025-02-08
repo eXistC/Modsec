@@ -58,6 +58,17 @@ const mockPasswords: PasswordEntry[] = [
     title: "Server Credentials",
     notes: "SSH: user@server.com\nPort: 22\nKey location: ~/.ssh/id_rsa",
     isBookmarked: true
+  },
+  {
+    id: "6",
+    type: "website",
+    title: "testing",
+    website: "github.com",
+    username: "username",
+    email: "user@example.com",
+    password: "",
+    isBookmarked: false,
+    notes: "GitHub account for work"
   }
 ];
 

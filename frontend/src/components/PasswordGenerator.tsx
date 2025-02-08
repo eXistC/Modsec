@@ -8,7 +8,11 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-export function PasswordGenerator() {
+interface PasswordGeneratorProps {
+  onPasswordGenerated?: (password: string) => void;
+}
+
+export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProps = {}) {
   const [generatorType, setGeneratorType] = useState<"password" | "username">("password");
   const [length, setLength] = useState(16);
   const [options, setOptions] = useState({
@@ -71,9 +75,13 @@ export function PasswordGenerator() {
 
   const generateValue = () => {
     if (generatorType === "password") {
-      setGenerated(generatePassword());
+      const newPassword = generatePassword();
+      setGenerated(newPassword);
+      onPasswordGenerated?.(newPassword);
     } else {
-      setGenerated(usernameType === "random" ? generateUsername() : generateGmailUsername());
+      const newUsername = usernameType === "random" ? generateUsername() : generateGmailUsername();
+      setGenerated(newUsername);
+      onPasswordGenerated?.(newUsername);
     }
   };
 

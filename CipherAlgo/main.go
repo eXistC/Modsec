@@ -81,21 +81,35 @@ func PBKDF2Function(password, salt string, iterations, keyLength int) string {
 	return BytToBa64(key)
 }
 
-func ModdedPBKDF2(password, iterations, keyLength int) string {
-	// This function is for PBKDF2
-	// It use SHA256 to do the hashing and the number of iteration can be control
+// NOT TESTED YET! AND IT WAS GENERATED
+func ModdedPBKDF2(password []byte, iterations, keyLength int) ([]byte, [][]byte) {
+	// This function born soley for Sanwich hashing
+	// It will
 	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
 	// Output as string(Base64)
+	var finalKey []byte   // Store XOR'd final key
+	var allSalts [][]byte // Store all salts used during iterations
+	for i := 0; i < iterations; i++ {
+		// Generate a new salt for each iteration
+		salt, err := GenerateSalts()
+		if err != nil {
+			panic("Failed to generate salt") // Handle error properly in real implementation
+		}
 
-	// Convert password and salt to byte slices
-	passwordBytes := []byte(password)
-	saltBytes := []byte(salt)
+		allSalts = append(allSalts, salt)
+		// Derive key using PBKDF2 with the generated salt
+		derivedKey := pbkdf2.Key(password, salt, 1, keyLength, sha256.New)
 
-	// Doing funky hashing by using sha256(For now)
-	key := pbkdf2.Key(passwordBytes, saltBytes, iterations, keyLength, sha256.New)
-
-	// Return the key as a base64 string
-	return BytToBa64(key)
+		if finalKey == nil {
+			finalKey = derivedKey // First iteration sets the base key
+		} else {
+			for j := range finalKey {
+				finalKey[j] ^= derivedKey[j] // XOR with previous keys
+			}
+		}
+	}
+	// Return the key byte and allsalts as array of byte
+	return finalKey, allSalts
 }
 
 func GenerateRandomBytes(size int) ([]byte, error) {
@@ -123,6 +137,11 @@ func GenerateIV() ([]byte, error) {
 func GenerateSessionKey() ([]byte, error) {
 	// Request: GenerateRandomBytes function
 	//
+	return GenerateRandomBytes(32) // Returns raw 32 byte (256)
+}
+
+func GenerateSalts() ([]byte, error) {
+	// Request: GenerateRandomBytes function
 	return GenerateRandomBytes(32) // Returns raw 32 byte (256)
 }
 

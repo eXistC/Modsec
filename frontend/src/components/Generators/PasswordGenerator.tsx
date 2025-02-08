@@ -5,8 +5,8 @@ import { Copy, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PasswordGeneratorModule } from "./Generators/PasswordGeneratorModule";
-import { UsernameGeneratorModule } from "./Generators/UsernameGeneratorModule";
+import { PasswordGeneratorModule } from "./PasswordGeneratorModule";
+import { UsernameGeneratorModule } from "./UsernameGeneratorModule";
 
 interface PasswordGeneratorProps {
   onPasswordGenerated?: (password: string) => void;

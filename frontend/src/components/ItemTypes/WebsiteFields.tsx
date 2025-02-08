@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WebsiteEntry } from "@/types/password";
-import { InlinePasswordGenerator } from "../PasswordGeneratorInline";
+import { InlinePasswordGenerator } from "../Generators/PasswordGeneratorInline";
 import { useState } from "react";
 
 interface WebsiteFieldsProps {

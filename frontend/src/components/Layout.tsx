@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { PasswordManager } from "./PasswordManager";
-import { PasswordGenerator } from "./PasswordGenerator";
+import { PasswordGenerator } from "./Generators/PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
 import { LoginPage } from "./LoginPage";
 import { PasswordEntry } from "../types/password";

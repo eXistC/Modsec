@@ -3,15 +3,26 @@ import { Sidebar } from "./Sidebar";
 import { PasswordManager } from "./PasswordManager";
 import { PasswordGenerator } from "./PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
+import { LoginPage } from "./LoginPage";
 import { PasswordEntry } from "../types/password";
 
 export function Layout() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState("passwords");
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
+
+  const handleLogin = (masterPassword: string) => {
+    // Authen Logic Here
+    setIsAuthenticated(true);
+  };
 
   const handleSelectPassword = (password: PasswordEntry) => {
     setSelectedPassword(password);
   };
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   return (
     <div className="h-screen bg-[#1E1E1E]">

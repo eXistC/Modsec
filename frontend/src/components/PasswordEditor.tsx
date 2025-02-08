@@ -132,7 +132,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
           />
         </div>
       </div>
-      <div className="p-6">
+      <div className="px-6 py-4">
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Item name</label>

@@ -54,7 +54,7 @@ export function PasswordList({
           New Item
         </Button>
       </div>
-      <div className="p-3">
+      <div className="px-3 pt-3">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 

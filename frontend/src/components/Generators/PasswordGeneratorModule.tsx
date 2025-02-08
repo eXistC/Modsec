@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Add useEffect import
 
 interface PasswordGeneratorModuleProps {
   onGenerate: (password: string) => void;
@@ -38,8 +38,13 @@ export function PasswordGeneratorModule({ onGenerate }: PasswordGeneratorModuleP
     onGenerate(generatedPassword);
   };
 
+  // Add useEffect to generate password on mount and when options/length change
+  useEffect(() => {
+    generatePassword();
+  }, [length, options.uppercase, options.numbers, options.symbols]);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-generator="password">
       <div className="space-y-2">
         <Label>Password Length: {length}</Label>
         <Slider
@@ -89,6 +94,13 @@ export function PasswordGeneratorModule({ onGenerate }: PasswordGeneratorModuleP
           />
         </div>
       </div>
+      <Button 
+        data-action="generate"
+        onClick={generatePassword}
+        className="hidden"
+      >
+        Generate
+      </Button>
     </div>
   );
 }

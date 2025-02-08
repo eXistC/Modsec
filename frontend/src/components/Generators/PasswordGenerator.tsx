@@ -16,6 +16,12 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
   const [generatorType, setGeneratorType] = useState<"password" | "username">("password");
   const [generated, setGenerated] = useState("");
 
+  // Clear generated value when switching tabs
+  const handleTypeChange = (value: "password" | "username") => {
+    setGeneratorType(value);
+    setGenerated(""); // Clear the previous value
+  };
+
   const handleGenerate = (value: string) => {
     setGenerated(value);
     onPasswordGenerated?.(value);
@@ -28,11 +34,31 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
     }
   };
 
+  const handleRandomize = () => {
+    if (generatorType === "password") {
+      const passwordModule = document.querySelector('div[data-generator="password"]');
+      if (passwordModule) {
+        const generateButton = passwordModule.querySelector('button[data-action="generate"]');
+        if (generateButton) {
+          generateButton.click();
+        }
+      }
+    } else {
+      const usernameModule = document.querySelector('div[data-generator="username"]');
+      if (usernameModule) {
+        const generateButton = usernameModule.querySelector('button[data-action="generate"]');
+        if (generateButton) {
+          generateButton.click();
+        }
+      }
+    }
+  };
+
   return (
     <div className="space-y-6 flex flex-col p-6">
       <Tabs 
         value={generatorType} 
-        onValueChange={(value) => setGeneratorType(value as "password" | "username")}
+        onValueChange={(value) => handleTypeChange(value as "password" | "username")}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-2 bg-accent">
@@ -67,6 +93,14 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
             disabled={!generated}
           >
             <Copy className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRandomize}
+            disabled={!generated}
+          >
+            <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
       </div>

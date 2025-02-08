@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { X, Check } from "lucide-react";
-import { PasswordGenerator } from "./PasswordGenerator";
+import { PasswordGeneratorModule } from "./PasswordGeneratorModule";
 import { useState, useRef, useEffect } from "react";
+import { Input } from "../ui/input";
 
 interface InlinePasswordGeneratorProps {
   onGenerate: (password: string) => void;
@@ -39,7 +40,7 @@ export function InlinePasswordGenerator({ onGenerate, onClose }: InlinePasswordG
       ref={popupRef}
       className="absolute top-full left-0 mt-2 z-50 w-full min-w-[280px] max-w-[400px] bg-popover border rounded-md shadow-md"
     >
-      <div className="p-3 overflow-auto">
+      <div className="px-2 py-3 overflow-auto">
         <div className="flex items-center justify-between px-4 mb-3">
           <Button
             size="sm"
@@ -63,8 +64,18 @@ export function InlinePasswordGenerator({ onGenerate, onClose }: InlinePasswordG
             Use
           </Button>
         </div>
-        <div className="border-t">
-          <PasswordGenerator onPasswordGenerated={handlePasswordGenerated} />
+        <div className="space-y-2 px-4 mb-3 py-1">
+          <div className="flex gap-2">
+            <Input
+              value={currentPassword}
+              readOnly
+              className="font-mono"
+              placeholder="Generated password here"
+            />
+          </div>
+        <div>
+          <PasswordGeneratorModule onGenerate={handlePasswordGenerated} />
+        </div>
         </div>
       </div>
     </div>

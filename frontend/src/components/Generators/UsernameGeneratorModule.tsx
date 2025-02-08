@@ -36,14 +36,13 @@ export function UsernameGeneratorModule({ onGenerate }: UsernameGeneratorModuleP
   }, [usernameType, emailProvider]);
 
   return (
-    <div className="space-y-4 bg-background/50 p-4 rounded-lg border">
+    <div className="space-y-4 bg-background/50 p-4 rounded-lg border" data-generator="username">
       <Tabs 
         value={usernameType} 
         onValueChange={(value) => setUsernameType(value as "random" | "gmail")}
         className="w-full"
       >
         <div className="flex items-center justify-between mb-4">
-          <Label>Username Style</Label>
           <TabsList className="grid w-[200px] grid-cols-2 bg-accent">
             <TabsTrigger 
               value="random"
@@ -76,6 +75,13 @@ export function UsernameGeneratorModule({ onGenerate }: UsernameGeneratorModuleP
           </div>
         </TabsContent>
       </Tabs>
+      <Button 
+        data-action="generate"
+        onClick={generateUsername}
+        className="hidden"
+      >
+        Generate
+      </Button>
     </div>
   );
 }

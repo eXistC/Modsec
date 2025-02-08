@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { Copy, RefreshCw } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PasswordGeneratorModule } from "./Generators/PasswordGeneratorModule";
+import { UsernameGeneratorModule } from "./Generators/UsernameGeneratorModule";
 
 interface PasswordGeneratorProps {
   onPasswordGenerated?: (password: string) => void;
@@ -14,75 +14,11 @@ interface PasswordGeneratorProps {
 
 export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProps = {}) {
   const [generatorType, setGeneratorType] = useState<"password" | "username">("password");
-  const [length, setLength] = useState(16);
-  const [options, setOptions] = useState({
-    uppercase: true,
-    numbers: true,
-    symbols: true,
-  });
   const [generated, setGenerated] = useState("");
-  const [usernameType, setUsernameType] = useState<"random" | "gmail">("random");
-  const [emailProvider, setEmailProvider] = useState("@gmail.com");
 
-  useEffect(() => {
-    generateValue();
-  }, [length, options, generatorType, usernameType, emailProvider]);
-
-  const generateUsername = () => {
-    const adjectives = ["Happy", "Clever", "Brave", "Swift", "Wise", "Cool", "Smart", "Bold"];
-    const nouns = ["Fox", "Eagle", "Wolf", "Lion", "Tiger", "Bear", "Hawk", "Deer"];
-    const numbers = Array.from({ length: 999 }, (_, i) => i + 1);
-
-    const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
-
-    return `${randomAdjective}${randomNoun}${randomNumber}`;
-  };
-
-  const generateGmailUsername = () => {
-    const adjectives = ["happy", "clever", "brave", "swift", "wise", "cool", "smart", "bold"];
-    const nouns = ["fox", "eagle", "wolf", "lion", "tiger", "bear", "hawk", "deer"];
-    const numbers = Array.from({ length: 999 }, (_, i) => i + 1);
-
-    const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
-
-    return `${randomAdjective}${randomNoun}${randomNumber}${emailProvider}`;
-  };
-
-  const generatePassword = () => {
-    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const lowercase = "abcdefghijklmnopqrstuvwxyz";
-    const numbers = "0123456789";
-    const symbols = "!@#$%^&*_+-|.";
-
-    let chars = lowercase;
-    if (options.uppercase) chars += uppercase;
-    if (options.numbers) chars += numbers;
-    if (options.symbols) chars += symbols;
-
-    let generatedPassword = "";
-    const array = new Uint32Array(length);
-    crypto.getRandomValues(array);
-    for (let i = 0; i < length; i++) {
-      generatedPassword += chars.charAt(array[i] % chars.length);
-    }
-
-    return generatedPassword;
-  };
-
-  const generateValue = () => {
-    if (generatorType === "password") {
-      const newPassword = generatePassword();
-      setGenerated(newPassword);
-      onPasswordGenerated?.(newPassword);
-    } else {
-      const newUsername = usernameType === "random" ? generateUsername() : generateGmailUsername();
-      setGenerated(newUsername);
-      onPasswordGenerated?.(newUsername);
-    }
+  const handleGenerate = (value: string) => {
+    setGenerated(value);
+    onPasswordGenerated?.(value);
   };
 
   const copyToClipboard = () => {
@@ -132,103 +68,13 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
           >
             <Copy className="h-4 w-4" />
           </Button>
-          <Button size="icon" onClick={generateValue}>
-            <RefreshCw className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
-      {generatorType === "username" && (
-        <div className="space-y-4 bg-background/50 p-4 rounded-lg border">
-          <Tabs 
-            value={usernameType} 
-            onValueChange={(value) => setUsernameType(value as "random" | "gmail")}
-            className="w-full"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <Label>Username Style</Label>
-              <TabsList className="grid w-[200px] grid-cols-2 bg-accent">
-                <TabsTrigger 
-                  value="random"
-                  className="data-[state=active]:bg-secondary"
-                >
-                  Random
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="gmail"
-                  className="data-[state=active]:bg-secondary"
-                >
-                  Email
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="gmail" className="space-y-4 mt-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="emailProvider">Email Provider</Label>
-                <Input
-                  id="emailProvider"
-                  value={emailProvider}
-                  onChange={(e) => setEmailProvider(e.target.value)}
-                  placeholder="@example.com"
-                  className="font-mono"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Enter your email provider (e.g. @gmail.com, @outlook.com)
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      )}
-
-      {generatorType === "password" && (
-        <>
-          <div className="space-y-2">
-            <Label>Password Length: {length}</Label>
-            <Slider
-              value={[length]}
-              onValueChange={([value]) => setLength(value)}
-              max={32}
-              min={8}
-              step={1}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="uppercase">Include Uppercase (ABCDEFG)</Label>
-              <Switch
-                id="uppercase"
-                checked={options.uppercase}
-                onCheckedChange={(checked) =>
-                  setOptions((prev) => ({ ...prev, uppercase: checked }))
-                }
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="numbers">Include Numbers (0123456789)</Label>
-              <Switch
-                id="numbers"
-                checked={options.numbers}
-                onCheckedChange={(checked) =>
-                  setOptions((prev) => ({ ...prev, numbers: checked }))
-                }
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="symbols">Include Symbols (!@#$%^&*_+-|.)</Label>
-              <Switch
-                id="symbols"
-                checked={options.symbols}
-                onCheckedChange={(checked) =>
-                  setOptions((prev) => ({ ...prev, symbols: checked }))
-                }
-              />
-            </div>
-          </div>
-        </>
-      )}
+      {generatorType === "password" 
+        ? <PasswordGeneratorModule onGenerate={handleGenerate} />
+        : <UsernameGeneratorModule onGenerate={handleGenerate} />
+      }
     </div>
   );
 }

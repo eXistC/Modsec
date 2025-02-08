@@ -30,7 +30,7 @@ func EmailToSHA256(email string) string {
 	return hex.EncodeToString(emailHash[:])
 }
 
-func PBKDF2Function(password, salt string, iterations, keyLength int) string {
+func (a *App) PBKDF2Function(password, salt string, iterations, keyLength int) string {
 	// This function is for PBKDF2
 	// It use SHA256 to do the hashing and the number of iteration can be control
 	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
@@ -49,7 +49,7 @@ func PBKDF2Function(password, salt string, iterations, keyLength int) string {
 
 func GenerateRandomBytes(size int) ([]byte, error) {
 	// Create a byte slice to hold the random bytes
-	// This function will be used with generateIV and GenerateSessionkey
+	// This function will be used with generateIV and generateSessionkey
 	// Input: size(int)
 	// Output: byte and error
 	randomBytes := make([]byte, size)
@@ -63,19 +63,19 @@ func GenerateRandomBytes(size int) ([]byte, error) {
 	return randomBytes, nil
 }
 
-func GenerateIV() ([]byte, error) {
+func (a *App) GenerateIV() ([]byte, error) {
 	// Request: GenerateRandomBytes function
 	//
 	return GenerateRandomBytes(12) // Returns raw 12 byte (96)
 }
 
-func GenerateSessionKey() ([]byte, error) {
+func (a *App) GenerateSessionKey() ([]byte, error) {
 	// Request: GenerateRandomBytes function
 	//
 	return GenerateRandomBytes(32) // Returns raw 32 byte (256)
 }
 
-func EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
+func (a *App) EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: plaintext(byte) Key 32(byte) IV 12(byte)
 	// Output: byte, Error
@@ -97,7 +97,7 @@ func EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
 }
 
 // decryptAES256GCM decrypts ciphertext using AES-256 GCM with a provided nonce.
-func DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) {
+func (a *App) DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: ciphertext(byte) Key 32(byte) IV 12(byte)
 	// Output: byte, Error
@@ -120,53 +120,51 @@ func DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) 
 	return plaintext, nil
 }
 
-func main() {
-	var myPassword string = "Whatsup"
-	var myEmail string = "soMeth!ng@email.com"
-	var myMessage string = "Something wong"
-	fmt.Println("Test password:", myPassword)
-	fmt.Println("Test Email:", myEmail)
-	fmt.Println("Test Message", myMessage)
-	// Creating Master key which is 32 byte(256) for AES256
-	MasterKey := PBKDF2Function(myPassword, string(EmailToSHA256(myEmail)), 1, 32)
-	fmt.Println("Master key: 256 bits", MasterKey)
+// 	var myPassword string = "Whatsup"
+// 	var myEmail string = "soMeth!ng@email.com"
+// 	var myMessage string = "Something wong"
+// 	fmt.Println("Test password:", myPassword)
+// 	fmt.Println("Test Email:", myEmail)
+// 	fmt.Println("Test Message", myMessage)
+// 	// Creating Master key which is 32 byte(256) for AES256
+// 	MasterKey := PBKDF2Function(myPassword, string(emailToSHA256(myEmail)), 1, 32)
+// 	fmt.Println("Master key: 256 bits", MasterKey)
 
-	// Creating Streact email hash with SHA256
-	StreschEmailHash := EmailToSHA256(myEmail)
-	fmt.Println("StreschEmailHash:", StreschEmailHash)
+// 	// Creating Streact email hash with SHA256
+// 	StreschEmailHash := emailToSHA256(myEmail)
+// 	fmt.Println("StreschEmailHash:", StreschEmailHash)
 
-	// Creating Session key which is 32 byte(256) for AES256
-	sessionKey, err := GenerateSessionKey()
-	if err != nil {
-		fmt.Println("Error generating session key:", err)
-		return
-	}
-	fmt.Println("Session Key (byte) 256 bits:", sessionKey)
+// 	// Creating Session key which is 32 byte(256) for AES256
+// 	sessionKey, err := generateSessionKey()
+// 	if err != nil {
+// 		fmt.Println("Error generating session key:", err)
+// 		return
+// 	}
+// 	fmt.Println("Session Key (byte) 256 bits:", sessionKey)
 
-	// Creating IV for AES256 which is 12 byte(96)
-	iv, err := GenerateIV()
-	if err != nil {
-		fmt.Println("Error generating IV:", err)
-		return
-	}
-	fmt.Println("IV (byte) 96 bits:", iv)
+// 	// Creating IV for AES256 which is 12 byte(96)
+// 	iv, err := generateIV()
+// 	if err != nil {
+// 		fmt.Println("Error generating IV:", err)
+// 		return
+// 	}
+// 	fmt.Println("IV (byte) 96 bits:", iv)
 
-	//AES Encrypting
-	Plaintext := []byte(myMessage)
-	Ciphertext, err := EncryptAES256GCM(Plaintext, sessionKey, iv)
-	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
-	}
-	Translate := hex.EncodeToString(Ciphertext[:])
-	fmt.Println("Transgender: ", Translate)
-	fmt.Println("Encrypting successful", Ciphertext)
-	//Decrypting
-	Deciphertext, err := DecryptAES256GCM(Ciphertext, sessionKey, iv)
-	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
-	}
-	Translate = string(Deciphertext)
-	fmt.Println("Decrypting successful", Translate)
-}
+// 	//AES Encrypting
+// 	Plaintext := []byte(myMessage)
+// 	Ciphertext, err := encryptAES256GCM(Plaintext, sessionKey, iv)
+// 	if err != nil {
+// 		fmt.Println("Error Encrpyting AES", err)
+// 		return
+// 	}
+// 	Translate := hex.EncodeToString(Ciphertext[:])
+// 	fmt.Println("Transgender: ", Translate)
+// 	fmt.Println("Encrypting successful", Ciphertext)
+// 	//Decrypting
+// 	Deciphertext, err := decryptAES256GCM(Ciphertext, sessionKey, iv)
+// 	if err != nil {
+// 		fmt.Println("Error Encrpyting AES", err)
+// 		return
+// 	}
+// 	Translate = string(Deciphertext)
+// 	fmt.Println("Decrypting successful", Translate)

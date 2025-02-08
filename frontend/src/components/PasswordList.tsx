@@ -112,7 +112,7 @@ export function PasswordList({
                   className={`h-7 w-7 absolute right-2.5 top-1/2 -translate-y-1/2
                     transition-opacity duration-200 
                     ${entry.isBookmarked 
-                      ? 'bg-primary/5 hover:bg-primary/10' 
+                      ? 'hover:bg-primary/10' 
                       : 'opacity-0 group-hover:opacity-100 hover:bg-secondary'}`}
                   onClick={toggleBookmark(entry.id)}
                 >

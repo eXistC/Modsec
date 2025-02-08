@@ -44,7 +44,7 @@ export function PasswordGeneratorModule({ onGenerate }: PasswordGeneratorModuleP
   }, [length, options.uppercase, options.numbers, options.symbols]);
 
   return (
-    <div className="space-y-4" data-generator="password">
+    <div className="space-y-8" data-generator="password">
       <div className="space-y-2">
         <Label>Password Length: {length}</Label>
         <Slider
@@ -61,7 +61,7 @@ export function PasswordGeneratorModule({ onGenerate }: PasswordGeneratorModuleP
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label htmlFor="uppercase">Include Uppercase (ABCDEFG)</Label>
+          <Label htmlFor="uppercase">Include Uppercase</Label>
           <Switch
             id="uppercase"
             checked={options.uppercase}
@@ -72,7 +72,7 @@ export function PasswordGeneratorModule({ onGenerate }: PasswordGeneratorModuleP
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label htmlFor="numbers">Include Numbers (0123456789)</Label>
+          <Label htmlFor="numbers">Include Numbers</Label>
           <Switch
             id="numbers"
             checked={options.numbers}
@@ -83,7 +83,7 @@ export function PasswordGeneratorModule({ onGenerate }: PasswordGeneratorModuleP
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label htmlFor="symbols">Include Symbols (!@#$%^&*_+-|.)</Label>
+          <Label htmlFor="symbols">Include Symbols</Label>
           <Switch
             id="symbols"
             checked={options.symbols}

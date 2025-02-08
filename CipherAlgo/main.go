@@ -5,12 +5,38 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"strings"
 
+	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/pbkdf2"
 )
+
+// hashPassword hashes a password using Argon2id
+func Argon2Function(password string) (string, error) {
+	// This function turn into hash using Argon2 with NO SALT!!!
+	// If requested use salt as 16-byte
+
+	// Input as string
+	// Output as string
+	// Argon2id parameters
+	const (
+		time    = 1         // Number of iterations
+		memory  = 64 * 1024 // Memory usage (64MB)
+		threads = 4         // Number of parallel threads
+		keyLen  = 32        // Length of the generated key (256-bit)
+	)
+
+	// Generate the Argon2id hash
+	hash := argon2.IDKey([]byte(password), nil, time, memory, threads, keyLen)
+
+	// Encode to base64 for storage
+	hashBase64 := base64.StdEncoding.EncodeToString(hash)
+
+	return hashBase64, nil
+}
 
 func EmailToSHA256(email string) string {
 	// This function turn email Sinto sha256

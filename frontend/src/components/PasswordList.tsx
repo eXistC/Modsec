@@ -45,7 +45,7 @@ export function PasswordList({
 
   return (
     <div className="h-full bg-[#1E1E1E]">
-      <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
+      <div className="flex h-[60px] items-center justify-between border-b border-border px-4">
         <h2 className="text-sm font-normal">
           {currentView === "bookmarks" ? "Bookmarks" : "All Passwords"}
         </h2>
@@ -54,15 +54,14 @@ export function PasswordList({
           New Item
         </Button>
       </div>
-      <div className="p-4">
+      <div className="p-3">
         <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
-            className="pl-9 bg-secondary border-0" 
+            className="pl-8 bg-secondary border-0" 
             placeholder="Search..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            //onClick={SimplePOC()}
           />
         </div>
       </div>
@@ -72,37 +71,37 @@ export function PasswordList({
             <Button
               key={entry.id}
               variant="ghost"
-              className="w-full justify-start p-3 h-auto relative group 
+              className="w-full justify-start px-3 py-2 h-auto relative group 
                 hover:bg-secondary/40 transition-colors duration-200"
               onClick={() => onSelectPassword?.(entry)}
             >
-              <div className="flex items-center gap-3 w-full min-h-[40px]">
+              <div className="flex items-center gap-3 w-full min-h-[36px]">
                 <div className="flex-shrink-0">
                   {entry.type === "website" && (
-                    <Globe className="h-5 w-5" />
+                    <Globe className="h-[18px] w-[18px] text-muted-foreground" />
                   )}
                   {entry.type === "identity" && (
-                    <User className="h-5 w-5" />
+                    <User className="h-[18px] w-[18px] text-muted-foreground" />
                   )}
                   {entry.type === "card" && (
-                    <CreditCard className="h-5 w-5" />
+                    <CreditCard className="h-[18px] w-[18px] text-muted-foreground" />
                   )}
                   {entry.type === "crypto" && (
-                    <Wallet className="h-5 w-5" />
+                    <Wallet className="h-[18px] w-[18px] text-muted-foreground" />
                   )}
                   {entry.type === "memo" && (
-                    <File className="h-5 w-5" />
+                    <File className="h-[18px] w-[18px] text-muted-foreground" />
                   )}
                 </div>
-                <div className="text-left flex-1">
-                  <div className="font-medium text-sm">{entry.title}</div>
+                <div className="text-left flex-1 min-w-0">
+                  <div className="font-medium text-sm truncate pr-8">{entry.title}</div>
                   {entry.type === "website" && entry.username && (
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground/70 truncate pr-8">
                       {entry.username}
                     </div>
                   )}
                   {entry.type === "card" && entry.cardNumber && (
-                    <div className="text-sm text-muted-foreground font-mono">
+                    <div className="text-sm text-muted-foreground/70 font-mono truncate pr-8">
                       {maskCardNumber(entry.cardNumber)}
                     </div>
                   )}
@@ -110,24 +109,19 @@ export function PasswordList({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-8 w-8 absolute right-3 top-1/2 -translate-y-1/2
-                    transition-opacity duration-200
+                  className={`h-7 w-7 absolute right-2.5 top-1/2 -translate-y-1/2
+                    transition-opacity duration-200 
                     ${entry.isBookmarked 
-                      ? 'opacity-100' 
-                      : 'opacity-0 group-hover:opacity-100'}`}
+                      ? 'bg-primary/5 hover:bg-primary/10' 
+                      : 'opacity-0 group-hover:opacity-100 hover:bg-secondary'}`}
                   onClick={toggleBookmark(entry.id)}
                 >
-                  {entry.isBookmarked ? (
-                    <BookmarkCheck 
-                      className="h-4 w-4 text-primary transition-colors duration-200
-                        hover:text-primary/80" 
-                    />
-                  ) : (
-                    <Bookmark 
-                      className="h-4 w-4 transition-colors duration-200
-                        hover:text-primary/60" 
-                    />
-                  )}
+                  <Bookmark 
+                    className={`h-4 w-4 transition-colors duration-200
+                      ${entry.isBookmarked 
+                        ? 'text-primary fill-primary hover:text-primary/90 hover:fill-primary/90' 
+                        : 'text-muted-foreground/50 hover:text-primary/60'}`}
+                  />
                 </Button>
               </div>
             </Button>

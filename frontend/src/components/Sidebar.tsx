@@ -4,6 +4,7 @@ import { Bookmark, FileText, Infinity, Settings, Trash2 } from "lucide-react";
 import { CatList } from "@/components/CatList";
 import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 // Add these props to handle view switching
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -13,13 +14,18 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Sidebar({ className, currentView = "passwords", onViewChange }: SidebarProps) {
   const { logout } = useAuth();
+  const { toast } = useToast();
 
   const handleLogout = () => {
     try {
       logout();
     } catch (error) {
       console.error('Logout failed:', error);
-      // Optionally show an error toast/notification here
+      toast({
+        variant: "destructive",
+        title: "Logout Failed",
+        description: "There was a problem logging out. Please try again.",
+      });
     }
   };
 

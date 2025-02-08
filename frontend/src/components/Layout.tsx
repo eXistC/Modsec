@@ -24,7 +24,7 @@ export function Layout() {
 
   return (
     <div className="h-screen bg-[#1E1E1E]">
-      <div className="grid h-full lg:grid-cols-[280px_400px_1fr]">
+      <div className="grid h-full lg:grid-cols-[280px_320px_1fr]">
         <Sidebar 
           currentView={currentView} 
           onViewChange={setCurrentView} 

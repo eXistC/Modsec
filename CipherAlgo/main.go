@@ -80,8 +80,8 @@ func PBKDF2Function(password, salt string, iterations, keyLength int) string {
 }
 
 // This performs a PBKDF2 witch each iteration corresponding to each salts.
-func ModdedPBKDF2(password []byte, saltChain [][]byte, keyLength int) []byte {
-	// Inputs: password(byte) saltChain (Array of byte) keyLength (int 32)
+func ModdedPBKDF2(payload []byte, saltChain [][]byte, keyLength int) []byte {
+	// Inputs: payload(byte) saltChain (Array of byte) keyLength (int 32)
 	// Outputs: finalKey(byte)
 
 	if len(saltChain) == 0 {
@@ -92,7 +92,7 @@ func ModdedPBKDF2(password []byte, saltChain [][]byte, keyLength int) []byte {
 
 	for i, salt := range saltChain {
 		// Derive key using PBKDF2 with one iteration per salt
-		derivedKey := pbkdf2.Key(password, salt, 1, keyLength, sha256.New)
+		derivedKey := pbkdf2.Key(payload, salt, 1, keyLength, sha256.New)
 
 		if i == 0 {
 			finalKey = derivedKey // Set the base key for the first iteration
@@ -236,43 +236,44 @@ func SplitSaltsEmail(concatenated string) ([]string, string, error) {
 	return salts, email, nil
 }
 
-// func SandwichRegistOperation()
+func SandwichRegisOP() {
+
+}
 
 func main() {
+	// Testing simpler Sanwich Registeration Operation
+	// I'm tired
+	fmt.Println("===== Begin Operation =====")
 	var myPassword string = "Whatsup"
 	var myEmail string = "soMeth!ng@email.com"
 	var myMessage string = "Something wong"
 	fmt.Println("Test password:", myPassword)
 	fmt.Println("Test Email:", myEmail)
 	fmt.Println("Test Message", myMessage)
+
 	// Creating Master key which is 32 byte(256) for AES256
 	MasterKey := Argon2Function(myPassword, EmailToSHA256(myEmail))
-	fmt.Println("Master key: 256 bits", MasterKey)
-	fmt.Println("Transalated Master key: 256 bits", BytToBa64(MasterKey))
-
 	// Creating Streact email hash with SHA256
-	StreschEmailHash := BytToBa64(EmailToSHA256(myEmail))
-	fmt.Println("StreschEmailHash:", StreschEmailHash)
-
-	// Creating Session key which is 32 byte(256) for AES256
-	sessionKey, err := GenerateSessionKey()
+	StreschEmailHash := EmailToSHA256(myEmail)
+	SaltChain, err := GenerateSaltsChain(32)
 	if err != nil {
-		fmt.Println("Error generating session key:", err)
+		fmt.Println("Error generating IV:", err)
 		return
 	}
-	fmt.Println("Session Key (byte) 256 bits:", sessionKey)
-
-	// Creating IV for AES256 which is 12 byte(96)
 	iv, err := GenerateIV()
 	if err != nil {
 		fmt.Println("Error generating IV:", err)
 		return
 	}
-	fmt.Println("IV (byte) 96 bits:", iv)
 
-	//AES Encrypting
-	Plaintext := []byte(myMessage)
-	Ciphertext, err := EncryptAES256GCM(Plaintext, sessionKey, iv)
+	Result := ModdedPBKDF2(MasterKey, SaltChain, 32) // This suppose to use StreschEmailHash as a salt
+	var StringSaltChain []string = ConvertToStrSaltChain(SaltChain)
+
+	concated := ConSaltsEmail(StringSaltChain, myEmail)
+	fmt.Println("Concat result:\n", concated)
+	Plaintext := []byte(concated)
+
+	Ciphertext, err := EncryptAES256GCM(Plaintext, StreschEmailHash, iv)
 	if err != nil {
 		fmt.Println("Error Encrpyting AES", err)
 		return
@@ -280,59 +281,6 @@ func main() {
 	Translate := BytToBa64(Ciphertext[:])
 	fmt.Println("Encrypting successful", Ciphertext)
 	fmt.Println("Translate from Encrypted byte: ", Translate)
-
-	//Decrypting
-	Deciphertext, err := DecryptAES256GCM(Ciphertext, sessionKey, iv)
-	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
-	}
-	Translate = string(Deciphertext)
-	fmt.Println("Decrypting successful", Translate)
-
-	fmt.Println("===== Testing Modded PBKDF2 ====")
-	var ModPBMessage string = "Whatsup"
-	// Generate Salt Chain
-	SaltChain, err := GenerateSaltsChain(32)
-	if err != nil {
-		fmt.Println("Error when generating salt chain", err)
-		return
-	}
-	// for i, salt := range SaltChain {
-	// 	fmt.Println("Salt ", i+1, "", salt)
-	// }
-
-	// Convert Salt change from byte to string
-	var StringSaltChain []string = ConvertToStrSaltChain(SaltChain)
-
-	concated := ConSaltsEmail(StringSaltChain, myEmail)
-	fmt.Println("Concat result:\n", concated)
-
-	deconcated, email, err := SplitSaltsEmail(concated)
-	if err != nil {
-		fmt.Println("Error when split concat", err)
-		return
-	}
-	fmt.Println("DeConcat result:\n", deconcated)
-	fmt.Println("Email is", email)
-
-	// for i, salt := range StringSaltChain {
-	// 	fmt.Println("Salt ", i+1, "", salt)
-	// }
-
-	// Convert Salt change from string to byte
-	SaltChain, err = ConvertToBytSaltChain(StringSaltChain)
-	if err != nil {
-		fmt.Println("Error when generating salt chain", err)
-		return
-	}
-	// for i, salt := range SaltChain {
-	// 	fmt.Println("Salt ", i+1, "", salt)
-	// }
-	TestMessage := []byte(ModPBMessage)
-	TestMessage2 := []byte(ModPBMessage)
-	Result := ModdedPBKDF2(TestMessage, SaltChain, 32)
-	Result2 := ModdedPBKDF2(TestMessage2, SaltChain, 32)
-	fmt.Println("Result of ChainedPBKDF2(1)", Result)
-	fmt.Println("Result of ChainedPBKDF2(2)", Result2)
+	fmt.Println("Result from modded PBKDF: ", Result)
+	fmt.Println("===== End Operation =====")
 }

@@ -254,5 +254,19 @@ func main() {
 	fmt.Println("Decrypting successful", Translate)
 
 	fmt.Println("===== Testing Modded PBKDF2 ====")
-	// Result, Mosalt := ModdedPBKDF2()
+	var ModPBMessage string = "Whatsup"
+	SaltChain, err := GenerateSaltsChain(32)
+	if err != nil {
+		fmt.Println("Error when generating salt chain", err)
+		return
+	}
+	for i, salt := range SaltChain {
+		fmt.Printf("Salt %d: %x\n", i+1, salt)
+	}
+	TestMessage := []byte(ModPBMessage)
+	TestMessage2 := []byte(ModPBMessage)
+	Result := ModdedPBKDF2(TestMessage, SaltChain, 32)
+	Result2 := ModdedPBKDF2(TestMessage2, SaltChain, 32)
+	fmt.Println("Result of ChainedPBKDF2(1)", Result)
+	fmt.Println("Result of ChainedPBKDF2(2)", Result2)
 }

@@ -219,6 +219,23 @@ func ConvertToBytSaltChain(stringArray []string) ([][]byte, error) {
 	return byteArray, nil
 }
 
+func ConSaltsEmail(saltStrings []string, email string) string {
+	return strings.Join(saltStrings, "|") + "|" + email
+}
+
+// Split concatenated string back into salts and email
+func SplitSaltsEmail(concatenated string) ([]string, string, error) {
+	parts := strings.Split(concatenated, "|")
+	if len(parts) < 2 {
+		return nil, "", fmt.Errorf("invalid concatenated format")
+	}
+
+	// The last element is the email, the rest are salts
+	salts := parts[:len(parts)-1]
+	email := parts[len(parts)-1]
+	return salts, email, nil
+}
+
 // func SandwichRegistOperation()
 
 func main() {
@@ -287,6 +304,18 @@ func main() {
 
 	// Convert Salt change from byte to string
 	var StringSaltChain []string = ConvertToStrSaltChain(SaltChain)
+
+	concated := ConSaltsEmail(StringSaltChain, myEmail)
+	fmt.Println("Concat result:\n", concated)
+
+	deconcated, email, err := SplitSaltsEmail(concated)
+	if err != nil {
+		fmt.Println("Error when split concat", err)
+		return
+	}
+	fmt.Println("DeConcat result:\n", deconcated)
+	fmt.Println("Email is", email)
+
 	// for i, salt := range StringSaltChain {
 	// 	fmt.Println("Salt ", i+1, "", salt)
 	// }

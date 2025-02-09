@@ -54,7 +54,7 @@ export function PasswordList({
           New Item
         </Button>
       </div>
-      <div className="p-3">
+      <div className="px-3 pt-3">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
@@ -112,7 +112,7 @@ export function PasswordList({
                   className={`h-7 w-7 absolute right-2.5 top-1/2 -translate-y-1/2
                     transition-opacity duration-200 
                     ${entry.isBookmarked 
-                      ? 'bg-primary/5 hover:bg-primary/10' 
+                      ? 'hover:bg-primary/10' 
                       : 'opacity-0 group-hover:opacity-100 hover:bg-secondary'}`}
                   onClick={toggleBookmark(entry.id)}
                 >

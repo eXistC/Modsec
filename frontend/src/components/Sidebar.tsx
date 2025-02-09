@@ -41,7 +41,7 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
         </div>
       </div>
       <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
+        <div className="px-3">
           <div className="space-y-1">
             <Button 
               variant={currentView === "passwords" ? "secondary" : "ghost"}

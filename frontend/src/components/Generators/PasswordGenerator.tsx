@@ -38,7 +38,7 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
     if (generatorType === "password") {
       const passwordModule = document.querySelector('div[data-generator="password"]');
       if (passwordModule) {
-        const generateButton = passwordModule.querySelector('button[data-action="generate"]');
+        const generateButton = passwordModule.querySelector('button[data-action="generate"]') as HTMLButtonElement;
         if (generateButton) {
           generateButton.click();
         }
@@ -46,7 +46,7 @@ export function PasswordGenerator({ onPasswordGenerated }: PasswordGeneratorProp
     } else {
       const usernameModule = document.querySelector('div[data-generator="username"]');
       if (usernameModule) {
-        const generateButton = usernameModule.querySelector('button[data-action="generate"]');
+        const generateButton = usernameModule.querySelector('button[data-action="generate"]') as HTMLButtonElement;
         if (generateButton) {
           generateButton.click();
         }

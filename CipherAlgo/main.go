@@ -46,9 +46,8 @@ func Argon2Function(password string, salt []byte) []byte {
 	return hash //(As 256 bits)
 }
 
+// This function turn email Sinto sha256 which will be used as salt in the future. or maybe store in database
 func EmailToSHA256(email string) []byte {
-	// This function turn email Sinto sha256
-	// which will be used as salt in the future. or maybe store in database
 	// Input as string
 	// Output as byte
 
@@ -64,9 +63,8 @@ func EmailToSHA256(email string) []byte {
 	return emailHash[:]
 }
 
+// This function is for PBKDF2. It use SHA256 to do the hashing and the number of iteration can be control
 func PBKDF2Function(password, salt string, iterations, keyLength int) string {
-	// This function is for PBKDF2
-	// It use SHA256 to do the hashing and the number of iteration can be control
 	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
 	// Output as string(Base64)
 
@@ -81,9 +79,8 @@ func PBKDF2Function(password, salt string, iterations, keyLength int) string {
 	return BytToBa64(key)
 }
 
-// NOT TESTED YET!
+// This performs a PBKDF2 witch each iteration corresponding to each salts.
 func ModdedPBKDF2(password []byte, saltChain [][]byte, keyLength int) []byte {
-	// This performs a PBKDF2 witch each iteration corresponding to each salts.
 	// Inputs: password(byte) saltChain (Array of byte) keyLength (int 32)
 	// Outputs: finalKey(byte)
 
@@ -202,6 +199,28 @@ func DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) 
 	return plaintext, nil
 }
 
+func ConvertToStrSaltChain(byteArray [][]byte) []string {
+	var stringArray []string
+	for _, Bbyte := range byteArray {
+		stringArray = append(stringArray, BytToBa64(Bbyte))
+	}
+	return stringArray
+}
+
+func ConvertToBytSaltChain(stringArray []string) ([][]byte, error) {
+	var byteArray [][]byte
+	for _, Sstring := range stringArray {
+		decoded, err := Ba64ToByt(Sstring)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode base64 string: %w", err)
+		}
+		byteArray = append(byteArray, decoded)
+	}
+	return byteArray, nil
+}
+
+// func SandwichRegistOperation()
+
 func main() {
 	var myPassword string = "Whatsup"
 	var myEmail string = "soMeth!ng@email.com"
@@ -244,6 +263,7 @@ func main() {
 	Translate := BytToBa64(Ciphertext[:])
 	fmt.Println("Encrypting successful", Ciphertext)
 	fmt.Println("Translate from Encrypted byte: ", Translate)
+
 	//Decrypting
 	Deciphertext, err := DecryptAES256GCM(Ciphertext, sessionKey, iv)
 	if err != nil {
@@ -255,14 +275,31 @@ func main() {
 
 	fmt.Println("===== Testing Modded PBKDF2 ====")
 	var ModPBMessage string = "Whatsup"
+	// Generate Salt Chain
 	SaltChain, err := GenerateSaltsChain(32)
 	if err != nil {
 		fmt.Println("Error when generating salt chain", err)
 		return
 	}
-	for i, salt := range SaltChain {
-		fmt.Printf("Salt %d: %x\n", i+1, salt)
+	// for i, salt := range SaltChain {
+	// 	fmt.Println("Salt ", i+1, "", salt)
+	// }
+
+	// Convert Salt change from byte to string
+	var StringSaltChain []string = ConvertToStrSaltChain(SaltChain)
+	// for i, salt := range StringSaltChain {
+	// 	fmt.Println("Salt ", i+1, "", salt)
+	// }
+
+	// Convert Salt change from string to byte
+	SaltChain, err = ConvertToBytSaltChain(StringSaltChain)
+	if err != nil {
+		fmt.Println("Error when generating salt chain", err)
+		return
 	}
+	// for i, salt := range SaltChain {
+	// 	fmt.Println("Salt ", i+1, "", salt)
+	// }
 	TestMessage := []byte(ModPBMessage)
 	TestMessage2 := []byte(ModPBMessage)
 	Result := ModdedPBKDF2(TestMessage, SaltChain, 32)

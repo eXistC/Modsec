@@ -81,35 +81,33 @@ func PBKDF2Function(password, salt string, iterations, keyLength int) string {
 	return BytToBa64(key)
 }
 
-// NOT TESTED YET! AND IT WAS GENERATED
-func ModdedPBKDF2(password []byte, iterations, keyLength int) ([]byte, [][]byte) {
-	// This function born soley for Sanwich hashing
-	// It will
-	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
-	// Output as string(Base64)
-	var finalKey []byte   // Store XOR'd final key
-	var allSalts [][]byte // Store all salts used during iterations
-	for i := 0; i < iterations; i++ {
-		// Generate a new salt for each iteration
-		salt, err := GenerateSalts()
-		if err != nil {
-			panic("Failed to generate salt") // Handle error properly in real implementation
-		}
+// NOT TESTED YET!
+func ModdedPBKDF2(password []byte, saltChain [][]byte, keyLength int) []byte {
+	// This performs a PBKDF2 witch each iteration corresponding to each salts.
+	// Inputs: password(byte) saltChain (Array of byte) keyLength (int 32)
+	// Outputs: finalKey(byte)
 
-		allSalts = append(allSalts, salt)
-		// Derive key using PBKDF2 with the generated salt
+	if len(saltChain) == 0 {
+		return nil // Avoid processing if no salts
+	}
+
+	var finalKey []byte // Store XOR'd final key
+
+	for i, salt := range saltChain {
+		// Derive key using PBKDF2 with one iteration per salt
 		derivedKey := pbkdf2.Key(password, salt, 1, keyLength, sha256.New)
 
-		if finalKey == nil {
-			finalKey = derivedKey // First iteration sets the base key
+		if i == 0 {
+			finalKey = derivedKey // Set the base key for the first iteration
 		} else {
+			// XOR current derived key with previous result
 			for j := range finalKey {
-				finalKey[j] ^= derivedKey[j] // XOR with previous keys
+				finalKey[j] ^= derivedKey[j]
 			}
 		}
 	}
-	// Return the key byte and allsalts as array of byte
-	return finalKey, allSalts
+	// Return the final key and the salts used
+	return finalKey
 }
 
 func GenerateRandomBytes(size int) ([]byte, error) {
@@ -143,6 +141,20 @@ func GenerateSessionKey() ([]byte, error) {
 func GenerateSalts() ([]byte, error) {
 	// Request: GenerateRandomBytes function
 	return GenerateRandomBytes(32) // Returns raw 32 byte (256)
+}
+
+func GenerateSaltsChain(number int) ([][]byte, error) {
+	var saltChain [][]byte // Store all salts used during iterations
+	for i := 0; i < number; i++ {
+		// Generate a new salt for each iteration
+		salt, err := GenerateSalts()
+		if err != nil {
+			panic("Failed to generate salt") // Handle error properly in real implementation
+		}
+
+		saltChain = append(saltChain, salt)
+	}
+	return saltChain, nil
 }
 
 func EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
@@ -240,4 +252,7 @@ func main() {
 	}
 	Translate = string(Deciphertext)
 	fmt.Println("Decrypting successful", Translate)
+
+	fmt.Println("===== Testing Modded PBKDF2 ====")
+	// Result, Mosalt := ModdedPBKDF2()
 }

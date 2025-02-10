@@ -46,9 +46,8 @@ func Argon2Function(password string, salt []byte) []byte {
 	return hash //(As 256 bits)
 }
 
+// This function turn email Sinto sha256 which will be used as salt in the future. or maybe store in database
 func EmailToSHA256(email string) []byte {
-	// This function turn email Sinto sha256
-	// which will be used as salt in the future. or maybe store in database
 	// Input as string
 	// Output as byte
 
@@ -64,9 +63,8 @@ func EmailToSHA256(email string) []byte {
 	return emailHash[:]
 }
 
+// This function is for PBKDF2. It use SHA256 to do the hashing and the number of iteration can be control
 func PBKDF2Function(password, salt string, iterations, keyLength int) string {
-	// This function is for PBKDF2
-	// It use SHA256 to do the hashing and the number of iteration can be control
 	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
 	// Output as string(Base64)
 
@@ -81,35 +79,32 @@ func PBKDF2Function(password, salt string, iterations, keyLength int) string {
 	return BytToBa64(key)
 }
 
-// NOT TESTED YET! AND IT WAS GENERATED
-func ModdedPBKDF2(password []byte, iterations, keyLength int) ([]byte, [][]byte) {
-	// This function born soley for Sanwich hashing
-	// It will
-	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
-	// Output as string(Base64)
-	var finalKey []byte   // Store XOR'd final key
-	var allSalts [][]byte // Store all salts used during iterations
-	for i := 0; i < iterations; i++ {
-		// Generate a new salt for each iteration
-		salt, err := GenerateSalts()
-		if err != nil {
-			panic("Failed to generate salt") // Handle error properly in real implementation
-		}
+// This performs a PBKDF2 witch each iteration corresponding to each salts.
+func ModdedPBKDF2(payload []byte, saltChain [][]byte, keyLength int) []byte {
+	// Inputs: payload(byte) saltChain (Array of byte) keyLength (int 32)
+	// Outputs: finalKey(byte)
 
-		allSalts = append(allSalts, salt)
-		// Derive key using PBKDF2 with the generated salt
-		derivedKey := pbkdf2.Key(password, salt, 1, keyLength, sha256.New)
+	if len(saltChain) == 0 {
+		return nil // Avoid processing if no salts
+	}
 
-		if finalKey == nil {
-			finalKey = derivedKey // First iteration sets the base key
+	var finalKey []byte // Store XOR'd final key
+
+	for i, salt := range saltChain {
+		// Derive key using PBKDF2 with one iteration per salt
+		derivedKey := pbkdf2.Key(payload, salt, 1, keyLength, sha256.New)
+
+		if i == 0 {
+			finalKey = derivedKey // Set the base key for the first iteration
 		} else {
+			// XOR current derived key with previous result
 			for j := range finalKey {
-				finalKey[j] ^= derivedKey[j] // XOR with previous keys
+				finalKey[j] ^= derivedKey[j]
 			}
 		}
 	}
-	// Return the key byte and allsalts as array of byte
-	return finalKey, allSalts
+	// Return the final key and the salts used
+	return finalKey
 }
 
 func GenerateRandomBytes(size int) ([]byte, error) {
@@ -143,6 +138,20 @@ func GenerateSessionKey() ([]byte, error) {
 func GenerateSalts() ([]byte, error) {
 	// Request: GenerateRandomBytes function
 	return GenerateRandomBytes(32) // Returns raw 32 byte (256)
+}
+
+func GenerateSaltsChain(number int) ([][]byte, error) {
+	var saltChain [][]byte // Store all salts used during iterations
+	for i := 0; i < number; i++ {
+		// Generate a new salt for each iteration
+		salt, err := GenerateSalts()
+		if err != nil {
+			panic("Failed to generate salt") // Handle error properly in real implementation
+		}
+
+		saltChain = append(saltChain, salt)
+	}
+	return saltChain, nil
 }
 
 func EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
@@ -190,41 +199,82 @@ func DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) 
 	return plaintext, nil
 }
 
+func ConvertToStrSaltChain(byteArray [][]byte) []string {
+	var stringArray []string
+	for _, Bbyte := range byteArray {
+		stringArray = append(stringArray, BytToBa64(Bbyte))
+	}
+	return stringArray
+}
+
+func ConvertToBytSaltChain(stringArray []string) ([][]byte, error) {
+	var byteArray [][]byte
+	for _, Sstring := range stringArray {
+		decoded, err := Ba64ToByt(Sstring)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode base64 string: %w", err)
+		}
+		byteArray = append(byteArray, decoded)
+	}
+	return byteArray, nil
+}
+
+func ConSaltsEmail(saltStrings []string, email string) string {
+	return strings.Join(saltStrings, "|") + "|" + email
+}
+
+// Split concatenated string back into salts and email
+func SplitSaltsEmail(concatenated string) ([]string, string, error) {
+	parts := strings.Split(concatenated, "|")
+	if len(parts) < 2 {
+		return nil, "", fmt.Errorf("invalid concatenated format")
+	}
+
+	// The last element is the email, the rest are salts
+	salts := parts[:len(parts)-1]
+	email := parts[len(parts)-1]
+	return salts, email, nil
+}
+
+func SandwichRegisOP() {
+
+}
+
 func main() {
+	// Testing simpler Sanwich Registeration Operation
+	// I'm tired
+	fmt.Println("===== Begin Operation =====")
 	var myPassword string = "Whatsup"
 	var myEmail string = "soMeth!ng@email.com"
 	var myMessage string = "Something wong"
 	fmt.Println("Test password:", myPassword)
 	fmt.Println("Test Email:", myEmail)
 	fmt.Println("Test Message", myMessage)
+
 	// Creating Master key which is 32 byte(256) for AES256
 	MasterKey := Argon2Function(myPassword, EmailToSHA256(myEmail))
-	fmt.Println("Master key: 256 bits", MasterKey)
-	fmt.Println("Transalated Master key: 256 bits", BytToBa64(MasterKey))
-
+	fmt.Println("Error generating IV:", MasterKey)
 	// Creating Streact email hash with SHA256
-	StreschEmailHash := BytToBa64(EmailToSHA256(myEmail))
-	fmt.Println("StreschEmailHash:", StreschEmailHash)
-
-	// Creating Session key which is 32 byte(256) for AES256
-	sessionKey, err := GenerateSessionKey()
+	StreschEmailHash := EmailToSHA256(myEmail)
+	SaltChain, err := GenerateSaltsChain(32)
 	if err != nil {
-		fmt.Println("Error generating session key:", err)
+		fmt.Println("Error generating IV:", err)
 		return
 	}
-	fmt.Println("Session Key (byte) 256 bits:", sessionKey)
-
-	// Creating IV for AES256 which is 12 byte(96)
 	iv, err := GenerateIV()
 	if err != nil {
 		fmt.Println("Error generating IV:", err)
 		return
 	}
-	fmt.Println("IV (byte) 96 bits:", iv)
 
-	//AES Encrypting
-	Plaintext := []byte(myMessage)
-	Ciphertext, err := EncryptAES256GCM(Plaintext, sessionKey, iv)
+	Result := ModdedPBKDF2(MasterKey, SaltChain, 32000) // This suppose to use StreschEmailHash as a salt
+	var StringSaltChain []string = ConvertToStrSaltChain(SaltChain)
+
+	concated := ConSaltsEmail(StringSaltChain, myEmail)
+	fmt.Println("Concat result:\n", concated)
+	Plaintext := []byte(concated)
+
+	Ciphertext, err := EncryptAES256GCM(Plaintext, StreschEmailHash, iv)
 	if err != nil {
 		fmt.Println("Error Encrpyting AES", err)
 		return
@@ -232,12 +282,11 @@ func main() {
 	Translate := BytToBa64(Ciphertext[:])
 	fmt.Println("Encrypting successful", Ciphertext)
 	fmt.Println("Translate from Encrypted byte: ", Translate)
-	//Decrypting
-	Deciphertext, err := DecryptAES256GCM(Ciphertext, sessionKey, iv)
-	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
-	}
-	Translate = string(Deciphertext)
-	fmt.Println("Decrypting successful", Translate)
+	fmt.Println("Result from modded PBKDF: ", Result)
+	fmt.Println("===== End Operation =====")
+
+	// iteration need to be a random number value
+	// each PBKDF2 use different random
+	// Salts PBKDF2 use stretch Email by dividing in to something (8 section)
+	// Lowest PBKDF2 use 8 byte(length) of salt for 1 block (64 byte for 8 block)
 }

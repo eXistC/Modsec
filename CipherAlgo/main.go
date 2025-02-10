@@ -253,6 +253,7 @@ func main() {
 
 	// Creating Master key which is 32 byte(256) for AES256
 	MasterKey := Argon2Function(myPassword, EmailToSHA256(myEmail))
+	fmt.Println("Error generating IV:", MasterKey)
 	// Creating Streact email hash with SHA256
 	StreschEmailHash := EmailToSHA256(myEmail)
 	SaltChain, err := GenerateSaltsChain(32)
@@ -266,7 +267,7 @@ func main() {
 		return
 	}
 
-	Result := ModdedPBKDF2(MasterKey, SaltChain, 32) // This suppose to use StreschEmailHash as a salt
+	Result := ModdedPBKDF2(MasterKey, SaltChain, 32000) // This suppose to use StreschEmailHash as a salt
 	var StringSaltChain []string = ConvertToStrSaltChain(SaltChain)
 
 	concated := ConSaltsEmail(StringSaltChain, myEmail)
@@ -283,4 +284,9 @@ func main() {
 	fmt.Println("Translate from Encrypted byte: ", Translate)
 	fmt.Println("Result from modded PBKDF: ", Result)
 	fmt.Println("===== End Operation =====")
+
+	// iteration need to be a random number value
+	// each PBKDF2 use different random
+	// Salts PBKDF2 use stretch Email by dividing in to something (8 section)
+	// Lowest PBKDF2 use 8 byte(length) of salt for 1 block (64 byte for 8 block)
 }

@@ -19,20 +19,20 @@ func main() {
 	fmt.Println("Test Email:", myEmail)
 	fmt.Println("Test Message", myMessage)
 
-	// Creating Master key which is 32 byte(256) for AES256
-	MasterKey := myHash.Argon2Function(myPassword, myHash.EmailToSHA256(myEmail), 32)
-	fmt.Println("Error generating IV:", MasterKey)
-	// Creating Streact email hash with SHA256
-	StreschEmailHash := myHash.EmailToSHA256(myEmail)
+	MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
+	Masterkey := myHash.MasterPasswordGen(myPassword)
+	Answer := myHash.SandwichRegisOP(myPassword, myEmail)
+
+	fmt.Println("Master Password Hash", MasterPasswordHash)
+	fmt.Println("Master Key", Masterkey)
+	fmt.Println("Answer from PBKDF 8 time", Answer)
+
 	iv, err := myGenVal.GenerateIV()
 	if err != nil {
-		fmt.Println("Error generating IV:", err)
+		fmt.Println("Error Encrpyting AES", err)
 		return
 	}
-
-	Plaintext := []byte(myPassword)
-
-	Ciphertext, err := myEncrypt.EncryptAES256GCM(Plaintext, StreschEmailHash, iv)
+	Ciphertext, err := myEncrypt.EncryptAES256GCM(Masterkey, MasterPasswordHash, iv)
 	if err != nil {
 		fmt.Println("Error Encrpyting AES", err)
 		return
@@ -41,8 +41,4 @@ func main() {
 	fmt.Println("Encrypting successful", Ciphertext)
 	fmt.Println("Translate from Encrypted byte: ", Translate)
 	fmt.Println("===== End Operation =====")
-
-	SomNumber := myGenVal.RandomInt(1000, 800000)
-	fmt.Println("Translate from Encrypted byte: ", SomNumber)
-
 }

@@ -18,26 +18,6 @@ func BytToBa64(bytes []byte) string {
 	return base64.StdEncoding.EncodeToString(bytes)
 }
 
-func ConvertToStrSaltChain(byteArray [][]byte) []string {
-	var stringArray []string
-	for _, Bbyte := range byteArray {
-		stringArray = append(stringArray, BytToBa64(Bbyte))
-	}
-	return stringArray
-}
-
-func ConvertToBytSaltChain(stringArray []string) ([][]byte, error) {
-	var byteArray [][]byte
-	for _, Sstring := range stringArray {
-		decoded, err := Ba64ToByt(Sstring)
-		if err != nil {
-			return nil, fmt.Errorf("failed to decode base64 string: %w", err)
-		}
-		byteArray = append(byteArray, decoded)
-	}
-	return byteArray, nil
-}
-
 func ConSaltsEmail(saltStrings []string, email string) string {
 	return strings.Join(saltStrings, "|") + "|" + email
 }

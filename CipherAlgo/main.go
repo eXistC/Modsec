@@ -20,7 +20,7 @@ func main() {
 	fmt.Println("Test Message", myMessage)
 
 	// Creating Master key which is 32 byte(256) for AES256
-	MasterKey := myHash.Argon2Function(myPassword, myHash.EmailToSHA256(myEmail))
+	MasterKey := myHash.Argon2Function(myPassword, myHash.EmailToSHA256(myEmail), 32)
 	fmt.Println("Error generating IV:", MasterKey)
 	// Creating Streact email hash with SHA256
 	StreschEmailHash := myHash.EmailToSHA256(myEmail)

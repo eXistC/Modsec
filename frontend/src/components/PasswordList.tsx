@@ -65,7 +65,7 @@ export function PasswordList({
           />
         </div>
       </div>
-      <ScrollArea className="h-[calc(100vh-140px)]">
+      <ScrollArea className="h-auto">
         <div className="space-y-1 p-2">
           {filteredPasswords.map((entry) => (
             <Button

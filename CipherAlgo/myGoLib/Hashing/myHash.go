@@ -57,3 +57,14 @@ func PBKDF2Function(password, salt string, iterations, keyLength int) []byte {
 	// Return the key as a base64 string
 	return key
 }
+
+func SandwichRegisOP() {
+	// Sanswich
+	// Number of iteration = 1000 <= n <= 800000
+	// iteration need to be a random number value
+
+	// Do it about 8 time
+
+	// Salts PBKDF2 use stretch Email by dividing in to something (8 section)
+	// Lowest PBKDF2 size use 8 byte(length) of salt for 1 block (64 byte for 8 block)
+}

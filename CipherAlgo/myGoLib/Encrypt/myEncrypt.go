@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+// Return Byte, Error use to encrypt data(byte)
 func EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: plaintext(byte) Key 32(byte) IV 12(byte)
@@ -27,7 +28,7 @@ func EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
-// decryptAES256GCM decrypts ciphertext using AES-256 GCM with a provided nonce.
+// Return Byte, Error use to Decrypt data(Byte)
 func DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte, error) {
 	// AES256 using GCM mode
 	// Input: ciphertext(byte) Key 32(byte) IV 12(byte)

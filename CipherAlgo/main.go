@@ -8,10 +8,6 @@ import (
 	myHash "test/myGoLib/Hashing"
 )
 
-func SandwichRegisOP() {
-
-}
-
 func main() {
 	// Testing simpler Sanwich Registeration Operation
 	// I'm tired
@@ -46,8 +42,11 @@ func main() {
 	fmt.Println("Translate from Encrypted byte: ", Translate)
 	fmt.Println("===== End Operation =====")
 
-	// iteration need to be a random number value
-	// each PBKDF2 use different random
-	// Salts PBKDF2 use stretch Email by dividing in to something (8 section)
-	// Lowest PBKDF2 use 8 byte(length) of salt for 1 block (64 byte for 8 block)
+	SomNumber, err := myGenVal.RandomInt(1000, 800000)
+	if err != nil {
+		fmt.Println("Error Encrpyting AES", err)
+		return
+	}
+	fmt.Println("Translate from Encrypted byte: ", SomNumber)
+
 }

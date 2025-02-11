@@ -3,6 +3,7 @@ package myGenVal
 import (
 	"crypto/rand"
 	"fmt"
+	"math/big"
 )
 
 func GenerateRandomBytes(size int) ([]byte, error) {
@@ -50,4 +51,17 @@ func GenerateSaltsChain(number int) ([][]byte, error) {
 		saltChain = append(saltChain, salt)
 	}
 	return saltChain, nil
+}
+
+func RandomInt(min, max int) (int, error) {
+	if min >= max {
+		return 0, fmt.Errorf("invalid range: min must be less than max")
+	}
+
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(max-min+1)))
+	if err != nil {
+		return 0, fmt.Errorf("failed to generate random int: %w", err)
+	}
+
+	return int(nBig.Int64()) + min, nil
 }

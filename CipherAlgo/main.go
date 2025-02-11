@@ -42,11 +42,7 @@ func main() {
 	fmt.Println("Translate from Encrypted byte: ", Translate)
 	fmt.Println("===== End Operation =====")
 
-	SomNumber, err := myGenVal.RandomInt(1000, 800000)
-	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
-	}
+	SomNumber := myGenVal.RandomInt(1000, 800000)
 	fmt.Println("Translate from Encrypted byte: ", SomNumber)
 
 }

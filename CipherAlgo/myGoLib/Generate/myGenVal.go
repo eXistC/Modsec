@@ -53,15 +53,15 @@ func GenerateSaltsChain(number int) ([][]byte, error) {
 	return saltChain, nil
 }
 
-func RandomInt(min, max int) (int, error) {
+func RandomInt(min, max int) int {
 	if min >= max {
-		return 0, fmt.Errorf("invalid range: min must be less than max")
+		return 0
 	}
 
 	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(max-min+1)))
 	if err != nil {
-		return 0, fmt.Errorf("failed to generate random int: %w", err)
+		return 0
 	}
 
-	return int(nBig.Int64()) + min, nil
+	return int(nBig.Int64()) + min
 }

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { X, Check } from "lucide-react";
+import { X, Check, RefreshCw } from "lucide-react";
 import { PasswordGeneratorModule } from "./PasswordGeneratorModule";
 import { useState, useRef, useEffect } from "react";
 import { Input } from "../ui/input";
@@ -35,6 +35,16 @@ export function InlinePasswordGenerator({ onGenerate, onClose }: InlinePasswordG
     }
   };
 
+  const handleRefresh = () => {
+    const passwordModule = document.querySelector('div[data-generator="password"]');
+    if (passwordModule) {
+      const generateButton = passwordModule.querySelector('button[data-action="generate"]') as HTMLButtonElement;
+      if (generateButton) {
+        generateButton.click();
+      }
+    }
+  };
+
   return (
     <div 
       ref={popupRef}
@@ -49,6 +59,14 @@ export function InlinePasswordGenerator({ onGenerate, onClose }: InlinePasswordG
             onClick={onClose}
           >
             Cancel
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-primary hover:text-primary transition-colors"
+            onClick={handleRefresh}
+          >
+            <RefreshCw className="h-4 w-4" />
           </Button>
           <Button
             size="sm"

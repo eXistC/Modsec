@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck, Wallet, File, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { PasswordEntry } from "@/types/password";
+import { PasswordEntry, PasswordType } from "@/types/password";
+import { NewItemTypeOverlay } from "./Overlays/NewItemTypeOverlay";
 
 // Export the interface separately
 export interface PasswordListProps {
@@ -25,6 +26,7 @@ export function PasswordList({
   onToggleBookmark 
 }: PasswordListProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showNewItemOverlay, setShowNewItemOverlay] = useState(false);
 
   const toggleBookmark = (id: string) => (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -41,7 +43,20 @@ export function PasswordList({
        (entry.type === "card" && entry.cardNumber.toLowerCase().includes(searchQuery.toLowerCase())))
     );
 
+  const handleNewItem = () => {
+    setShowNewItemOverlay(true);
+  };
 
+  const handleTypeSelect = (type: PasswordType) => {
+    setShowNewItemOverlay(false);
+    const newEntry: Partial<PasswordEntry> = {
+      id: crypto.randomUUID(),
+      type,
+      title: "",
+      isBookmarked: false,
+    };
+    onSelectPassword(newEntry as PasswordEntry);
+  };
 
   return (
     <div className="h-full bg-[#1E1E1E]">
@@ -49,7 +64,12 @@ export function PasswordList({
         <h2 className="text-sm font-normal">
           {currentView === "bookmarks" ? "Bookmarks" : "All Passwords"}
         </h2>
-        <Button size="sm" variant="outline" className="bg-secondary hover:bg-secondary/80">
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="bg-secondary hover:bg-secondary/80"
+          onClick={handleNewItem}
+        >
           <Plus className="mr-2 h-4 w-4" />
           New Item
         </Button>
@@ -134,6 +154,12 @@ export function PasswordList({
           )}
         </div>
       </ScrollArea>
+      {showNewItemOverlay && (
+        <NewItemTypeOverlay
+          onSelect={handleTypeSelect}
+          onClose={() => setShowNewItemOverlay(false)}
+        />
+      )}
     </div>
   );
 }

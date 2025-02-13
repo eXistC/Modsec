@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,16 @@ export function CryptoFields({
   setShowPassword,
   handleChange
 }: CryptoFieldsProps) {
+  const handleFieldFocus = () => {
+    if (isEditing) {
+      setShowPassword(true);
+    }
+  };
+
+  const handlePasswordChange = (field: keyof CryptoEntry) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(field)(e);
+  };
+
   return (
     <>
       <div className="space-y-2">
@@ -34,42 +45,16 @@ export function CryptoFields({
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Password</label>
-        <div className="relative">
-        <Input 
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter password" 
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono ${isEditing ? '' : 'pr-10'}`}
-            value={formData.password || ''}
-            onChange={handleChange('password')}
-            onFocus={() => {
-              if (isEditing) {
-                setShowPassword(true);
-              }
-            }}
-            onBlur={() => {
-              if (isEditing) {
-                setShowPassword(false);
-              }
-            }}
-            readOnly={!isEditing}
-          />
-          {!isEditing && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground/70" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground/70" />
-              )}
-            </Button>
-          )}
-        </div>
+        <PasswordInput 
+          placeholder="Enter password"
+          value={formData.password || ''}
+          onChange={handlePasswordChange('password')}
+          isEditing={isEditing}
+          showPassword={showPassword}
+          onPasswordVisibilityChange={setShowPassword}
+          onPasswordFocus={handleFieldFocus}
+          className="font-mono"
+        />
       </div>
 
       <div className="space-y-2">
@@ -83,11 +68,7 @@ export function CryptoFields({
             style={{ 
               WebkitTextSecurity: (!isEditing || !showPassword) ? 'disc' : 'none'
             } as React.CSSProperties}
-            onFocus={() => {
-              if (isEditing) {
-                setShowPassword(true);
-              }
-            }}
+            onFocus={handleFieldFocus}
             onBlur={() => {
               if (isEditing) {
                 setShowPassword(false);

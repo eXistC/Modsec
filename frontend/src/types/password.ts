@@ -34,14 +34,15 @@ export interface CryptoEntry extends BaseEntry {
 
 export interface IdentityEntry extends BaseEntry {
   type: "identity";
-  initial?: string;
+  initial: string;
   firstName: string;
   lastName: string;
-  phoneNumber?: string;
-  gender?: "male" | "female" | "other";
-  birthDay?: string;
-  occupation?: string;
-  address?: string;
+  nickname?: string;
+  phoneNumber: string;
+  gender: string;
+  birthDay: string;
+  occupation: string;
+  address: string;
 }
 
 export interface MemoEntry extends BaseEntry {

@@ -50,6 +50,17 @@ export function IdentityFields({
         />
       </div>
 
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-muted-foreground">Nickname</label>
+        <Input
+          placeholder="Enter nickname"
+          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+          value={formData.nickname}
+          onChange={handleChange('nickname')}
+          readOnly={!isEditing}
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-muted-foreground">Phone Number</label>

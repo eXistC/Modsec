@@ -44,6 +44,7 @@ const mockPasswords: PasswordEntry[] = [
     initial: "Mr",
     firstName: "John",
     lastName: "Doe",
+    nickname: "Johnny",
     phoneNumber: "+1234567890",
     gender: "male",
     birthDay: "1990-01-01",

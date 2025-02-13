@@ -1,7 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { CardEntry } from "@/types/password";
 
 interface CardFieldsProps {
@@ -19,6 +17,18 @@ export function CardFields({
   setShowPassword, 
   handleChange 
 }: CardFieldsProps) {
+
+  const handleFieldFocus = () => {
+    // Match WebsiteFields behavior - only show in editing mode
+    if (isEditing) {
+      setShowPassword(true);
+    }
+  };
+
+  const handlePasswordChange = (field: keyof CardEntry) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(field)(e);
+  };
+
   return (
     <>
       <div className="space-y-2">
@@ -31,35 +41,21 @@ export function CardFields({
           readOnly={!isEditing}
         />
       </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Card Number</label>
-        <div className="relative">
-          <Input 
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter card number"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10`}
-            value={formData.cardNumber}
-            onChange={handleChange('cardNumber')}
-            readOnly={!isEditing}
-          />
-          {!isEditing && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground/70" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground/70" />
-              )}
-            </Button>
-          )}
-        </div>
+        <PasswordInput 
+          placeholder="Enter card number"
+          value={formData.cardNumber}
+          onChange={handlePasswordChange('cardNumber')}
+          isEditing={isEditing}
+          showPassword={showPassword}
+          onPasswordVisibilityChange={setShowPassword}
+          onPasswordFocus={handleFieldFocus}
+          className="font-mono"
+        />
       </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-muted-foreground">Valid From</label>
@@ -82,34 +78,19 @@ export function CardFields({
           />
         </div>
       </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">CVV</label>
-        <div className="relative">
-          <Input 
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter CVV"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10`}
-            value={formData.cvv}
-            onChange={handleChange('cvv')}
-            readOnly={!isEditing}
-          />
-          {!isEditing && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground/70" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground/70" />
-              )}
-            </Button>
-          )}
-        </div>
+        <PasswordInput 
+          placeholder="Enter CVV"
+          value={formData.cvv}
+          onChange={handlePasswordChange('cvv')}
+          isEditing={isEditing}
+          showPassword={showPassword}
+          onPasswordVisibilityChange={setShowPassword}
+          onPasswordFocus={handleFieldFocus}
+          className="font-mono"
+        />
       </div>
     </>
   );

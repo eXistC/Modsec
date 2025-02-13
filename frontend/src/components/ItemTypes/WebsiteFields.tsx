@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { WebsiteEntry } from "@/types/password";
 import { InlinePasswordGenerator } from "../Generators/PasswordGeneratorInline";
 import { useState } from "react";
+import { PasswordInput } from "@/components/ui/password-input";
 
 interface WebsiteFieldsProps {
   formData: WebsiteEntry;
@@ -74,30 +75,15 @@ export function WebsiteFields({
       <div className="space-y-2 relative">
         <label className="text-sm font-medium text-muted-foreground">Password</label>
         <div className="relative">
-          <Input 
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter password" 
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input`}
+          <PasswordInput 
+            placeholder="Enter password"
             value={formData.password || ''}
             onChange={handlePasswordChange}
             onFocus={handlePasswordFocus}
-            readOnly={!isEditing}
+            isEditing={isEditing}
+            showPassword={showPassword}
+            onPasswordVisibilityChange={setShowPassword}
           />
-          {!isEditing && formData.password && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground/70" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground/70" />
-              )}
-            </Button>
-          )}
           {showGenerator && isEditing && (
             <InlinePasswordGenerator 
               onGenerate={handleGeneratePassword}

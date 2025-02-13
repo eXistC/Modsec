@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck, Wallet, File, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { PasswordEntry, PasswordType } from "@/types/password";
+import { IdentityEntry, PasswordEntry, PasswordType } from "@/types/password";
 import { NewItemTypeOverlay } from "./Overlays/NewItemTypeOverlay";
 
 // Export the interface separately
@@ -17,6 +17,11 @@ export interface PasswordListProps {
 // Add this helper function at the top of the file, after imports
 const maskCardNumber = (cardNumber: string) => {
   return `•••• •••• •••• ${cardNumber.slice(-4)}`;
+};
+
+// Add after the maskCardNumber function
+const formatFullName = (entry: IdentityEntry) => {
+  return `${entry.firstName} ${entry.lastName}`.trim();
 };
 
 export function PasswordList({ 
@@ -40,7 +45,11 @@ export function PasswordList({
       // Then apply search filter
       (entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
        (entry.type === "website" && entry.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-       (entry.type === "card" && entry.cardNumber.toLowerCase().includes(searchQuery.toLowerCase())))
+       (entry.type === "card" && entry.cardNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
+       (entry.type === "identity" && (
+         entry.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         entry.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+       )))
     );
 
   const handleNewItem = () => {
@@ -123,6 +132,11 @@ export function PasswordList({
                   {entry.type === "card" && entry.cardNumber && (
                     <div className="text-sm text-muted-foreground/70 font-mono truncate pr-8">
                       {maskCardNumber(entry.cardNumber)}
+                    </div>
+                  )}
+                  {entry.type === "identity" && (
+                    <div className="text-sm text-muted-foreground/70 truncate pr-8">
+                      {formatFullName(entry)}
                     </div>
                   )}
                 </div>

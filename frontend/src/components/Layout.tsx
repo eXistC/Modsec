@@ -3,7 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { PasswordManager } from "./PasswordManager";
 import { PasswordGenerator } from "./Generators/PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
-import { LoginPage } from "./LoginPage";
+import { LoginPage } from "./Pages/LoginPage";
 import { PasswordEntry } from "../types/password";
 import { useAuth } from '@/context/AuthContext';
 

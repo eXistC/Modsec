@@ -78,7 +78,9 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="h-full bg-background">
@@ -142,7 +144,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               </div>
               <Input 
                 placeholder="Enter item name" 
-                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+                className={`${isEditing ? 'bg-secondary' : 'bg-background'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
                 value={formData.title}
                 onChange={handleChange('title')}
                 readOnly={!isEditing}
@@ -189,7 +191,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               <label className="text-sm font-medium text-muted-foreground">Notes</label>
               <Textarea 
                 placeholder="Add notes..." 
-                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[100px]`}
+                className={`${isEditing ? 'bg-secondary' : 'bg-background'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[100px]`}
                 value={formData.notes}
                 onChange={handleChange('notes')}
                 readOnly={!isEditing}

@@ -14,13 +14,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (masterPassword: string) => {
     // Authentication logic here
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulated delay
+    await new Promise(resolve => setTimeout(resolve, 400)); // Simulated delay
     setIsAuthenticated(true);
   };
 
   const register = async (password: string) => {
     // Registration logic here
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulated delay
+    await new Promise(resolve => setTimeout(resolve, 400)); // Simulated delay
     setIsAuthenticated(true);
   };
 

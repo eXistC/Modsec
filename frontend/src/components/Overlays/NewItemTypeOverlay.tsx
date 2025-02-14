@@ -22,7 +22,7 @@ export function NewItemTypeOverlay({ onSelect, onClose }: NewItemTypeOverlayProp
       onClick={onClose}
     >
       <div 
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-in slide-in-from-bottom-4 duration-300"
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-in zoom-in duration-300"
         onClick={e => e.stopPropagation()}
       >
         <div className="w-[400px] rounded-xl border bg-card text-card-foreground shadow-lg">

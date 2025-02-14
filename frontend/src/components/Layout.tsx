@@ -1,15 +1,15 @@
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { LoginPage } from "./Pages/LoginPage";
+import { RegisterPage } from "./Pages/RegisterPage";
 import { Sidebar } from "./Sidebar";
 import { PasswordManager } from "./PasswordManager";
 import { PasswordGenerator } from "./Generators/PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
-import { LoginPage } from "./Pages/LoginPage";
-import { RegisterPage } from "./Pages/RegisterPage";
-import { PasswordEntry } from "../types/password";
-import { useAuth } from '@/context/AuthContext';
+import { PasswordEntry } from "@/types/password";
 
 export function Layout() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login, register } = useAuth();
   const [currentView, setCurrentView] = useState("passwords");
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
   const [showRegister, setShowRegister] = useState(false);
@@ -18,17 +18,24 @@ export function Layout() {
     setSelectedPassword(password);
   };
 
-  const handleLogin = (masterPassword: string) => {
-    // Implement your login logic here
-    console.log("Logging in with:", masterPassword);
+  const handleLogin = async (masterPassword: string) => {
+    try {
+      await login(masterPassword);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
-  const handleRegister = (password: string, confirmPassword: string) => {
-    // Implement your registration logic here
-    console.log("Registering with:", password);
-    setShowRegister(false);
+  const handleRegister = async (password: string, confirmPassword: string) => {
+    try {
+      await register(password);
+      setShowRegister(false);
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
 
+  // Show authentication pages if not authenticated
   if (!isAuthenticated) {
     if (showRegister) {
       return (
@@ -46,6 +53,7 @@ export function Layout() {
     );
   }
 
+  // Show main application layout when authenticated
   return (
     <div className="h-screen bg-[#1E1E1E]">
       <div className="grid h-full md:grid-cols-[240px_280px_1fr]">

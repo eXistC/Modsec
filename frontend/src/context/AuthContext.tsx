@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   login: (masterPassword: string) => Promise<void>;
+  register: (password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -11,29 +11,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Check if user is authenticated on mount
-    const token = localStorage.getItem('auth-token');
-    setIsAuthenticated(!!token);
-  }, []);
 
   const login = async (masterPassword: string) => {
-    // Add your actual authentication logic here
-    localStorage.setItem('auth-token', 'your-auth-token');
+    // Authentication logic here
+    await new Promise(resolve => setTimeout(resolve, 800)); // Simulated delay
     setIsAuthenticated(true);
-    navigate('/');
+  };
+
+  const register = async (password: string) => {
+    // Registration logic here
+    await new Promise(resolve => setTimeout(resolve, 800)); // Simulated delay
+    setIsAuthenticated(true);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem('auth-token');
-    navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

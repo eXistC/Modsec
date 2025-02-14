@@ -40,6 +40,13 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
     }
   };
 
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Only close if clicking the backdrop directly
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   const renderFields = () => {
     switch (formData.type) {
       case "website":
@@ -94,11 +101,9 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
   return (
     <div 
       className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 animate-in fade-in duration-200"
-      onClick={onClose}
     >
       <div 
         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] animate-in zoom-in duration-300"
-        onClick={e => e.stopPropagation()}
       >
         <form onSubmit={handleSubmit} className="h-full">
           <div className="rounded-xl border bg-card text-card-foreground shadow-lg flex flex-col h-full max-h-[calc(90vh-2rem)]">
@@ -108,7 +113,7 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 hover:bg-secondary/80"
                 onClick={onClose}
               >
                 <X className="h-4 w-4" />

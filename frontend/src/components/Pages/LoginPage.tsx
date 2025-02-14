@@ -7,7 +7,7 @@ import { LockKeyhole, ArrowRightCircle, Check } from "lucide-react";
 
 interface LoginPageProps {
   onLogin: (masterPassword: string) => void;
-  onRegisterClick: () => void;  // Add this prop
+  onRegisterClick: () => void; 
 }
 
 export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {

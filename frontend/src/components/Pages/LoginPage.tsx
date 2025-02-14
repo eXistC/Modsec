@@ -38,7 +38,6 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
 
   return (
     <div className="h-screen flex items-center justify-center bg-[#1E1E1E] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/50 pointer-events-none" />
       <AnimatedCard isSuccess={isSuccess}>
         <CardHeader className="text-center">
           <div className="w-full flex justify-center mb-4">

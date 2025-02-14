@@ -5,6 +5,7 @@ import { Globe, Plus, Search, User, CreditCard, Pen, Bookmark, BookmarkCheck, Wa
 import { useState } from "react";
 import { IdentityEntry, PasswordEntry, PasswordType } from "@/types/password";
 import { NewItemTypeOverlay } from "./Overlays/NewItemTypeOverlay";
+import { NewItemCreateOverlay } from "./Overlays/NewItemCreateOverlay";
 
 // Export the interface separately
 export interface PasswordListProps {
@@ -31,7 +32,8 @@ export function PasswordList({
   onToggleBookmark 
 }: PasswordListProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showNewItemOverlay, setShowNewItemOverlay] = useState(false);
+  const [showTypeOverlay, setShowTypeOverlay] = useState(false);
+  const [selectedType, setSelectedType] = useState<PasswordType | null>(null);
 
   const toggleBookmark = (id: string) => (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -53,18 +55,19 @@ export function PasswordList({
     );
 
   const handleNewItem = () => {
-    setShowNewItemOverlay(true);
+    setShowTypeOverlay(true);
   };
 
   const handleTypeSelect = (type: PasswordType) => {
-    setShowNewItemOverlay(false);
-    const newEntry: Partial<PasswordEntry> = {
-      id: crypto.randomUUID(),
-      type,
-      title: "",
-      isBookmarked: false,
-    };
-    onSelectPassword(newEntry as PasswordEntry);
+    setShowTypeOverlay(false);
+    setSelectedType(type);
+  };
+
+  const handleCreateNewItem = (entry: PasswordEntry) => {
+    // Handle saving the new item
+    console.log("New item created:", entry);
+    setSelectedType(null);
+    // You might want to add the new item to the passwords list here
   };
 
   return (
@@ -168,10 +171,18 @@ export function PasswordList({
           )}
         </div>
       </ScrollArea>
-      {showNewItemOverlay && (
+      {showTypeOverlay && (
         <NewItemTypeOverlay
           onSelect={handleTypeSelect}
-          onClose={() => setShowNewItemOverlay(false)}
+          onClose={() => setShowTypeOverlay(false)}
+        />
+      )}
+      
+      {selectedType && (
+        <NewItemCreateOverlay
+          type={selectedType}
+          onSave={handleCreateNewItem}
+          onClose={() => setSelectedType(null)}
         />
       )}
     </div>

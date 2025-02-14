@@ -9,6 +9,7 @@ import { IdentityFields } from "../ItemTypes/IdentityFields";
 import { CardFields } from "../ItemTypes/CardFields";
 import { CryptoFields } from "../ItemTypes/CryptoFields";
 import { MemoFields } from "../ItemTypes/MemoFields";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface NewItemCreateOverlayProps {
   type: PasswordType;
@@ -99,9 +100,9 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] animate-in zoom-in duration-300"
         onClick={e => e.stopPropagation()}
       >
-        <form onSubmit={handleSubmit}>
-          <div className="rounded-xl border bg-card text-card-foreground shadow-lg">
-            <div className="flex h-[52px] items-center justify-between border-b px-6">
+        <form onSubmit={handleSubmit} className="h-full">
+          <div className="rounded-xl border bg-card text-card-foreground shadow-lg flex flex-col h-full max-h-[calc(90vh-2rem)]">
+            <div className="flex h-[52px] items-center justify-between border-b px-6 flex-shrink-0">
               <h2 className="text-lg font-semibold">Create New Item</h2>
               <Button
                 type="button"
@@ -113,29 +114,22 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="space-y-4 p-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Title</label>
-                <Input
-                  required
-                  placeholder="Enter title"
-                  className="bg-secondary"
-                  value={formData.title || ''}
-                  onChange={handleChange('title')}
-                />
+            <ScrollArea className="flex-1 overflow-y-auto">
+              <div className="space-y-4 p-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Title</label>
+                  <Input
+                    required
+                    placeholder="Enter title"
+                    className="bg-secondary"
+                    value={formData.title || ''}
+                    onChange={handleChange('title')}
+                  />
+                </div>
+                {renderFields()}
               </div>
-              {renderFields()}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Notes</label>
-                <Textarea
-                  placeholder="Enter notes"
-                  className="bg-secondary min-h-[80px]"
-                  value={formData.notes || ''}
-                  onChange={handleChange('notes')}
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-2 border-t p-4">
+            </ScrollArea>
+            <div className="flex items-center justify-end gap-2 border-t p-4 flex-shrink-0">
               <Button
                 type="button"
                 variant="ghost"

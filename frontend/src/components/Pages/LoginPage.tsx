@@ -7,9 +7,10 @@ import { LockKeyhole, ArrowRightCircle, Check } from "lucide-react";
 
 interface LoginPageProps {
   onLogin: (masterPassword: string) => void;
+  onRegisterClick: () => void;  // Add this prop
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -85,6 +86,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     }`} />
                   </Button>
                 </div>
+              </div>
+              <div className="pt-2 text-center animate-in slide-in-from-bottom-1 duration-500 delay-500">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={onRegisterClick}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  Don't have an account? Register here
+                </Button>
               </div>
             </div>
           </CardContent>

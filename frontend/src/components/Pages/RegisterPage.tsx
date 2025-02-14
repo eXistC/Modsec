@@ -7,9 +7,10 @@ import { LockKeyhole, ArrowRightCircle, Check, Shield } from "lucide-react";
 
 interface RegisterPageProps {
   onRegister: (masterPassword: string, confirmPassword: string) => void;
+  onLoginClick: () => void;
 }
 
-export function RegisterPage({ onRegister }: RegisterPageProps) {
+export function RegisterPage({ onRegister, onLoginClick }: RegisterPageProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
@@ -116,6 +117,17 @@ export function RegisterPage({ onRegister }: RegisterPageProps) {
                 {confirmPassword && !doPasswordsMatch && (
                   <p className="text-xs text-red-500">Passwords do not match</p>
                 )}
+              </div>
+
+              <div className="pt-2 text-center animate-in slide-in-from-bottom-1 duration-500 delay-600">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={onLoginClick}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  Already have an account? Login here
+                </Button>
               </div>
             </div>
           </CardContent>

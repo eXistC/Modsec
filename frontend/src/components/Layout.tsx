@@ -4,6 +4,7 @@ import { PasswordManager } from "./PasswordManager";
 import { PasswordGenerator } from "./Generators/PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
 import { LoginPage } from "./Pages/LoginPage";
+import { RegisterPage } from "./Pages/RegisterPage";
 import { PasswordEntry } from "../types/password";
 import { useAuth } from '@/context/AuthContext';
 
@@ -11,15 +12,38 @@ export function Layout() {
   const { isAuthenticated } = useAuth();
   const [currentView, setCurrentView] = useState("passwords");
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
+  const [showRegister, setShowRegister] = useState(false);
 
   const handleSelectPassword = (password: PasswordEntry) => {
     setSelectedPassword(password);
   };
 
+  const handleLogin = (masterPassword: string) => {
+    // Implement your login logic here
+    console.log("Logging in with:", masterPassword);
+  };
+
+  const handleRegister = (password: string, confirmPassword: string) => {
+    // Implement your registration logic here
+    console.log("Registering with:", password);
+    setShowRegister(false);
+  };
+
   if (!isAuthenticated) {
-    return <LoginPage onLogin={function (masterPassword: string): void {
-      throw new Error("Function not implemented.");
-    } } />;
+    if (showRegister) {
+      return (
+        <RegisterPage 
+          onRegister={handleRegister}
+          onLoginClick={() => setShowRegister(false)}
+        />
+      );
+    }
+    return (
+      <LoginPage 
+        onLogin={handleLogin}
+        onRegisterClick={() => setShowRegister(true)}
+      />
+    );
   }
 
   return (

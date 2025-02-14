@@ -6,11 +6,12 @@ import { useState } from "react";
 import { LockKeyhole, ArrowRightCircle, Check, Shield } from "lucide-react";
 
 interface RegisterPageProps {
-  onRegister: (masterPassword: string, confirmPassword: string) => void;
+  onRegister: (email: string, masterPassword: string, confirmPassword: string) => void;
   onLoginClick: () => void;
 }
 
 export function RegisterPage({ onRegister, onLoginClick }: RegisterPageProps) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
@@ -24,22 +25,21 @@ export function RegisterPage({ onRegister, onLoginClick }: RegisterPageProps) {
     setIsRegistering(true);
 
     try {
-      // Simulate registration delay
       await new Promise(resolve => setTimeout(resolve, 500));
       setIsSuccess(true);
       
-      // Delay before calling onRegister to show success animation
       setTimeout(() => {
-        onRegister(password, confirmPassword);
+        onRegister(email, password, confirmPassword);
       }, 800);
     } catch (error) {
       setIsRegistering(false);
     }
   };
 
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isPasswordValid = password.length >= 8;
   const doPasswordsMatch = password === confirmPassword && confirmPassword !== "";
-  const canSubmit = isPasswordValid && doPasswordsMatch && !isRegistering;
+  const canSubmit = isEmailValid && isPasswordValid && doPasswordsMatch && !isRegistering;
 
   return (
     <div className="h-screen flex items-center justify-center bg-[#1E1E1E]">
@@ -59,14 +59,35 @@ export function RegisterPage({ onRegister, onLoginClick }: RegisterPageProps) {
             Create Your Account
           </CardTitle>
           <CardDescription className="animate-in slide-in-from-bottom-2 duration-500 delay-300">
-            Set up your master password to get started
+            Enter your email and master password to get started
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent>
             <div className="space-y-4">
+              <div className="space-y-2 animate-in slide-in-from-bottom-1 duration-500 delay-300">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    autoFocus
+                    disabled={isRegistering}
+                    className={`transition-all duration-200 focus:scale-[1.01] ${
+                      isSuccess ? 'border-green-500 ring-green-500' : ''
+                    }`}
+                  />
+                </div>
+                {email && !isEmailValid && (
+                  <p className="text-xs text-red-500">Please enter a valid email address</p>
+                )}
+              </div>
+
               <div className="space-y-2 animate-in slide-in-from-bottom-1 duration-500 delay-400">
-                <Label htmlFor="masterPassword">Master Password</Label>
+                <Label htmlFor="masterPassword">Password</Label>
                 <div className="relative">
                   <Input
                     id="masterPassword"

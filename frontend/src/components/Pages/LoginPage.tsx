@@ -9,11 +9,12 @@ import { text } from "stream/consumers";
 import { AnimatedCard } from "../ui/animated-card";
 
 interface LoginPageProps {
-  onLogin: (masterPassword: string) => void;
+  onLogin: (email: string, masterPassword: string) => void;
   onRegisterClick: () => void; 
 }
 
 export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -29,7 +30,7 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
       
       // Delay before calling onLogin to show success animation
       setTimeout(() => {
-        onLogin(password);
+        onLogin(email, password);
       }, 800);
     } catch (error) {
       setIsLoggingIn(false);
@@ -68,6 +69,27 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
         <form onSubmit={handleSubmit}>
           <CardContent>
             <div className="space-y-4">
+              <div className="space-y-2 animate-in slide-in-from-bottom-1 duration-700 delay-300">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative group">
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    autoFocus
+                    disabled={isLoggingIn}
+                    className={`
+                      transition-all
+                      duration-300
+                      focus:animate-[input-focus_300ms_cubic-bezier(0.22, 1, 0.36, 1)_forwards]
+                      group-hover:border-primary/50
+                      ${isSuccess ? 'border-green-500 ring-green-500' : ''}
+                    `}
+                  />
+                </div>
+              </div>
               <div className="space-y-2 animate-in slide-in-from-bottom-1 duration-700 delay-300">
                 <Label 
                   htmlFor="masterPassword"

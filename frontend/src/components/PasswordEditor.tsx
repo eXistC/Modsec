@@ -3,14 +3,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
-import { CardEntry, CryptoEntry, IdentityEntry, PasswordEntry, WebsiteEntry } from "@/types/password";
+import { CardEntry, CryptoEntry, IdentityEntry, MemoEntry, PasswordEntry, WebsiteEntry } from "@/types/password";
 import { Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardFields } from './ItemTypes/CardFields';
 import { CryptoFields } from './ItemTypes/CryptoFields';
 import { IdentityFields } from './ItemTypes/IdentityFields';
 import { WebsiteFields } from './ItemTypes/WebsiteFields';
+import { MemoFields } from './ItemTypes/MemoFields';
 import { SettingsDropdown } from "./ui/SettingsDropdown";
+
 
 interface PasswordEditorProps {
   password: PasswordEntry;
@@ -186,19 +188,14 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               />
             )}
           </div>
-          {formData.notes && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Notes</label>
-              <Textarea 
-                placeholder="Add notes..." 
-                className={`${isEditing ? 'bg-secondary' : 'bg-background'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[100px]`}
-                value={formData.notes}
-                onChange={handleChange('notes')}
-                readOnly={!isEditing}
+          {formData.type === "memo" && (
+              <MemoFields
+                formData={formData as MemoEntry}
+                isEditing={isEditing}
+                handleChange={handleChange}
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
   );
 }

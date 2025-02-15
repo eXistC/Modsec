@@ -40,12 +40,12 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
     }
   };
 
-  const handleContainerClick = (e: React.MouseEvent) => {
-    // Only close if clicking the backdrop directly
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  // const handleContainerClick = (e: React.MouseEvent) => {
+  //   // Only close if clicking the backdrop directly
+  //   if (e.target === e.currentTarget) {
+  //     onClose();
+  //   }
+  // };
 
   const renderFields = () => {
     switch (formData.type) {

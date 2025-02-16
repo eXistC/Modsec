@@ -1,5 +1,9 @@
 package main
 
+// prerequesites:
+// go get github.com/labstack/echo/v4
+// go get github.com/stretchr/testify
+
 // cd clientside/TestModule
 // go test -v
 

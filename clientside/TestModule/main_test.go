@@ -1,5 +1,6 @@
 package main
 
+// cd clientside/TestModule
 // go test -v
 
 import (

@@ -98,7 +98,7 @@ func SandwichRegisOP(Password, Email string) (Answer [][]byte) {
 	// Lowest PBKDF2 size use 8 byte(length) of salt for 1 block (64 byte for 8 block)
 }
 
-func SandwichLoginOP(Password, Email string) (Answer [][]byte) {
+func SandwichLoginOP(Password, Email string) (Answer [][]byte, Ran []int) {
 	// Sanswich
 	HashMasterPassword := MasterPasswordHashGen(Password) // 32 byte or 256 bit(MUST BE ONLY)
 	StreschEmailHash := Argon2Function(Email, nil, 256)   // 256 byte or 2048 bit
@@ -118,10 +118,11 @@ func SandwichLoginOP(Password, Email string) (Answer [][]byte) {
 		// Predefine the Value Regis 60k - 800k
 		// Loging 1k - 60k-1
 		derivedKey := PBKDF2Function(HashMasterPassword, chunks[i], RandNum, 32)
+		Ran = append(Ran, RandNum)
 		Answer = append(Answer, derivedKey)
 	}
 
-	return Answer
+	return Answer, Ran
 	// Number of iteration = 1000 <= n <= 800000
 	// iteration need to be a random number value
 

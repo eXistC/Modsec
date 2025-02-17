@@ -18,8 +18,8 @@ func BytToBa64(bytes []byte) string {
 	return base64.StdEncoding.EncodeToString(bytes)
 }
 
-func ConSaltsEmail(saltStrings []string, email string) string {
-	return strings.Join(saltStrings, "|") + "|" + email
+func ConSaltsEmail(arrayStrings []string, email string) string {
+	return strings.Join(arrayStrings, "|") + "|" + email
 }
 
 // Split concatenated string back into salts and email
@@ -30,7 +30,7 @@ func SplitSaltsEmail(concatenated string) ([]string, string, error) {
 	}
 
 	// The last element is the email, the rest are salts
-	salts := parts[:len(parts)-1]
+	arrasy := parts[:len(parts)-1]
 	email := parts[len(parts)-1]
-	return salts, email, nil
+	return arrasy, email, nil
 }

@@ -21,11 +21,31 @@ func main() {
 
 	MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
 	Masterkey := myHash.MasterPasswordGen(myPassword)
-	Answer := myHash.SandwichLoginOP(myPassword, myEmail) //Already Fix
+	Answer, Ran := myHash.SandwichLoginOP(myPassword, myEmail) //Already Fix
 
 	fmt.Println("Master Password Hash", MasterPasswordHash)
 	fmt.Println("Master Key", Masterkey)
-	fmt.Println("Answer from PBKDF 8 time", Answer)
+	fmt.Println("Answer from PBKDF 8 time", Answer) //Hpt but without concat
+
+	//Combine Hpt with Timestemp
+	Time := myGenVal.GenerateTimestamp()
+
+	// Converting Answer into String
+	var BaseAnswer []string
+	for _, b := range Answer {
+		BaseAnswer = append(BaseAnswer, myConvert.BytToBa64(b))
+	}
+
+	//Test Print
+	for i, z := range BaseAnswer {
+		fmt.Printf("Salt %d: %s\n", i+1, z)
+	}
+	//HqT = BaseAnswer + Ran + Time
+
+	//Creating Hq1-HqR,Bt
+	Payload := myConvert.ConSaltsEmail(BaseAnswer, Time)
+
+	fmt.Println("Printing Hq1-HqR", Payload)
 
 	iv, err := myGenVal.GenerateIV()
 	if err != nil {

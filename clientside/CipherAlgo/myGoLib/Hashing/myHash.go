@@ -81,7 +81,9 @@ func SandwichRegisOP(Password, Email string) (Answer [][]byte) {
 	}
 
 	for i := 0; i < 8; i++ {
-		RandNum := myGenVal.RandomInt(1000, 800000)
+		RandNum := myGenVal.RandomInt(60000, 800000)
+		// Predefine the Value Regis 60k - 800k
+		// Loging 1k - 60k-1
 		derivedKey := PBKDF2Function(HashMasterPassword, chunks[i], RandNum, 32)
 		Answer = append(Answer, derivedKey)
 	}

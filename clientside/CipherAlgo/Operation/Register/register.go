@@ -21,7 +21,7 @@ func main() {
 
 	MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
 	Masterkey := myHash.MasterPasswordGen(myPassword)
-	Answer := myHash.SandwichRegisOP(myPassword, myEmail)
+	Answer := myHash.SandwichRegisOP(myPassword, myEmail) //Hpt but without concat
 
 	fmt.Println("Master Password Hash", MasterPasswordHash)
 	fmt.Println("Master Key", Masterkey)

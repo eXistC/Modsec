@@ -23,11 +23,6 @@ func main() {
 	Answer, Ran := myHash.SandwichLoginOP(myPassword, myEmail) //Already Fix
 	EmailHash := myHash.EmailToSHA256(myEmail)
 
-	fmt.Println("Master Password Hash", MasterPasswordHash)
-	fmt.Println("Master Key", Masterkey)
-	fmt.Println("Email Hash with SHA256", EmailHash)
-	fmt.Println("Answer from PBKDF 8 time", Answer) //Hpt but without concat
-
 	//Combine Hpt with Timestemp
 	Time := myGenVal.GenerateTimestamp()
 
@@ -48,6 +43,10 @@ func main() {
 	//Creating Hq1-HqR,Bt
 	PackHqPayload := myConvert.ConSaltsEmail(BaseAnswer, Time)
 
+	fmt.Println("Master Password Hash", MasterPasswordHash)
+	fmt.Println("Master Key", Masterkey)
+	fmt.Println("Email Hash with SHA256", EmailHash)
+	fmt.Println("Answer from PBKDF 8 time", Answer) //Hpt but without concat
 	fmt.Println("\nPrinting Hq1-HqR", PackHqPayload, "\n")
 	fmt.Println("Printing HqT", PackHqT, "\n")
 

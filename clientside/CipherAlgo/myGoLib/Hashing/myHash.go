@@ -97,3 +97,36 @@ func SandwichRegisOP(Password, Email string) (Answer [][]byte) {
 	// Salts PBKDF2 use stretch Email by dividing in to something (8 section)
 	// Lowest PBKDF2 size use 8 byte(length) of salt for 1 block (64 byte for 8 block)
 }
+
+func SandwichLoginOP(Password, Email string) (Answer [][]byte) {
+	// Sanswich
+	HashMasterPassword := MasterPasswordHashGen(Password) // 32 byte or 256 bit(MUST BE ONLY)
+	StreschEmailHash := Argon2Function(Email, nil, 256)   // 256 byte or 2048 bit
+	var chunks [][]byte
+
+	//Slice StreschEmailHash into 32 byte each (32 * 8 block)
+	for i := 0; i < len(StreschEmailHash); i += 32 {
+		end := i + 32
+		if end > len(StreschEmailHash) {
+			end = len(StreschEmailHash)
+		}
+		chunks = append(chunks, StreschEmailHash[i:end])
+	}
+
+	for i := 0; i < 8; i++ {
+		RandNum := myGenVal.RandomInt(1000, 59999)
+		// Predefine the Value Regis 60k - 800k
+		// Loging 1k - 60k-1
+		derivedKey := PBKDF2Function(HashMasterPassword, chunks[i], RandNum, 32)
+		Answer = append(Answer, derivedKey)
+	}
+
+	return Answer
+	// Number of iteration = 1000 <= n <= 800000
+	// iteration need to be a random number value
+
+	// Do it about 8 time
+
+	// Salts PBKDF2 use stretch Email by dividing in to something (8 section)
+	// Lowest PBKDF2 size use 8 byte(length) of salt for 1 block (64 byte for 8 block)
+}

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	myConvert "test/myGoLib/Convert"
-	myEncrypt "test/myGoLib/Encrypt"
 	myGenVal "test/myGoLib/Generate"
 	myHash "test/myGoLib/Hashing"
 )
@@ -22,9 +21,11 @@ func main() {
 	MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
 	Masterkey := myHash.MasterPasswordGen(myPassword)
 	Answer, Ran := myHash.SandwichLoginOP(myPassword, myEmail) //Already Fix
+	EmailHash := myHash.EmailToSHA256(myEmail)
 
 	fmt.Println("Master Password Hash", MasterPasswordHash)
 	fmt.Println("Master Key", Masterkey)
+	fmt.Println("Email Hash with SHA256", EmailHash)
 	fmt.Println("Answer from PBKDF 8 time", Answer) //Hpt but without concat
 
 	//Combine Hpt with Timestemp
@@ -35,30 +36,20 @@ func main() {
 	for _, b := range Answer {
 		BaseAnswer = append(BaseAnswer, myConvert.BytToBa64(b))
 	}
-
-	//Test Print
-	for i, z := range BaseAnswer {
-		fmt.Printf("Salt %d: %s\n", i+1, z)
+	//Creating HqT = BaseAnswer + Ran + Time
+	var result []string
+	for _, num := range Ran {
+		result = append(result, fmt.Sprintf("%d", num)) // Format the int as string and append
 	}
-	//HqT = BaseAnswer + Ran + Time
+	PackHqT := myConvert.ConCombineTime(BaseAnswer, result, Time)
 
+	Output := myHash.Argon2Function(PackHqT, nil, 32)
+	PackHqT = myConvert.BytToBa64(Output)
 	//Creating Hq1-HqR,Bt
-	Payload := myConvert.ConSaltsEmail(BaseAnswer, Time)
+	PackHqPayload := myConvert.ConSaltsEmail(BaseAnswer, Time)
 
-	fmt.Println("Printing Hq1-HqR", Payload)
+	fmt.Println("\nPrinting Hq1-HqR", PackHqPayload, "\n")
+	fmt.Println("Printing HqT", PackHqT, "\n")
 
-	iv, err := myGenVal.GenerateIV()
-	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
-	}
-	Ciphertext, err := myEncrypt.EncryptAES256GCM(Masterkey, MasterPasswordHash, iv)
-	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
-	}
-	Translate := myConvert.BytToBa64(Ciphertext[:])
-	fmt.Println("Encrypting successful", Ciphertext)
-	fmt.Println("Translate from Encrypted byte: ", Translate)
 	fmt.Println("===== End Operation =====")
 }

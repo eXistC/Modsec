@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"time"
 )
 
 func GenerateRandomBytes(size int) ([]byte, error) {
@@ -64,4 +65,8 @@ func RandomInt(min, max int) int {
 	}
 
 	return int(nBig.Int64()) + min
+}
+
+func GenerateTimestamp() string {
+	return time.Now().Format("20060102150405")
 }

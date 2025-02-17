@@ -40,5 +40,6 @@ func main() {
 	Translate := myConvert.BytToBa64(Ciphertext[:])
 	fmt.Println("Encrypting successful", Ciphertext)
 	fmt.Println("Translate from Encrypted byte: ", Translate)
+	fmt.Println("Timestamp: ", myGenVal.GenerateTimestamp())
 	fmt.Println("===== End Operation =====")
 }

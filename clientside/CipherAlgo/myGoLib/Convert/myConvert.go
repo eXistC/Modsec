@@ -28,6 +28,11 @@ func ConCombineTime(arr1, arr2 []string, time string) string {
 	return strings.Join(combined, "|")
 }
 
+func ConAnsSalt(arr1, arr2 []string) string {
+	combined := append(arr1, arr2...)
+	return strings.Join(combined, "|")
+}
+
 func SplitCombineTime(concatenated string) ([]string, []string, string, error) {
 	parts := strings.Split(concatenated, "|")
 

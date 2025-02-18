@@ -37,6 +37,7 @@ func main() {
 		result = append(result, fmt.Sprintf("%d", num)) // Format the int as string and append
 	}
 	PackHqT := myConvert.ConCombineTime(BaseAnswer, result, Time)
+	fmt.Println("PackHqT", PackHqT)
 
 	Output := myHash.Argon2Function(PackHqT, nil, 32)
 	PackHqT = myConvert.BytToBa64(Output)

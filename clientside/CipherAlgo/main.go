@@ -21,11 +21,11 @@ func main() {
 
 	MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
 	Masterkey := myHash.MasterPasswordGen(myPassword)
-	Answer := myHash.SandwichRegisOP(myPassword, myEmail)
+	//Answer := myHash.SandwichRegisOP(myPassword, myEmail)
 
 	fmt.Println("Master Password Hash", MasterPasswordHash)
 	fmt.Println("Master Key", Masterkey)
-	fmt.Println("Answer from PBKDF 8 time", Answer)
+	//fmt.Println("Answer from PBKDF 8 time", Answer)
 
 	iv, err := myGenVal.GenerateIV()
 	if err != nil {

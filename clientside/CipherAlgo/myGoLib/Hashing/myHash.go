@@ -65,7 +65,7 @@ func MasterPasswordGen(Password string) []byte {
 	return MasterPassword[:]
 }
 
-func SandwichRegisOP(Password, Email string) (Answer [][]byte) {
+func SandwichRegisOP(Password, Email string) (Answer [][]byte, Ran []int) {
 	// Sanswich
 	HashMasterPassword := MasterPasswordHashGen(Password) // 32 byte or 256 bit(MUST BE ONLY)
 	StreschEmailHash := Argon2Function(Email, nil, 256)   // 256 byte or 2048 bit
@@ -85,10 +85,11 @@ func SandwichRegisOP(Password, Email string) (Answer [][]byte) {
 		// Predefine the Value Regis 60k - 800k
 		// Loging 1k - 60k-1
 		derivedKey := PBKDF2Function(HashMasterPassword, chunks[i], RandNum, 32)
+		Ran = append(Ran, RandNum)
 		Answer = append(Answer, derivedKey)
 	}
 
-	return Answer
+	return Answer, Ran
 	// Number of iteration = 1000 <= n <= 800000
 	// iteration need to be a random number value
 

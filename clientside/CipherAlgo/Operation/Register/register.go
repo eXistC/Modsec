@@ -50,9 +50,16 @@ func main() {
 		return
 	}
 
+	EncryptHpt, err := myEncrypt.EncryptAES256GCM(Masterkey, []byte(PackHpT), iv)
+	if err != nil {
+		fmt.Println("Error Encrpyting AES", err)
+		return
+	}
+
 	Translate := myConvert.BytToBa64(Ciphertext[:])
 	fmt.Println("Encrypting successful", Ciphertext)
 	fmt.Println("Translate from Encrypted byte: ", Translate)
 	fmt.Println("HpT:", PackHpT)
+	fmt.Println("Encrypting Hpt", EncryptHpt)
 	fmt.Println("===== End Operation =====")
 }

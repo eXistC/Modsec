@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"strconv"
 	myConvert "test/myGoLib/Convert"
 	myEncrypt "test/myGoLib/Encrypt"
 	myGenVal "test/myGoLib/Generate"
@@ -27,39 +29,45 @@ func main() {
 	fmt.Println("Master Key", Masterkey)
 	//fmt.Println("Answer from PBKDF 8 time", Answer)
 
-	var BaseAnswer []string
+	BaseAnswer := make([]string, 0, len(Answer)) // Initilization and size allocation for better performance
 	for _, b := range Answer {
 		BaseAnswer = append(BaseAnswer, myConvert.BytToBa64(b))
 	}
 
-	var result []string
-	for _, num := range Ran {
-		result = append(result, fmt.Sprintf("%d", num)) // Format the int as string and append
+	// Convert Ran numbers to strings
+	result := make([]string, len(Ran))
+	for i, num := range Ran {
+		result[i] = strconv.Itoa(num)
 	}
 
-	PackHpT := myConvert.ConCombineTime(BaseAnswer, result, myEmail) //Hp1-HpR+iteration+email
+	// Combine hashes with time and email
+	PackHpT := myConvert.ConCombineTime(BaseAnswer, result, myEmail)
 
+	// Generate IV and encrypt data
 	iv, err := myGenVal.GenerateIV()
 	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
+		log.Fatalf("Failed to generate IV: %v", err) //
 	}
+
+	// Encrypt master password hash
 	Ciphertext, err := myEncrypt.EncryptAES256GCM(Masterkey, MasterPasswordHash, iv)
 	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
+		log.Fatalf("Failed to encrypt master password hash: %v", err)
 	}
 
+	// Encrypt combined hash data
 	EncryptHpt, err := myEncrypt.EncryptAES256GCM(Masterkey, []byte(PackHpT), iv)
 	if err != nil {
-		fmt.Println("Error Encrpyting AES", err)
-		return
+		log.Fatalf("Failed to encrypt HpT: %v", err)
 	}
 
-	Translate := myConvert.BytToBa64(Ciphertext[:])
-	fmt.Println("Encrypting successful", Ciphertext)
-	fmt.Println("Translate from Encrypted byte: ", Translate)
-	fmt.Println("HpT:", PackHpT)
-	fmt.Println("Encrypting Hpt", EncryptHpt)
+	// Convert to base64 for output
+	encryptedBase64 := myConvert.BytToBa64(Ciphertext[:])
+
+	// Output results
+	fmt.Printf("Encryption successful. Ciphertext length: %d bytes\n", len(Ciphertext))
+	fmt.Printf("Base64 encoded ciphertext: %s\n", encryptedBase64)
+	fmt.Printf("HpT hash: %s\n", PackHpT)
+	fmt.Printf("Encrypted HpT length: %d bytes\n", len(EncryptHpt))
 	fmt.Println("===== End Operation =====")
 }

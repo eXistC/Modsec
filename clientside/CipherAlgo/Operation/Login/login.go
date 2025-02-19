@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	myConvert "test/myGoLib/Convert"
 	myGenVal "test/myGoLib/Generate"
 	myHash "test/myGoLib/Hashing"
@@ -26,15 +27,16 @@ func main() {
 	//Combine Hpt with Timestemp
 	Time := myGenVal.GenerateTimestamp()
 
-	// Converting Answer into String
-	var BaseAnswer []string
-	for _, b := range Answer {
-		BaseAnswer = append(BaseAnswer, myConvert.BytToBa64(b))
+	// Convert Answer bytes to base64 strings
+	BaseAnswer := make([]string, len(Answer))
+	for i, b := range Answer {
+		BaseAnswer[i] = myConvert.BytToBa64(b) // Faster than append
 	}
-	//Creating HqT = BaseAnswer + Ran + Time
-	var result []string
-	for _, num := range Ran {
-		result = append(result, fmt.Sprintf("%d", num)) // Format the int as string and append
+
+	// Convert random numbers to strings for HqT creation
+	result := make([]string, len(Ran)) // Since we know the length of Ran, we can allocate the size for better performance
+	for i, num := range Ran {
+		result[i] = strconv.Itoa(num) // strconv is faster than append
 	}
 	PackHqT := myConvert.ConCombineTime(BaseAnswer, result, Time)
 	fmt.Println("PackHqT", PackHqT)

@@ -1,3 +1,9 @@
+export interface Category {
+  id: string;
+  name: string;
+  color?: string; // Optional: for category customization
+}
+
 export type PasswordType = "website" | "card" | "crypto" | "identity" | "memo";
 
 export interface BaseEntry {
@@ -50,9 +56,12 @@ export interface MemoEntry extends BaseEntry {
   notes: string;
 }
 
-export type PasswordEntry = 
+export type PasswordEntry = (
   | WebsiteEntry 
   | CardEntry 
   | CryptoEntry 
   | IdentityEntry 
-  | MemoEntry;
+  | MemoEntry
+) & {
+  category?: string;
+};

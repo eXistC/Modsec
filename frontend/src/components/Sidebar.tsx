@@ -5,14 +5,25 @@ import { CatList } from "@/components/CatList";
 import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect } from "react";
+import { Category, PasswordEntry } from "@/types/password";
+import { extractCategories } from "@/lib/categories";
 
-// Add these props to handle view switching
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  currentView?: string;
-  onViewChange?: (view: string) => void;
+interface SidebarProps {
+  currentView: string;
+  onViewChange: (view: string) => void;
+  passwords: PasswordEntry[];
+  categories: Category[];
+  onCategorySelect: (category: string | null) => void;
 }
 
-export function Sidebar({ className, currentView = "passwords", onViewChange }: SidebarProps) {
+export function Sidebar({
+  currentView,
+  onViewChange,
+  passwords,
+  categories,
+  onCategorySelect
+}: SidebarProps) {
   const { logout } = useAuth();
   const { toast } = useToast();
 
@@ -30,7 +41,7 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
   };
 
   return (
-    <div className={cn("border-r bg-[#1E1E1E]", className)}>
+    <div className={cn("border-r bg-[#1E1E1E]")}>
       <div className="flex h-[60px] items-center px-6 border-b border-border">
         <span className="text-sm">example@gmail.com</span>
         <div className="ml-auto">
@@ -77,7 +88,11 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
             </Button>
           </div>
         </div>
-        <CatList/>
+        <CatList
+          passwords={passwords}
+          categories={categories}
+          onCategorySelect={onCategorySelect}
+        />
       </div>
     </div>
   );

@@ -13,13 +13,19 @@ import { WebsiteFields } from './ItemTypes/WebsiteFields';
 import { MemoFields } from './ItemTypes/MemoFields';
 import { SettingsDropdown } from "./ui/SettingsDropdown";
 
+interface Category {
+  id: string;
+  name: string;
+}
 
 interface PasswordEditorProps {
   password: PasswordEntry;
   isOpen: boolean;
+  categories: Category[]; // Add categories prop
+  onSave?: (password: PasswordEntry) => void; // Add save handler
 }
 
-export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
+export function PasswordEditor({ password, isOpen, categories, onSave }: PasswordEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(password);
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +38,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
 
   const handleSave = () => {
     setIsEditing(false);
+    onSave?.(formData);
   };
 
   const handleEdit = () => {
@@ -138,6 +145,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       </div>
       <div className="px-6 py-4">
         <div className="space-y-6">
+          {/* Item name section */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Item name</label>
             <div className="flex gap-3">
@@ -153,49 +161,73 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               />
             </div>
           </div>
-            {formData.type === "website" && (
-              <WebsiteFields
-                formData={formData as WebsiteEntry}
-                isEditing={isEditing}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
-                handleChange={handleChange}
-              />
-            )}
-            {formData.type === "card" && (
-              <CardFields
-                formData={formData as CardEntry}
-                isEditing={isEditing}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
-                handleChange={handleChange}
-              />
-            )}
-            {formData.type === "crypto" && (
-              <CryptoFields
-                formData={formData as CryptoEntry}
-                isEditing={isEditing}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
-                handleChange={handleChange}
-              />
-            )}
-            {formData.type === "identity" && (
-              <IdentityFields
-                formData={formData as IdentityEntry}
-                isEditing={isEditing}
-                handleChange={handleChange}
-              />
-            )}
+
+          {/* Category section */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">Category</label>
+            <Select
+              disabled={!isEditing}
+              value={formData.category || ''}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+            >
+              <SelectTrigger className={`w-full ${isEditing ? 'bg-secondary' : 'bg-background'}`}>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No Category</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.name}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* Type-specific fields */}
+          {formData.type === "website" && (
+            <WebsiteFields
+              formData={formData as WebsiteEntry}
+              isEditing={isEditing}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              handleChange={handleChange}
+            />
+          )}
+          {formData.type === "card" && (
+            <CardFields
+              formData={formData as CardEntry}
+              isEditing={isEditing}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              handleChange={handleChange}
+            />
+          )}
+          {formData.type === "crypto" && (
+            <CryptoFields
+              formData={formData as CryptoEntry}
+              isEditing={isEditing}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              handleChange={handleChange}
+            />
+          )}
+          {formData.type === "identity" && (
+            <IdentityFields
+              formData={formData as IdentityEntry}
+              isEditing={isEditing}
+              handleChange={handleChange}
+            />
+          )}
           {formData.type === "memo" && (
-              <MemoFields
-                formData={formData as MemoEntry}
-                isEditing={isEditing}
-                handleChange={handleChange}
-              />
-            )}
-          </div>
+            <MemoFields
+              formData={formData as MemoEntry}
+              isEditing={isEditing}
+              handleChange={handleChange}
+            />
+          )}
         </div>
+      </div>
+    </div>
   );
 }

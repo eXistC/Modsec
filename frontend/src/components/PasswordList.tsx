@@ -13,6 +13,7 @@ export interface PasswordListProps {
   onSelectPassword: (password: PasswordEntry) => void;
   passwords: PasswordEntry[];
   onToggleBookmark: (id: string) => void;
+  selectedCategory?: string | null;
 }
 
 // Add this helper function at the top of the file, after imports
@@ -29,7 +30,8 @@ export function PasswordList({
   currentView, 
   onSelectPassword,
   passwords,
-  onToggleBookmark 
+  onToggleBookmark,
+  selectedCategory 
 }: PasswordListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showTypeOverlay, setShowTypeOverlay] = useState(false);
@@ -41,18 +43,28 @@ export function PasswordList({
   };
 
   const filteredPasswords = passwords
-    .filter(entry => 
-      // First apply bookmark filter if we're in bookmarks view
-      (currentView === "bookmarks" ? entry.isBookmarked : true) &&
-      // Then apply search filter
-      (entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       (entry.type === "website" && entry.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-       (entry.type === "card" && entry.cardNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
-       (entry.type === "identity" && (
-         entry.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         entry.lastName.toLowerCase().includes(searchQuery.toLowerCase())
-       )))
-    );
+    .filter(entry => {
+      // First apply view filters
+      const viewFilter = currentView === "bookmarks" ? entry.isBookmarked : true;
+      
+      // Then apply category filter
+      const categoryFilter = selectedCategory 
+        ? entry.category === selectedCategory
+        : true;
+
+      // Finally apply search filter
+      const searchFilter = 
+        entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        entry.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (entry.type === "website" && entry.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (entry.type === "card" && entry.cardNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (entry.type === "identity" && (
+          entry.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          entry.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+        ));
+      
+      return viewFilter && categoryFilter && searchFilter;
+    });
 
   const handleNewItem = () => {
     setShowTypeOverlay(true);
@@ -71,8 +83,9 @@ export function PasswordList({
   };
 
   return (
-    <div className="h-full bg-[#1E1E1E]">
-      <div className="flex h-[60px] items-center justify-between border-b border-border px-4">
+    <div className="h-full flex flex-col bg-[#1E1E1E]">
+      {/* Header */}
+      <div className="flex h-[60px] items-center justify-between border-b border-border px-4 flex-shrink-0">
         <h2 className="text-sm font-normal">
           {currentView === "bookmarks" ? "Bookmarks" : "All Passwords"}
         </h2>
@@ -86,7 +99,9 @@ export function PasswordList({
           New Item
         </Button>
       </div>
-      <div className="px-3 pt-3">
+      
+      {/* Search */}
+      <div className="px-3 pt-3 flex-shrink-0">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
@@ -97,7 +112,9 @@ export function PasswordList({
           />
         </div>
       </div>
-      <ScrollArea className="h-auto">
+
+      {/* Password List */}
+      <ScrollArea className="flex-1 h-[calc(100vh-140px)]">
         <div className="space-y-1 p-2">
           {filteredPasswords.map((entry) => (
             <Button
@@ -127,21 +144,28 @@ export function PasswordList({
                 </div>
                 <div className="text-left flex-1 min-w-0">
                   <div className="font-medium text-sm truncate pr-8">{entry.title}</div>
-                  {entry.type === "website" && entry.username && (
-                    <div className="text-sm text-muted-foreground/70 truncate pr-8">
-                      {entry.username}
-                    </div>
-                  )}
-                  {entry.type === "card" && entry.cardNumber && (
-                    <div className="text-sm text-muted-foreground/70 font-mono truncate pr-8">
-                      {maskCardNumber(entry.cardNumber)}
-                    </div>
-                  )}
-                  {entry.type === "identity" && (
-                    <div className="text-sm text-muted-foreground/70 truncate pr-8">
-                      {formatFullName(entry)}
-                    </div>
-                  )}
+                  <div className="flex items-center text-xs text-muted-foreground/70">
+                    {entry.category && (
+                      <span className="inline-block px-1.5 py-0.5 bg-secondary/50 rounded-full mr-2">
+                        {entry.category}
+                      </span>
+                    )}
+                    {entry.type === "website" && entry.username && (
+                      <div className="text-sm text-muted-foreground/70 truncate pr-8">
+                        {entry.username}
+                      </div>
+                    )}
+                    {entry.type === "card" && entry.cardNumber && (
+                      <div className="text-sm text-muted-foreground/70 font-mono truncate pr-8">
+                        {maskCardNumber(entry.cardNumber)}
+                      </div>
+                    )}
+                    {entry.type === "identity" && (
+                      <div className="text-sm text-muted-foreground/70 truncate pr-8">
+                        {formatFullName(entry)}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
@@ -171,6 +195,8 @@ export function PasswordList({
           )}
         </div>
       </ScrollArea>
+
+      {/* Overlays */}
       {showTypeOverlay && (
         <NewItemTypeOverlay
           onSelect={handleTypeSelect}

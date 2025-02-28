@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	myConvert "test/myGoLib/Convert"
 	myEncrypt "test/myGoLib/Encrypt"
 	myGenVal "test/myGoLib/Generate"
@@ -21,12 +22,13 @@ func main() {
 	fmt.Println("Test Email:", myEmail)
 	fmt.Println("Test Message", myMessage)
 
+	fmt.Println("===== Data send =====")
 	MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
-	Masterkey := myHash.MasterPasswordGen(myPassword)
+	//Masterkey := myHash.MasterPasswordGen(myPassword)
 	Answer, Ran := myHash.SandwichRegisOP(myPassword, myEmail) //Hpt but without concat
 
-	fmt.Println("Master Password Hash", MasterPasswordHash)
-	fmt.Println("Master Key", Masterkey)
+	//fmt.Println("Master Password Hash", MasterPasswordHash)
+	//fmt.Println("Master Key", Masterkey)
 	//fmt.Println("Answer from PBKDF 8 time", Answer)
 
 	BaseAnswer := make([]string, 0, len(Answer)) // Initilization and size allocation for better performance
@@ -40,8 +42,10 @@ func main() {
 		result[i] = strconv.Itoa(num)
 	}
 
-	// Combine hashes with time and email
-	PackHpT := myConvert.ConCombineTime(BaseAnswer, result, myEmail)
+	// Each data send to server
+	Hp1_HpR := strings.Join(BaseAnswer, "|")
+	Iteration := strings.Join(result, "|")
+	//myEmail string = "soMeth!ng@email.com"
 
 	// Generate IV and encrypt data
 	iv, err := myGenVal.GenerateIV()
@@ -50,24 +54,35 @@ func main() {
 	}
 
 	// Encrypt master password hash
-	Ciphertext, err := myEncrypt.EncryptAES256GCM(Masterkey, MasterPasswordHash, iv)
+	// Ciphertext, err := myEncrypt.EncryptAES256GCM(Masterkey, MasterPasswordHash, iv)
+	// if err != nil {
+	// 	log.Fatalf("Failed to encrypt master password hash: %v", err)
+	// }
+
+	//Note: Key is MasterPasswordHash but need to be Randomnum
+	// Encrypt Hp1-HpR
+	EncryptedHp1_HpR, err := myEncrypt.EncryptAES256GCM([]byte(Hp1_HpR), MasterPasswordHash, iv)
 	if err != nil {
-		log.Fatalf("Failed to encrypt master password hash: %v", err)
+		log.Fatalf("Failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt combined hash data
-	EncryptHpt, err := myEncrypt.EncryptAES256GCM(Masterkey, []byte(PackHpT), iv)
+	EncryptedIteration, err := myEncrypt.EncryptAES256GCM([]byte(Iteration), MasterPasswordHash, iv)
 	if err != nil {
-		log.Fatalf("Failed to encrypt HpT: %v", err)
+		log.Fatalf("Failed to encrypt Iteration: %v", err)
 	}
 
 	// Convert to base64 for output
-	encryptedBase64 := myConvert.BytToBa64(Ciphertext[:])
+	//encryptedBase64 := myConvert.BytToBa64(Ciphertext[:])
+	EncryptedHp1_HpR64 := myConvert.BytToBa64(EncryptedHp1_HpR[:])
+	EncryptedIteration64 := myConvert.BytToBa64(EncryptedIteration[:])
 
 	// Output results
-	fmt.Printf("Encryption successful. Ciphertext length: %d bytes\n", len(Ciphertext))
-	fmt.Printf("Base64 encoded ciphertext: %s\n", encryptedBase64)
-	fmt.Printf("HpT hash: %s\n", PackHpT)
-	fmt.Printf("Encrypted HpT length: %d bytes\n", len(EncryptHpt))
+	//fmt.Printf("Encryption successful. Ciphertext length: %d bytes\n", len(Ciphertext))
+	//fmt.Printf("Base64 encoded ciphertext: %s\n", encryptedBase64)
+	fmt.Printf("Hp1-HpR encrypted: %s\n", EncryptedHp1_HpR64)
+	fmt.Printf("Iteration encrypted: %s\n", EncryptedIteration64)
+	fmt.Printf("Email: %s\n", myEmail)
+
 	fmt.Println("===== End Operation =====")
 }

@@ -61,27 +61,25 @@ func main() {
 
 	//Note: Key is MasterPasswordHash but need to be Randomnum
 	// Encrypt Hp1-HpR
-	EncryptedHp1_HpR, err := myEncrypt.EncryptAES256GCM([]byte(Hp1_HpR), MasterPasswordHash, iv)
+	EncryptedHp1_HpR, err := myEncrypt.EncryptAES256GCM(Hp1_HpR, MasterPasswordHash, iv)
 	if err != nil {
 		log.Fatalf("Failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt combined hash data
-	EncryptedIteration, err := myEncrypt.EncryptAES256GCM([]byte(Iteration), MasterPasswordHash, iv)
+	EncryptedIteration, err := myEncrypt.EncryptAES256GCM(Iteration, MasterPasswordHash, iv)
 	if err != nil {
 		log.Fatalf("Failed to encrypt Iteration: %v", err)
 	}
 
 	// Convert to base64 for output
 	//encryptedBase64 := myConvert.BytToBa64(Ciphertext[:])
-	EncryptedHp1_HpR64 := myConvert.BytToBa64(EncryptedHp1_HpR[:])
-	EncryptedIteration64 := myConvert.BytToBa64(EncryptedIteration[:])
 
 	// Output results
 	//fmt.Printf("Encryption successful. Ciphertext length: %d bytes\n", len(Ciphertext))
 	//fmt.Printf("Base64 encoded ciphertext: %s\n", encryptedBase64)
-	fmt.Printf("Hp1-HpR encrypted: %s\n", EncryptedHp1_HpR64)
-	fmt.Printf("Iteration encrypted: %s\n", EncryptedIteration64)
+	fmt.Printf("Hp1-HpR encrypted: %s\n", EncryptedHp1_HpR)
+	fmt.Printf("Iteration encrypted: %s\n", EncryptedIteration)
 	fmt.Printf("Email: %s\n", myEmail)
 
 	fmt.Println("===== End Operation =====")

@@ -23,8 +23,8 @@ func main() {
 	fmt.Println("Test Message", myMessage)
 
 	fmt.Println("===== Data send =====")
-	MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
-	//Masterkey := myHash.MasterPasswordGen(myPassword)
+	//MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
+	Masterkey := myHash.MasterPasswordGen(myPassword)
 	Answer, Ran := myHash.SandwichRegisOP(myPassword, myEmail) //Hpt but without concat
 
 	//fmt.Println("Master Password Hash", MasterPasswordHash)
@@ -53,6 +53,16 @@ func main() {
 		log.Fatalf("Failed to generate IV: %v", err) //
 	}
 
+	sessionkey, err := myGenVal.GenerateSessionKey()
+	if err != nil {
+		log.Fatalf("Failed to generate sessionkey: %v", err) //
+	}
+
+	vaultkey, err := myGenVal.GenerateSessionKey()
+	if err != nil {
+		log.Fatalf("Failed to generate vaultkey: %v", err) //
+	}
+
 	// Encrypt master password hash
 	// Ciphertext, err := myEncrypt.EncryptAES256GCM(Masterkey, MasterPasswordHash, iv)
 	// if err != nil {
@@ -61,26 +71,31 @@ func main() {
 
 	//Note: Key is MasterPasswordHash but need to be Randomnum
 	// Encrypt Hp1-HpR
-	EncryptedHp1_HpR, err := myEncrypt.EncryptAES256GCM(Hp1_HpR, MasterPasswordHash, iv)
+	EncryptedHp1_HpR, err := myEncrypt.EncryptAES256GCM(Hp1_HpR, sessionkey, iv)
 	if err != nil {
 		log.Fatalf("Failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt combined hash data
-	EncryptedIteration, err := myEncrypt.EncryptAES256GCM(Iteration, MasterPasswordHash, iv)
+	EncryptedIteration, err := myEncrypt.EncryptAES256GCM(Iteration, sessionkey, iv)
 	if err != nil {
 		log.Fatalf("Failed to encrypt Iteration: %v", err)
 	}
 
-	// Convert to base64 for output
-	//encryptedBase64 := myConvert.BytToBa64(Ciphertext[:])
+	Protectedvaultkey, err := myEncrypt.EncryptAES256GCM(string(vaultkey), Masterkey, iv)
+	if err != nil {
+		log.Fatalf("Failed to encrypt vaultkey: %v", err)
+	}
 
 	// Output results
 	//fmt.Printf("Encryption successful. Ciphertext length: %d bytes\n", len(Ciphertext))
 	//fmt.Printf("Base64 encoded ciphertext: %s\n", encryptedBase64)
+	fmt.Println("IV:", iv)
+	fmt.Println("Sessionkey:", sessionkey)
 	fmt.Printf("Hp1-HpR encrypted: %s\n", EncryptedHp1_HpR)
 	fmt.Printf("Iteration encrypted: %s\n", EncryptedIteration)
 	fmt.Printf("Email: %s\n", myEmail)
+	fmt.Printf("Protectedvaultkey: %s\n", Protectedvaultkey)
 
 	fmt.Println("===== End Operation =====")
 }

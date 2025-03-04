@@ -52,17 +52,17 @@ func main() {
 	// Generate IV and encrypt data
 	iv, err := myGenVal.GenerateIV()
 	if err != nil {
-		log.Fatalf("Failed to generate IV: %v", err) //
+		log.Fatalf("Failed to generate IV: %v", err)
 	}
 
 	sessionkey, err := myGenVal.GenerateSessionKey()
 	if err != nil {
-		log.Fatalf("Failed to generate sessionkey: %v", err) //
+		log.Fatalf("Failed to generate sessionkey: %v", err)
 	}
 
 	vaultkey, err := myGenVal.GenerateSessionKey()
 	if err != nil {
-		log.Fatalf("Failed to generate vaultkey: %v", err) //
+		log.Fatalf("Failed to generate vaultkey: %v", err)
 	}
 
 	// Encrypt master password hash
@@ -94,6 +94,8 @@ func main() {
 		EncryptedIteration: EncryptedIteration,
 		ProtectedVaultKey:  Protectedvaultkey,
 		Email:              myEmail,
+		IV:                 iv,
+		Sessionkey:         sessionkey,
 	}
 
 	jsonresData, err := json.Marshal(resData)
@@ -104,9 +106,6 @@ func main() {
 	// Output results
 	//fmt.Printf("Encryption successful. Ciphertext length: %d bytes\n", len(Ciphertext))
 	//fmt.Printf("Base64 encoded ciphertext: %s\n", encryptedBase64)
-	fmt.Println("IV:", iv)
-	fmt.Println("Sessionkey:", sessionkey)
-	fmt.Println("Encoded JSON(Not string):", jsonresData)
 	fmt.Println("Encoded JSON:", string(jsonresData))
 
 	fmt.Println("===== End Operation =====")

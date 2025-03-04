@@ -5,6 +5,8 @@ type ResData struct {
 	EncryptedIteration string `json:"encrypted_iteration"`
 	ProtectedVaultKey  string `json:"protected_vault_key"`
 	Email              string `json:"email"`
+	IV                 []byte `json:"iv"`
+	Sessionkey         []byte `json:"sessionkey"`
 }
 
 type LoginData struct {

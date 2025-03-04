@@ -98,4 +98,7 @@ func main() {
 	fmt.Printf("Protectedvaultkey: %s\n", Protectedvaultkey)
 
 	fmt.Println("===== End Operation =====")
+	fmt.Printf("Hp1-HpR: %s\n", Hp1_HpR)
+	fmt.Printf("Iteration: %s\n", Iteration)
+	fmt.Println("Sessionkey:", vaultkey)
 }

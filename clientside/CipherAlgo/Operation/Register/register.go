@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
+	"test/Operation/DataStr"
 	myConvert "test/myGoLib/Convert"
 	myEncrypt "test/myGoLib/Encrypt"
 	myGenVal "test/myGoLib/Generate"
@@ -87,15 +89,25 @@ func main() {
 		log.Fatalf("Failed to encrypt vaultkey: %v", err)
 	}
 
+	resData := DataStr.ResData{
+		EncryptedHp1_HpR:   EncryptedHp1_HpR,
+		EncryptedIteration: EncryptedIteration,
+		ProtectedVaultKey:  Protectedvaultkey,
+		Email:              myEmail,
+	}
+
+	jsonresData, err := json.Marshal(resData)
+	if err != nil {
+		log.Fatalf("Failed to encode JSON: %v", err)
+	}
+
 	// Output results
 	//fmt.Printf("Encryption successful. Ciphertext length: %d bytes\n", len(Ciphertext))
 	//fmt.Printf("Base64 encoded ciphertext: %s\n", encryptedBase64)
 	fmt.Println("IV:", iv)
 	fmt.Println("Sessionkey:", sessionkey)
-	fmt.Printf("Hp1-HpR encrypted: %s\n", EncryptedHp1_HpR)
-	fmt.Printf("Iteration encrypted: %s\n", EncryptedIteration)
-	fmt.Printf("Email: %s\n", myEmail)
-	fmt.Printf("Protectedvaultkey: %s\n", Protectedvaultkey)
+	fmt.Println("Encoded JSON(Not string):", jsonresData)
+	fmt.Println("Encoded JSON:", string(jsonresData))
 
 	fmt.Println("===== End Operation =====")
 	fmt.Printf("Hp1-HpR: %s\n", Hp1_HpR)

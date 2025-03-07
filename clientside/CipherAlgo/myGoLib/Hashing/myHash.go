@@ -44,6 +44,7 @@ func EmailToSHA256(email string) []byte {
 	return emailHash[:]
 }
 
+// Not use
 func PBKDF2Function(password, salt []byte, iterations, keyLength int) []byte {
 	// Input: Password(Str) Salt(Str) Iteration(int) Keylength(int) <== Depend on algorithm we use
 	// Output as string(Base64)
@@ -52,6 +53,25 @@ func PBKDF2Function(password, salt []byte, iterations, keyLength int) []byte {
 
 	// Return the key as a base64 string
 	return key
+}
+
+func SHA256Function(data []byte) []byte {
+	hash := sha256.Sum256(data) // Returns [32]byte
+	return hash[:]              // Convert to slice
+}
+
+func PBKDF2Function_modified(password, salt []byte, iterations int) []byte {
+	// Input: Password(Str) Salt(Str) Iteration(int)
+	// Output as byte
+
+	//loop sha256 for iterations
+	for i := range iterations {
+		combined := append(password, salt...)
+		password = SHA256Function(combined)
+		i++
+	}
+	// Return the key as a base64 string
+	return password
 }
 
 func MasterPasswordHashGen(Password string) []byte {
@@ -84,7 +104,7 @@ func SandwichRegisOP(Password, Email string) (Answer [][]byte, Ran []int) {
 		RandNum := myGenVal.RandomInt(60000, 800000)
 		// Predefine the Value Regis 60k - 800k
 		// Loging 1k - 60k-1
-		derivedKey := PBKDF2Function(HashMasterPassword, chunks[i], RandNum, 32)
+		derivedKey := PBKDF2Function_modified(HashMasterPassword, chunks[i], RandNum)
 		Ran = append(Ran, RandNum)
 		Answer = append(Answer, derivedKey)
 	}
@@ -118,7 +138,7 @@ func SandwichLoginOP(Password, Email string) (Answer [][]byte, Ran []int) {
 		RandNum := myGenVal.RandomInt(1000, 59999)
 		// Predefine the Value Regis 60k - 800k
 		// Loging 1k - 60k-1
-		derivedKey := PBKDF2Function(HashMasterPassword, chunks[i], RandNum, 32)
+		derivedKey := PBKDF2Function_modified(HashMasterPassword, chunks[i], RandNum)
 		Ran = append(Ran, RandNum)
 		Answer = append(Answer, derivedKey)
 	}

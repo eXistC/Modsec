@@ -4,28 +4,29 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
+	myConvert "test/myGoLib/Convert"
 )
 
 // Return Byte, Error use to encrypt data(byte)
-func EncryptAES256GCM(plaintext []byte, key []byte, IV []byte) ([]byte, error) {
+func EncryptAES256GCM(plaintext string, key []byte, IV []byte) (string, error) {
 	// AES256 using GCM mode
 	// Input: plaintext(byte) Key 32(byte) IV 12(byte)
 	// Output: byte, Error
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create AES cipher: %w", err)
+		return "", fmt.Errorf("failed to create AES cipher: %w", err)
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create GCM mode: %w", err)
+		return "", fmt.Errorf("failed to create GCM mode: %w", err)
 	}
 
 	// Encrypt the plaintext using the provided IV
-	ciphertext := gcm.Seal(nil, IV, plaintext, nil)
+	ciphertext := gcm.Seal(nil, IV, []byte(plaintext), nil)
 
 	// Return only the ciphertext (nonce should be stored separately)
-	return ciphertext, nil
+	return myConvert.BytToBa64(ciphertext), nil
 }
 
 // Return Byte, Error use to Decrypt data(Byte)

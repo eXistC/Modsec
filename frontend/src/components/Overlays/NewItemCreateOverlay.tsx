@@ -21,10 +21,15 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
   const [formData, setFormData] = useState<Partial<PasswordEntry>>({ type });
   const [showPassword, setShowPassword] = useState(false);
   const isEditing = true;
-    
   
+  // Since this is a creation form, we don't need real copy functionality,
+  // but we need to provide the props for the field components
+  const dummyCopyToClipboard = (_field: string, _value: string) => {
+    // Do nothing - copying isn't needed in creation mode
+  };
+  const copiedField = null;
 
-  const handleChange = (field: keyof PasswordEntry) => (
+  const handleChange = (field: string) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData(prev => ({
@@ -40,13 +45,6 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
     }
   };
 
-  // const handleContainerClick = (e: React.MouseEvent) => {
-  //   // Only close if clicking the backdrop directly
-  //   if (e.target === e.currentTarget) {
-  //     onClose();
-  //   }
-  // };
-
   const renderFields = () => {
     switch (formData.type) {
       case "website":
@@ -56,7 +54,9 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
             isEditing={isEditing}
             showPassword={showPassword}
             setShowPassword={setShowPassword}
-            handleChange={handleChange as (field: keyof WebsiteEntry) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void}
+            handleChange={handleChange}
+            copyToClipboard={dummyCopyToClipboard}
+            copiedField={copiedField}
           />
         );
       case "identity":
@@ -64,7 +64,9 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
           <IdentityFields
             formData={formData as IdentityEntry}
             isEditing={isEditing}
-            handleChange={handleChange as (field: keyof IdentityEntry) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void}
+            handleChange={handleChange}
+            copyToClipboard={dummyCopyToClipboard}
+            copiedField={copiedField}
           />
         );
       case "card":
@@ -74,7 +76,9 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
             isEditing={isEditing}
             showPassword={showPassword}
             setShowPassword={setShowPassword}
-            handleChange={handleChange as (field: keyof CardEntry) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void}
+            handleChange={handleChange}
+            copyToClipboard={dummyCopyToClipboard}
+            copiedField={copiedField}
           />
         );
       case "crypto":
@@ -84,7 +88,9 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
             isEditing={isEditing}
             showPassword={showPassword}
             setShowPassword={setShowPassword}
-            handleChange={handleChange as (field: keyof CryptoEntry) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void}
+            handleChange={handleChange}
+            copyToClipboard={dummyCopyToClipboard}
+            copiedField={copiedField}
           />
         );
       case "memo":
@@ -93,6 +99,8 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
             formData={formData as MemoEntry}
             isEditing={isEditing}
             handleChange={handleChange}
+            copyToClipboard={dummyCopyToClipboard}
+            copiedField={copiedField}
           />
         );
     }

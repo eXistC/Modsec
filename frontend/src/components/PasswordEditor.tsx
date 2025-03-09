@@ -110,12 +110,6 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     return null;
   }
 
-  console.log("PasswordEditor render state:", { 
-    isEditing, 
-    passwordType: formData.type,
-    category: formData.category
-  });
-
   return (
     <div className="h-full bg-background">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
@@ -142,9 +136,9 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
           ) : (
             <Button 
               variant="outline" 
-              size="sm" 
-              className="bg-secondary hover:bg-secondary/80"
-              onClick={handleEdit}
+                size="sm" 
+                className="bg-secondary hover:bg-secondary/80"
+                onClick={handleEdit}
             >
               <Pencil className="h-4 w-4 mr-2" />
               Edit
@@ -170,6 +164,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       </div>
       <div className="px-6 py-4">
         <div className="space-y-6">
+          {/* Item name - kept at the top */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Item name</label>
             <div className="flex gap-3">
@@ -186,38 +181,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
             </div>
           </div>
 
-          {/* Category selector */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Category</label>
-            <div className="flex gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-secondary">
-                <Tag className="h-5 w-5" />
-              </div>
-              {isEditing ? (
-                <Select
-                  value={formData.category || NO_CATEGORY}
-                  onValueChange={handleCategoryChange}
-                >
-                  <SelectTrigger className="w-full bg-secondary border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NO_CATEGORY}>None</SelectItem>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input 
-                  className="bg-background border-[1px] border-input"
-                  value={formData.category || "Uncategorized"}
-                  readOnly
-                />
-              )}
-            </div>
-          </div>
-
+          {/* Type-specific fields */}
           {formData.type === "website" && (
             <WebsiteFields
               formData={formData as WebsiteEntry}
@@ -259,6 +223,56 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               handleChange={handleChange}
             />
           )}
+
+          {/* Notes field if available */}
+          {formData.notes !== undefined && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Notes</label>
+              <Textarea
+                placeholder="Add notes..."
+                value={formData.notes || ""}
+                onChange={handleChange('notes')}
+                readOnly={!isEditing}
+                className={`${isEditing ? 'bg-secondary' : 'bg-background'} min-h-[100px] border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+              />
+            </div>
+          )}
+
+          {/* Category selector - moved to bottom */}
+          <div className="space-y-2 mt-8 border-t border-border pt-6">
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4 text-muted-foreground" />
+              <label className="text-sm font-medium text-muted-foreground">Category</label>
+            </div>
+            <div className="pl-6">
+              {isEditing ? (
+                <Select
+                  value={formData.category || NO_CATEGORY}
+                  onValueChange={handleCategoryChange}
+                >
+                  <SelectTrigger className="w-full bg-secondary border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_CATEGORY}>None</SelectItem>
+                    {categories.map(category => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex items-center h-10">
+                  <span className="text-sm">
+                    {formData.category ? (
+                      <span className="px-2 py-1 bg-secondary/50 rounded-md">{formData.category}</span>
+                    ) : (
+                      <span className="text-muted-foreground">Uncategorized</span>
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

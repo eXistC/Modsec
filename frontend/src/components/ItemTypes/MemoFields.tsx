@@ -2,6 +2,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MemoEntry } from "@/types/password";
 import { Check, Copy } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import React from "react";
 
 interface MemoFieldsProps {
   formData: MemoEntry;
@@ -34,7 +35,7 @@ export function MemoFields({
             <TooltipTrigger asChild>
               <button 
                 type="button"
-                onClick={() => copyToClipboard('notes', formData.notes)}
+                onClick={() => copyToClipboard('notes', formData.notes || "")}
                 className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
               >
                 {copiedField === 'notes' ? (

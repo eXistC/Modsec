@@ -14,6 +14,7 @@ import { MemoFields } from './ItemTypes/MemoFields';
 import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { calculateCategoryCounts } from "@/data/mockPasswords";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 
 
 interface PasswordEditorProps {
@@ -25,6 +26,7 @@ interface PasswordEditorProps {
 const NO_CATEGORY = "uncategorized";
 
 export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<PasswordEntry & { category?: string | null }>(password);
   const [showPassword, setShowPassword] = useState(false);
@@ -92,12 +94,61 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     console.log("Deleting item...");
   };
 
-  // Function to copy field content to clipboard
+  // Enhanced function to copy field content to clipboard with toast notification
   const copyToClipboard = (field: string, value: string) => {
+    if (!value) {
+      toast({
+        title: "Nothing to copy",
+        description: "This field is empty.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     navigator.clipboard.writeText(value).then(() => {
+      // Set visual indicator
       setCopiedField(field);
       setTimeout(() => setCopiedField(null), 2000);
+      
+      // Show toast notification
+      const fieldLabel = getFieldLabel(field);
+      toast({
+        title: "Copied to clipboard",
+        description: `${fieldLabel} has been copied to your clipboard.`,
+        variant: "default",
+        duration: 3000,
+      });
+    }).catch(err => {
+      console.error('Copy failed:', err);
+      toast({
+        title: "Copy failed",
+        description: "Could not copy to clipboard. Please try again.",
+        variant: "destructive"
+      });
     });
+  };
+
+  // Helper function to get a readable field label for toast notifications
+  const getFieldLabel = (field: string): string => {
+    // Map common field names to readable labels
+    const fieldLabels: Record<string, string> = {
+      'title': 'Item name',
+      'username': 'Username',
+      'password': 'Password',
+      'url': 'Website URL',
+      'email': 'Email address',
+      'cardNumber': 'Card number',
+      'cardholderName': 'Cardholder name',
+      'expiryDate': 'Expiry date',
+      'cvv': 'CVV',
+      'notes': 'Notes',
+      'content': 'Content',
+      'seedPhrase': 'Seed phrase',
+      'publicKey': 'Public key',
+      'privateKey': 'Private key'
+    };
+
+    return fieldLabels[field] || field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1');
   };
 
   const getIcon = () => {

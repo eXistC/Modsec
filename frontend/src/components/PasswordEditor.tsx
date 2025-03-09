@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet, Tag } from "lucide-react";
+import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet, Tag, Copy, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CardEntry, CryptoEntry, IdentityEntry, MemoEntry, PasswordEntry, WebsiteEntry } from "@/types/password";
 import { Calendar } from "lucide-react";
@@ -13,6 +13,7 @@ import { WebsiteFields } from './ItemTypes/WebsiteFields';
 import { MemoFields } from './ItemTypes/MemoFields';
 import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { calculateCategoryCounts } from "@/data/mockPasswords";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 interface PasswordEditorProps {
@@ -28,6 +29,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const [formData, setFormData] = useState<PasswordEntry & { category?: string | null }>(password);
   const [showPassword, setShowPassword] = useState(false);
   const [categories, setCategories] = useState(calculateCategoryCounts().map(cat => cat.name));
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Make sure password changes are properly reflected in the component
   useEffect(() => {
@@ -90,6 +92,14 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     console.log("Deleting item...");
   };
 
+  // Function to copy field content to clipboard
+  const copyToClipboard = (field: string, value: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    });
+  };
+
   const getIcon = () => {
     switch (password.type) {
       case "website":
@@ -109,6 +119,68 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   if (!isOpen) {
     return null;
   }
+
+  // Reusable component for copyable input fields
+  const CopyableField = ({ 
+    label, 
+    value, 
+    fieldName, 
+    isPassword = false,
+    isConcealed = false,
+    placeholder = ""
+  }: { 
+    label: string, 
+    value: string | undefined, 
+    fieldName: string,
+    isPassword?: boolean,
+    isConcealed?: boolean,
+    placeholder?: string
+  }) => {
+    return (
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-muted-foreground">{label}</label>
+        <div className="relative">
+          <Input 
+            type={isPassword && !showPassword ? "password" : "text"}
+            placeholder={placeholder}
+            value={value || ""}
+            onChange={handleChange(fieldName)}
+            readOnly={!isEditing}
+            className={`${isEditing ? 'bg-secondary' : 'bg-background'} ${isConcealed ? 'font-mono' : ''} pr-10 border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+          />
+          {!isEditing && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  type="button"
+                  onClick={() => copyToClipboard(fieldName, value || "")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {copiedField === fieldName ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{copiedField === fieldName ? "Copied!" : "Copy to clipboard"}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+          {isPassword && isEditing && (
+            <button
+              type="button"
+              onClick={handlePasswordClick}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="h-full bg-background">
@@ -136,9 +208,9 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
           ) : (
             <Button 
               variant="outline" 
-                size="sm" 
-                className="bg-secondary hover:bg-secondary/80"
-                onClick={handleEdit}
+              size="sm" 
+              className="bg-secondary hover:bg-secondary/80"
+              onClick={handleEdit}
             >
               <Pencil className="h-4 w-4 mr-2" />
               Edit
@@ -171,13 +243,35 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-secondary">
                 {getIcon()}
               </div>
-              <Input 
-                placeholder="Enter item name" 
-                className={`${isEditing ? 'bg-secondary' : 'bg-background'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-                value={formData.title}
-                onChange={handleChange('title')}
-                readOnly={!isEditing}
-              />
+              <div className="relative w-full">
+                <Input 
+                  placeholder="Enter item name" 
+                  className={`${isEditing ? 'bg-secondary' : 'bg-background'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10`}
+                  value={formData.title}
+                  onChange={handleChange('title')}
+                  readOnly={!isEditing}
+                />
+                {!isEditing && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        type="button"
+                        onClick={() => copyToClipboard('title', formData.title)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {copiedField === 'title' ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{copiedField === 'title' ? "Copied!" : "Copy to clipboard"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           </div>
 
@@ -189,6 +283,8 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               showPassword={showPassword}
               setShowPassword={setShowPassword}
               handleChange={handleChange}
+              copyToClipboard={copyToClipboard}
+              copiedField={copiedField}
             />
           )}
           {formData.type === "card" && (
@@ -198,6 +294,8 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               showPassword={showPassword}
               setShowPassword={setShowPassword}
               handleChange={handleChange}
+              copyToClipboard={copyToClipboard}
+              copiedField={copiedField}
             />
           )}
           {formData.type === "crypto" && (
@@ -207,6 +305,8 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               showPassword={showPassword}
               setShowPassword={setShowPassword}
               handleChange={handleChange}
+              copyToClipboard={copyToClipboard}
+              copiedField={copiedField}
             />
           )}
           {formData.type === "identity" && (
@@ -214,6 +314,8 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               formData={formData as IdentityEntry}
               isEditing={isEditing}
               handleChange={handleChange}
+              copyToClipboard={copyToClipboard}
+              copiedField={copiedField}
             />
           )}
           {formData.type === "memo" && (
@@ -221,6 +323,8 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
               formData={formData as MemoEntry}
               isEditing={isEditing}
               handleChange={handleChange}
+              copyToClipboard={copyToClipboard}
+              copiedField={copiedField}
             />
           )}
 
@@ -228,13 +332,35 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
           {formData.notes !== undefined && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Notes</label>
-              <Textarea
-                placeholder="Add notes..."
-                value={formData.notes || ""}
-                onChange={handleChange('notes')}
-                readOnly={!isEditing}
-                className={`${isEditing ? 'bg-secondary' : 'bg-background'} min-h-[100px] border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-              />
+              <div className="relative">
+                <Textarea
+                  placeholder="Add notes..."
+                  value={formData.notes || ""}
+                  onChange={handleChange('notes')}
+                  readOnly={!isEditing}
+                  className={`${isEditing ? 'bg-secondary' : 'bg-background'} min-h-[100px] border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10`}
+                />
+                {!isEditing && formData.notes && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        type="button"
+                        onClick={() => copyToClipboard('notes', formData.notes || "")}
+                        className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                      >
+                        {copiedField === 'notes' ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{copiedField === 'notes' ? "Copied!" : "Copy to clipboard"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           )}
 

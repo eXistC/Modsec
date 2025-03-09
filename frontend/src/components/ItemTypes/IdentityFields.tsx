@@ -2,127 +2,203 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IdentityEntry } from "@/types/password";
+import { Check, Copy } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface IdentityFieldsProps {
   formData: IdentityEntry;
   isEditing: boolean;
-  handleChange: (field: keyof IdentityEntry) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleChange: (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  copyToClipboard: (field: string, value: string) => void;
+  copiedField: string | null;
 }
 
 export function IdentityFields({
   formData,
   isEditing,
-  handleChange
+  handleChange,
+  copyToClipboard,
+  copiedField
 }: IdentityFieldsProps) {
+  
+  // Helper component for copyable inputs
+  const CopyableInput = ({ 
+    label, 
+    value, 
+    fieldName,
+    placeholder = "",
+    className = "",
+    type = "text" 
+  }: { 
+    label: string;
+    value: string | undefined;
+    fieldName: string;
+    placeholder?: string;
+    className?: string;
+    type?: string;
+  }) => (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-muted-foreground">{label}</label>
+      <div className="relative">
+        <Input
+          type={type}
+          placeholder={placeholder}
+          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10 ${className}`}
+          value={value || ''}
+          onChange={handleChange(fieldName)}
+          readOnly={!isEditing}
+        />
+        {!isEditing && value && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button 
+                type="button"
+                onClick={() => copyToClipboard(fieldName, value)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {copiedField === fieldName ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{copiedField === fieldName ? "Copied!" : "Copy to clipboard"}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </div>
+  );
+  
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Initial</label>
-          <Input
-            placeholder="Mr/Mrs/Ms"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-            value={formData.initial}
-            onChange={handleChange('initial')}
-            readOnly={!isEditing}
-          />
-        </div>
-        <div className="space-y-2 col-span-2">
-          <label className="text-sm font-medium text-muted-foreground">First Name</label>
-          <Input
-            placeholder="Enter first name"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+        <CopyableInput
+          label="Initial"
+          value={formData.initial}
+          fieldName="initial"
+          placeholder="Mr/Mrs/Ms"
+        />
+        <div className="col-span-2">
+          <CopyableInput
+            label="First Name"
             value={formData.firstName}
-            onChange={handleChange('firstName')}
-            readOnly={!isEditing}
+            fieldName="firstName"
+            placeholder="Enter first name"
           />
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">Last Name</label>
-        <Input
-          placeholder="Enter last name"
-          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-          value={formData.lastName}
-          onChange={handleChange('lastName')}
-          readOnly={!isEditing}
-        />
-      </div>
+      <CopyableInput
+        label="Last Name"
+        value={formData.lastName}
+        fieldName="lastName"
+        placeholder="Enter last name"
+      />
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">Nickname</label>
-        <Input
-          placeholder="Enter nickname"
-          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-          value={formData.nickname}
-          onChange={handleChange('nickname')}
-          readOnly={!isEditing}
-        />
-      </div>
+      <CopyableInput
+        label="Nickname"
+        value={formData.nickname}
+        fieldName="nickname"
+        placeholder="Enter nickname"
+      />
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
-          <Input
-            placeholder="Enter phone number"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-            value={formData.phoneNumber}
-            onChange={handleChange('phoneNumber')}
-            readOnly={!isEditing}
-          />
-        </div>
+        <CopyableInput
+          label="Phone Number"
+          value={formData.phoneNumber}
+          fieldName="phoneNumber"
+          placeholder="Enter phone number"
+        />
         <div className="space-y-2">
           <label className="text-sm font-medium text-muted-foreground">Gender</label>
-          <Select 
-            disabled={!isEditing}
-            value={formData.gender}
-            onValueChange={(value) => handleChange('gender')({ target: { value } } as any)}
-          >
-            <SelectTrigger className={`${!isEditing ? 'bg-background' : 'bg-secondary'}`}>
-              <SelectValue placeholder="Select gender" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="male">Male</SelectItem>
-              <SelectItem value="female">Female</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <Select 
+              disabled={!isEditing}
+              value={formData.gender}
+              onValueChange={(value) => handleChange('gender')({ target: { value } } as any)}
+            >
+              <SelectTrigger className={`${!isEditing ? 'bg-background' : 'bg-secondary'} pr-10`}>
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            {!isEditing && formData.gender && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    type="button"
+                    onClick={() => copyToClipboard('gender', formData.gender)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {copiedField === 'gender' ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{copiedField === 'gender' ? "Copied!" : "Copy to clipboard"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Birth Day</label>
-          <Input
-            type="date"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-            value={formData.birthDay}
-            onChange={handleChange('birthDay')}
-            readOnly={!isEditing}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Occupation</label>
-          <Input
-            placeholder="Enter occupation"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
-            value={formData.occupation}
-            onChange={handleChange('occupation')}
-            readOnly={!isEditing}
-          />
-        </div>
+        <CopyableInput
+          label="Birth Day"
+          value={formData.birthDay}
+          fieldName="birthDay"
+          type="date"
+        />
+        <CopyableInput
+          label="Occupation"
+          value={formData.occupation}
+          fieldName="occupation"
+          placeholder="Enter occupation"
+        />
       </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Address</label>
-        <Textarea
-          placeholder="Enter address"
-          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[80px]`}
-          value={formData.address}
-          onChange={handleChange('address')}
-          readOnly={!isEditing}
-        />
+        <div className="relative">
+          <Textarea
+            placeholder="Enter address"
+            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[80px] pr-10`}
+            value={formData.address || ''}
+            onChange={handleChange('address')}
+            readOnly={!isEditing}
+          />
+          {!isEditing && formData.address && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  type="button"
+                  onClick={() => copyToClipboard('address', formData.address)}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                >
+                  {copiedField === 'address' ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{copiedField === 'address' ? "Copied!" : "Copy to clipboard"}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </div>
     </div>
   );

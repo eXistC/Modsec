@@ -1,16 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
+import { mockCategories, calculateCategoryCounts, Category } from "@/data/mockPasswords";
 
 export function CatList() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [categories, setCategories] = useState([
-    { name: "SCHOOL", count: 3 },
-    { name: "WORK", count: 2 },
-    { name: "PERSONAL", count: 2 }
-  ]);
+  const [categories, setCategories] = useState<Category[]>(calculateCategoryCounts());
   const [newCategory, setNewCategory] = useState("");
   const [isAdding, setIsAdding] = useState(false);
 

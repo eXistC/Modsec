@@ -6,6 +6,7 @@ export interface BaseEntry {
   title: string;
   isBookmarked?: boolean;
   notes?: string;
+  category?: string | null;
 }
 
 export interface WebsiteEntry extends BaseEntry {
@@ -56,3 +57,9 @@ export type PasswordEntry =
   | CryptoEntry 
   | IdentityEntry 
   | MemoEntry;
+
+export interface Category {
+  name: string;
+  count: number;
+}
+

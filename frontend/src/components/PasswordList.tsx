@@ -25,6 +25,24 @@ const formatFullName = (entry: IdentityEntry) => {
   return `${entry.firstName} ${entry.lastName}`.trim();
 };
 
+// Helper function to determine icon color based on entry type
+const getIconColorClass = (type: string): string => {
+  switch (type) {
+    case "website":
+      return "text-blue-500";
+    case "identity":
+      return "text-green-500";
+    case "card":
+      return "text-purple-500";
+    case "crypto":
+      return "text-amber-500";
+    case "memo":
+      return "text-slate-500";
+    default:
+      return "text-muted-foreground";
+  }
+};
+
 export function PasswordList({ 
   currentView, 
   onSelectPassword,
@@ -108,21 +126,28 @@ export function PasswordList({
               onClick={() => onSelectPassword?.(entry)}
             >
               <div className="flex items-center gap-3 w-full min-h-[36px]">
-                <div className="flex-shrink-0">
+                <div className={`
+                  flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg
+                  ${entry.type === "website" ? "bg-blue-500/10" : ""}
+                  ${entry.type === "identity" ? "bg-green-500/10" : ""}
+                  ${entry.type === "card" ? "bg-purple-500/10" : ""}
+                  ${entry.type === "crypto" ? "bg-amber-500/10" : ""}
+                  ${entry.type === "memo" ? "bg-slate-500/10" : ""}
+                `}>
                   {entry.type === "website" && (
-                    <Globe className="h-[18px] w-[18px] text-muted-foreground" />
+                    <Globe className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
                   )}
                   {entry.type === "identity" && (
-                    <User className="h-[18px] w-[18px] text-muted-foreground" />
+                    <User className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
                   )}
                   {entry.type === "card" && (
-                    <CreditCard className="h-[18px] w-[18px] text-muted-foreground" />
+                    <CreditCard className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
                   )}
                   {entry.type === "crypto" && (
-                    <Wallet className="h-[18px] w-[18px] text-muted-foreground" />
+                    <Wallet className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
                   )}
                   {entry.type === "memo" && (
-                    <File className="h-[18px] w-[18px] text-muted-foreground" />
+                    <File className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
                   )}
                 </div>
                 <div className="text-left flex-1 min-w-0">

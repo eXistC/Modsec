@@ -300,52 +300,28 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       </div>
       <div className="px-6 py-4">
         <div className="space-y-6">
-          {/* Item name - kept at the top but improved */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Item name</label>
-            <div className="flex gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-secondary">
+          {/* Item name - enhanced with larger size, no outline, and no copy functionality */}
+          <div className="space-y-3">
+            <div className="flex gap-3 items-center">
+              <div className="flex items-center justify-center h-14 w-14 rounded-full bg-secondary/60">
                 {getIcon()}
               </div>
-              <div className="relative w-full group">
-                <Input 
-                  placeholder="Enter item name" 
-                  className={`
-                    ${isEditing ? 'bg-secondary' : 'bg-background'} 
-                    ${!isEditing ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
-                    border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10
-                  `}
-                  value={formData.title}
-                  onChange={handleChange('title')}
-                  readOnly={!isEditing}
-                  onClick={() => !isEditing && copyToClipboard('title', formData.title)}
-                />
-                {!isEditing && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div 
-                        className={`
-                          absolute right-3 top-1/2 transform -translate-y-1/2 
-                          text-muted-foreground hover:text-primary transition-all duration-200
-                          ${copiedField === 'title' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
-                          cursor-pointer
-                        `}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          copyToClipboard('title', formData.title);
-                        }}
-                      >
-                        {copiedField === 'title' ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="left" className="bg-primary text-primary-foreground">
-                      <p>{copiedField === 'title' ? "Copied!" : "Click to copy"}</p>
-                    </TooltipContent>
-                  </Tooltip>
+              <div className="relative w-full">
+                {isEditing ? (
+                  <Input 
+                    placeholder="Enter item name" 
+                    className="
+                      bg-secondary 
+                      text-lg font-medium h-12 px-4
+                      border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background
+                    "
+                    value={formData.title}
+                    onChange={handleChange('title')}
+                  />
+                ) : (
+                  <h2 className="text-xl font-medium text-foreground line-clamp-2">
+                    {formData.title || "Untitled"}
+                  </h2>
                 )}
               </div>
             </div>

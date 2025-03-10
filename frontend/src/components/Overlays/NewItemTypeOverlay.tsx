@@ -7,6 +7,24 @@ interface NewItemTypeOverlayProps {
   onClose: () => void;
 }
 
+// Helper function to determine icon background color based on entry type
+const getIconBackgroundClass = (type: string): string => {
+  switch (type) {
+    case "website":
+      return "bg-blue-500/10 text-blue-500";
+    case "identity":
+      return "bg-green-500/10 text-green-500";
+    case "card":
+      return "bg-purple-500/10 text-purple-500";
+    case "crypto":
+      return "bg-amber-500/10 text-amber-500";
+    case "memo":
+      return "bg-slate-500/10 text-slate-500";
+    default:
+      return "bg-secondary/60 text-muted-foreground";
+  }
+};
+
 export function NewItemTypeOverlay({ onSelect, onClose }: NewItemTypeOverlayProps) {
   const types = [
     { type: "website" as PasswordType, icon: Globe, label: "Website", description: "Store login credentials for websites" },
@@ -46,8 +64,13 @@ export function NewItemTypeOverlay({ onSelect, onClose }: NewItemTypeOverlayProp
                 onClick={() => onSelect(type)}
               >
                 <div className="flex items-start gap-4">
-                  <div className="rounded-lg bg-secondary/40 p-2 group-hover:bg-secondary transition-colors">
-                    <Icon className="h-5 w-5 text-foreground/70" />
+                  <div className={`
+                    rounded-lg p-2.5 
+                    ${getIconBackgroundClass(type)} 
+                    group-hover:bg-opacity-20 transition-all duration-200
+                    shadow-sm
+                  `}>
+                    <Icon className="h-5 w-5" />
                   </div>
                   <div className="flex flex-col items-start">
                     <span className="text-sm font-medium">{label}</span>

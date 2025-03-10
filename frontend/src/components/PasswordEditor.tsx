@@ -166,6 +166,42 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     }
   };
 
+  // Helper function to determine icon background color based on entry type
+  const getIconBackgroundClass = (type: string): string => {
+    switch (type) {
+      case "website":
+        return "bg-blue-500/10 text-blue-500";
+      case "identity":
+        return "bg-green-500/10 text-green-500";
+      case "card":
+        return "bg-purple-500/10 text-purple-500";
+      case "crypto":
+        return "bg-amber-500/10 text-amber-500";
+      case "memo":
+        return "bg-slate-500/10 text-slate-500";
+      default:
+        return "bg-secondary/60";
+    }
+  };
+
+  // Get styled icon with appropriate sizing
+  const getStyledIcon = () => {
+    switch (formData.type) {
+      case "website":
+        return <Globe className="h-6 w-6" />;
+      case "identity":
+        return <User className="h-6 w-6" />;
+      case "card":
+        return <CreditCard className="h-6 w-6" />;
+      case "crypto":
+        return <Wallet className="h-6 w-6" />;
+      case "memo":
+        return <Pen className="h-6 w-6" />;
+      default:
+        return <Globe className="h-6 w-6" />;
+    }
+  };
+
   // Check for missing data
   if (!isOpen) {
     return null;
@@ -300,11 +336,15 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       </div>
       <div className="px-6 py-4">
         <div className="space-y-6">
-          {/* Item name - enhanced with larger size, no outline, and no copy functionality */}
+          {/* Item name - enhanced with stylish icon and typography */}
           <div className="space-y-3">
-            <div className="flex gap-3 items-center">
-              <div className="flex items-center justify-center h-14 w-14 rounded-full bg-secondary/60">
-                {getIcon()}
+            <div className="flex gap-4 items-center">
+              <div className={`
+                flex items-center justify-center h-12 w-12 rounded-xl 
+                ${getIconBackgroundClass(formData.type)} 
+                shadow-sm
+              `}>
+                {getStyledIcon()}
               </div>
               <div className="relative w-full">
                 {isEditing ? (

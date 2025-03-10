@@ -171,7 +171,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     return null;
   }
 
-  // Reusable component for copyable input fields
+  // Reusable component for copyable input fields with enhanced design
   const CopyableField = ({ 
     label, 
     value, 
@@ -190,32 +190,45 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     return (
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">{label}</label>
-        <div className="relative">
+        <div className="relative group">
           <Input 
             type={isPassword && !showPassword ? "password" : "text"}
             placeholder={placeholder}
             value={value || ""}
             onChange={handleChange(fieldName)}
             readOnly={!isEditing}
-            className={`${isEditing ? 'bg-secondary' : 'bg-background'} ${isConcealed ? 'font-mono' : ''} pr-10 border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background`}
+            className={`
+              ${isEditing ? 'bg-secondary' : 'bg-background'} 
+              ${isConcealed ? 'font-mono' : ''} 
+              ${!isEditing && value ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+              pr-10 border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background
+            `}
+            onClick={() => !isEditing && value && copyToClipboard(fieldName, value)}
           />
-          {!isEditing && (
+          {!isEditing && value && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button 
-                  type="button"
-                  onClick={() => copyToClipboard(fieldName, value || "")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                <div 
+                  className={`
+                    absolute right-3 top-1/2 transform -translate-y-1/2 
+                    text-muted-foreground hover:text-primary transition-all duration-200
+                    ${copiedField === fieldName ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                    cursor-pointer
+                  `}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard(fieldName, value);
+                  }}
                 >
                   {copiedField === fieldName ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
-                </button>
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>{copiedField === fieldName ? "Copied!" : "Copy to clipboard"}</p>
+              <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                <p>{copiedField === fieldName ? "Copied!" : "Click to copy"}</p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -287,38 +300,50 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       </div>
       <div className="px-6 py-4">
         <div className="space-y-6">
-          {/* Item name - kept at the top */}
+          {/* Item name - kept at the top but improved */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Item name</label>
             <div className="flex gap-3">
               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-secondary">
                 {getIcon()}
               </div>
-              <div className="relative w-full">
+              <div className="relative w-full group">
                 <Input 
                   placeholder="Enter item name" 
-                  className={`${isEditing ? 'bg-secondary' : 'bg-background'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10`}
+                  className={`
+                    ${isEditing ? 'bg-secondary' : 'bg-background'} 
+                    ${!isEditing ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
+                    border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10
+                  `}
                   value={formData.title}
                   onChange={handleChange('title')}
                   readOnly={!isEditing}
+                  onClick={() => !isEditing && copyToClipboard('title', formData.title)}
                 />
                 {!isEditing && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button 
-                        type="button"
-                        onClick={() => copyToClipboard('title', formData.title)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      <div 
+                        className={`
+                          absolute right-3 top-1/2 transform -translate-y-1/2 
+                          text-muted-foreground hover:text-primary transition-all duration-200
+                          ${copiedField === 'title' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                          cursor-pointer
+                        `}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyToClipboard('title', formData.title);
+                        }}
                       >
                         {copiedField === 'title' ? (
                           <Check className="h-4 w-4 text-green-500" />
                         ) : (
                           <Copy className="h-4 w-4" />
                         )}
-                      </button>
+                      </div>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{copiedField === 'title' ? "Copied!" : "Copy to clipboard"}</p>
+                    <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                      <p>{copiedField === 'title' ? "Copied!" : "Click to copy"}</p>
                     </TooltipContent>
                   </Tooltip>
                 )}
@@ -379,35 +404,47 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
             />
           )}
 
-          {/* Notes field if available */}
-          {formData.notes !== undefined && (
+          {/* Notes field with improved design - only show for non-memo types */}
+          {formData.notes !== undefined && formData.type !== "memo" && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Notes</label>
-              <div className="relative">
+              <div className="relative group">
                 <Textarea
                   placeholder="Add notes..."
                   value={formData.notes || ""}
                   onChange={handleChange('notes')}
                   readOnly={!isEditing}
-                  className={`${isEditing ? 'bg-secondary' : 'bg-background'} min-h-[100px] border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10`}
+                  className={`
+                    ${isEditing ? 'bg-secondary' : 'bg-background'} 
+                    ${!isEditing && formData.notes ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+                    min-h-[100px] border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10
+                  `}
+                  onClick={() => !isEditing && formData.notes && copyToClipboard('notes', formData.notes)}
                 />
                 {!isEditing && formData.notes && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button 
-                        type="button"
-                        onClick={() => copyToClipboard('notes', formData.notes || "")}
-                        className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                      <div
+                        className={`
+                          absolute right-3 top-3 
+                          text-muted-foreground hover:text-primary transition-all duration-200
+                          ${copiedField === 'notes' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                          cursor-pointer
+                        `}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyToClipboard('notes', formData.notes || "");
+                        }}
                       >
                         {copiedField === 'notes' ? (
                           <Check className="h-4 w-4 text-green-500" />
                         ) : (
                           <Copy className="h-4 w-4" />
                         )}
-                      </button>
+                      </div>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{copiedField === 'notes' ? "Copied!" : "Copy to clipboard"}</p>
+                    <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                      <p>{copiedField === 'notes' ? "Copied!" : "Click to copy"}</p>
                     </TooltipContent>
                   </Tooltip>
                 )}

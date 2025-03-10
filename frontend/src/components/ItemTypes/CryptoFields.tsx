@@ -39,31 +39,41 @@ export function CryptoFields({
     <>
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Wallet Address</label>
-        <div className="relative">
+        <div className="relative group">
           <Input
             placeholder="Enter wallet address"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10`}
+            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
+              ${!isEditing && formData.walletAddress ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
+              border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10`}
             value={formData.walletAddress}
             onChange={handleChange('walletAddress')}
             readOnly={!isEditing}
+            onClick={() => !isEditing && formData.walletAddress && copyToClipboard('walletAddress', formData.walletAddress)}
           />
-          {!isEditing && (
+          {!isEditing && formData.walletAddress && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button 
-                  type="button"
-                  onClick={() => copyToClipboard('walletAddress', formData.walletAddress)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                <div 
+                  className={`
+                    absolute right-3 top-1/2 transform -translate-y-1/2 
+                    text-muted-foreground hover:text-primary transition-all duration-200
+                    ${copiedField === 'walletAddress' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                    cursor-pointer
+                  `}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard('walletAddress', formData.walletAddress);
+                  }}
                 >
                   {copiedField === 'walletAddress' ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
-                </button>
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>{copiedField === 'walletAddress' ? "Copied!" : "Copy to clipboard"}</p>
+              <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                <p>{copiedField === 'walletAddress' ? "Copied!" : "Click to copy"}</p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -72,7 +82,7 @@ export function CryptoFields({
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Password</label>
-        <div className="relative">
+        <div className="relative group">
           <PasswordInput 
             placeholder="Enter password"
             value={formData.password || ''}
@@ -81,25 +91,33 @@ export function CryptoFields({
             showPassword={showPassword}
             onPasswordVisibilityChange={setShowPassword}
             onPasswordFocus={handleFieldFocus}
-            className="font-mono"
+            className={`font-mono ${!isEditing && formData.password ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
+            onClick={() => !isEditing && formData.password && copyToClipboard('password', formData.password)}
           />
           {!isEditing && formData.password && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button 
-                  type="button"
-                  onClick={() => copyToClipboard('password', formData.password || "")}
-                  className="absolute right-10 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                <div 
+                  className={`
+                    absolute right-10 top-1/2 transform -translate-y-1/2 
+                    text-muted-foreground hover:text-primary transition-all duration-200
+                    ${copiedField === 'password' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                    cursor-pointer
+                  `}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard('password', formData.password || "");
+                  }}
                 >
                   {copiedField === 'password' ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
-                </button>
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>{copiedField === 'password' ? "Copied!" : "Copy to clipboard"}</p>
+              <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                <p>{copiedField === 'password' ? "Copied!" : "Click to copy"}</p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -108,10 +126,12 @@ export function CryptoFields({
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Recovery Phrase</label>
-        <div className="relative">
+        <div className="relative group">
           <Textarea
             placeholder="Enter recovery phrase"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10 min-h-[80px]`}
+            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
+              ${!isEditing && formData.recoveryPhrase ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
+              border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10 min-h-[80px]`}
             value={formData.recoveryPhrase || ''}
             onChange={handleChange('recoveryPhrase')}
             style={{ 
@@ -124,24 +144,26 @@ export function CryptoFields({
               }
             }}
             readOnly={!isEditing}
+            onClick={() => !isEditing && formData.recoveryPhrase && copyToClipboard('recoveryPhrase', formData.recoveryPhrase)}
           />
           {!isEditing && formData.recoveryPhrase && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button 
-                  type="button"
+                <div 
+                  className="absolute right-10 top-3 
+                    text-muted-foreground hover:text-primary transition-colors
+                    opacity-70 group-hover:opacity-100 cursor-pointer"
                   onClick={() => copyToClipboard('recoveryPhrase', formData.recoveryPhrase)}
-                  className="absolute right-10 top-3 text-muted-foreground hover:text-foreground"
                 >
                   {copiedField === 'recoveryPhrase' ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
-                </button>
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>{copiedField === 'recoveryPhrase' ? "Copied!" : "Copy to clipboard"}</p>
+              <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                <p>{copiedField === 'recoveryPhrase' ? "Copied!" : "Click to copy"}</p>
               </TooltipContent>
             </Tooltip>
           )}

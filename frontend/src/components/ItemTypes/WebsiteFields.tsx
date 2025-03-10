@@ -68,32 +68,44 @@ export function WebsiteFields({
   }) => (
     <div className="space-y-2">
       <label className="text-sm font-medium text-muted-foreground">{label}</label>
-      <div className="relative">
+      <div className="relative group">
         <Input
           type={type}
           placeholder={placeholder}
-          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10`}
+          className={`
+            ${!isEditing ? 'bg-background' : 'bg-secondary'}
+            ${!isEditing && value ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+            border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10
+          `}
           value={value || ''}
           onChange={handleChange(fieldName)}
           readOnly={!isEditing}
+          onClick={() => !isEditing && value && copyToClipboard(fieldName, value)}
         />
         {!isEditing && value && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
-                type="button"
-                onClick={() => copyToClipboard(fieldName, value)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              <div 
+                className={`
+                  absolute right-3 top-1/2 transform -translate-y-1/2 
+                  text-muted-foreground hover:text-primary transition-all duration-200
+                  ${copiedField === fieldName ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                  cursor-pointer
+                `}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(fieldName, value);
+                }}
               >
                 {copiedField === fieldName ? (
                   <Check className="h-4 w-4 text-green-500" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
-              </button>
+              </div>
             </TooltipTrigger>
-            <TooltipContent>
-              <p>{copiedField === fieldName ? "Copied!" : "Copy to clipboard"}</p>
+            <TooltipContent side="left" className="bg-primary text-primary-foreground">
+              <p>{copiedField === fieldName ? "Copied!" : "Click to copy"}</p>
             </TooltipContent>
           </Tooltip>
         )}
@@ -104,67 +116,78 @@ export function WebsiteFields({
   return (
     <>
       <CopyableInput
-      label="Username"
-      value={formData.username}
-      fieldName="username"
-      placeholder="Enter username"
+        label="Username"
+        value={formData.username}
+        fieldName="username"
+        placeholder="Enter username"
       />
 
       <CopyableInput
-      label="Email"
-      value={formData.email}
-      fieldName="email"
-      placeholder="Enter email"
-      type="email"
+        label="Email"
+        value={formData.email}
+        fieldName="email"
+        placeholder="Enter email"
+        type="email"
       />
 
       <div className="space-y-2 relative">
-      <label className="text-sm font-medium text-muted-foreground">Password</label>
-      <div className="relative">
-        <PasswordInput 
-        placeholder="Enter password"
-        value={formData.password || ''}
-        onChange={handlePasswordChange}
-        onFocus={handlePasswordFocus}
-        isEditing={isEditing}
-        showPassword={showPassword}
-        onPasswordVisibilityChange={setShowPassword}
-        />
-        {!isEditing && formData.password && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-          <button 
-            type="button"
-            onClick={() => copyToClipboard('password', formData.password || "")}
-            className="absolute right-10 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {copiedField === 'password' ? (
-            <Check className="h-4 w-4 text-green-500" />
-            ) : (
-            <Copy className="h-4 w-4" />
-            )}
-          </button>
-          </TooltipTrigger>
-          <TooltipContent>
-          <p>{copiedField === 'password' ? "Copied!" : "Copy to clipboard"}</p>
-          </TooltipContent>
-        </Tooltip>
-        )}
-        {showGenerator && isEditing && (
-        <InlinePasswordGenerator 
-          onGenerate={handleGeneratePassword}
-          onClose={() => setShowGenerator(false)}
-        />
-        )}
-      </div>
+        <label className="text-sm font-medium text-muted-foreground">Password</label>
+        <div className="relative group">
+          <PasswordInput 
+            placeholder="Enter password"
+            value={formData.password || ''}
+            onChange={handlePasswordChange}
+            onFocus={handlePasswordFocus}
+            isEditing={isEditing}
+            showPassword={showPassword}
+            onPasswordVisibilityChange={setShowPassword}
+            className={`
+              ${!isEditing && formData.password ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
+            `}
+            onClick={() => !isEditing && formData.password && copyToClipboard('password', formData.password)}
+          />
+          {!isEditing && formData.password && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div 
+                  className={`
+                    absolute right-10 top-1/2 transform -translate-y-1/2 
+                    text-muted-foreground hover:text-primary transition-all duration-200
+                    ${copiedField === 'password' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                    cursor-pointer
+                  `}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard('password', formData.password || "");
+                  }}
+                >
+                  {copiedField === 'password' ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                <p>{copiedField === 'password' ? "Copied!" : "Click to copy"}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+          {showGenerator && isEditing && (
+            <InlinePasswordGenerator 
+              onGenerate={handleGeneratePassword}
+              onClose={() => setShowGenerator(false)}
+            />
+          )}
+        </div>
       </div>
 
       {/* URL field with copy functionality */}
       <CopyableInput
-      label="URL"
-      value={formData.website}
-      fieldName="website"
-      placeholder="Enter website URL"
+        label="URL"
+        value={formData.website}
+        fieldName="website"
+        placeholder="Enter website URL"
       />
     </>
   );

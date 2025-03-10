@@ -143,15 +143,22 @@ export function PasswordList({
                     </div>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
+                {/* Replace Button with div */}
+                <div
+                  role="button"
+                  tabIndex={0}
                   className={`h-7 w-7 absolute right-2.5 top-1/2 -translate-y-1/2
-                    transition-opacity duration-200 
+                    transition-opacity duration-200 rounded-md flex items-center justify-center
                     ${entry.isBookmarked 
                       ? 'hover:bg-primary/10' 
                       : 'opacity-0 group-hover:opacity-100 hover:bg-secondary'}`}
                   onClick={toggleBookmark(entry.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleBookmark(entry.id)(e as unknown as React.MouseEvent);
+                    }
+                  }}
                 >
                   <Bookmark 
                     className={`h-4 w-4 transition-colors duration-200
@@ -159,7 +166,7 @@ export function PasswordList({
                         ? 'text-primary fill-primary hover:text-primary/90 hover:fill-primary/90' 
                         : 'text-muted-foreground/50 hover:text-primary/60'}`}
                   />
-                </Button>
+                </div>
               </div>
             </Button>
           ))}

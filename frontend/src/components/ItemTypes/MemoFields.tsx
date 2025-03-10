@@ -22,31 +22,43 @@ export function MemoFields({
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-muted-foreground">Notes</label>
-      <div className="relative">
+      <div className="relative group">
         <Textarea
           placeholder="Enter secure notes"
-          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[200px] pr-10`}
+          className={`
+            ${!isEditing ? 'bg-background' : 'bg-secondary'}
+            ${!isEditing && formData.notes ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+            border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[200px] pr-10
+          `}
           value={formData.notes || ''}
           onChange={handleChange('notes')}
           readOnly={!isEditing}
+          onClick={() => !isEditing && formData.notes && copyToClipboard('notes', formData.notes)}
         />
         {!isEditing && formData.notes && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
-                type="button"
-                onClick={() => copyToClipboard('notes', formData.notes || "")}
-                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+              <div
+                className={`
+                  absolute right-3 top-3 
+                  text-muted-foreground hover:text-primary transition-all duration-200
+                  ${copiedField === 'notes' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                  cursor-pointer
+                `}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard('notes', formData.notes || "");
+                }}
               >
                 {copiedField === 'notes' ? (
                   <Check className="h-4 w-4 text-green-500" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
-              </button>
+              </div>
             </TooltipTrigger>
-            <TooltipContent>
-              <p>{copiedField === 'notes' ? "Copied!" : "Copy to clipboard"}</p>
+            <TooltipContent side="left" className="bg-primary text-primary-foreground">
+              <p>{copiedField === 'notes' ? "Copied!" : "Click to copy"}</p>
             </TooltipContent>
           </Tooltip>
         )}

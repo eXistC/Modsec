@@ -39,32 +39,44 @@ export function IdentityFields({
   }) => (
     <div className="space-y-2">
       <label className="text-sm font-medium text-muted-foreground">{label}</label>
-      <div className="relative">
+      <div className="relative group">
         <Input
           type={type}
           placeholder={placeholder}
-          className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10 ${className}`}
+          className={`
+            ${!isEditing ? 'bg-background' : 'bg-secondary'} 
+            ${!isEditing && value ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+            border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10 ${className}
+          `}
           value={value || ''}
           onChange={handleChange(fieldName)}
           readOnly={!isEditing}
+          onClick={() => !isEditing && value && copyToClipboard(fieldName, value)}
         />
         {!isEditing && value && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
-                type="button"
-                onClick={() => copyToClipboard(fieldName, value)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              <div 
+                className={`
+                  absolute right-3 top-1/2 transform -translate-y-1/2 
+                  text-muted-foreground hover:text-primary transition-all duration-200
+                  ${copiedField === fieldName ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                  cursor-pointer
+                `}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(fieldName, value);
+                }}
               >
                 {copiedField === fieldName ? (
                   <Check className="h-4 w-4 text-green-500" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
-              </button>
+              </div>
             </TooltipTrigger>
-            <TooltipContent>
-              <p>{copiedField === fieldName ? "Copied!" : "Copy to clipboard"}</p>
+            <TooltipContent side="left" className="bg-primary text-primary-foreground">
+              <p>{copiedField === fieldName ? "Copied!" : "Click to copy"}</p>
             </TooltipContent>
           </Tooltip>
         )}
@@ -114,13 +126,17 @@ export function IdentityFields({
         />
         <div className="space-y-2">
           <label className="text-sm font-medium text-muted-foreground">Gender</label>
-          <div className="relative">
+          <div className="relative group">
             <Select 
               disabled={!isEditing}
               value={formData.gender}
               onValueChange={(value) => handleChange('gender')({ target: { value } } as any)}
             >
-              <SelectTrigger className={`${!isEditing ? 'bg-background' : 'bg-secondary'} pr-10`}>
+              <SelectTrigger className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
+                ${!isEditing && formData.gender ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
+                pr-10`}
+                onClick={() => !isEditing && formData.gender && copyToClipboard('gender', formData.gender)}
+              >
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -132,20 +148,27 @@ export function IdentityFields({
             {!isEditing && formData.gender && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button 
-                    type="button"
-                    onClick={() => copyToClipboard('gender', formData.gender)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  <div 
+                    className={`
+                      absolute right-3 top-1/2 transform -translate-y-1/2 
+                      text-muted-foreground hover:text-primary transition-all duration-200
+                      ${copiedField === 'gender' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                      cursor-pointer
+                    `}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard('gender', formData.gender);
+                    }}
                   >
                     {copiedField === 'gender' ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
-                  </button>
+                  </div>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>{copiedField === 'gender' ? "Copied!" : "Copy to clipboard"}</p>
+                <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                  <p>{copiedField === 'gender' ? "Copied!" : "Click to copy"}</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -170,31 +193,43 @@ export function IdentityFields({
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Address</label>
-        <div className="relative">
+        <div className="relative group">
           <Textarea
             placeholder="Enter address"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[80px] pr-10`}
+            className={`
+              ${!isEditing ? 'bg-background' : 'bg-secondary'} 
+              ${!isEditing && formData.address ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+              border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[80px] pr-10
+            `}
             value={formData.address || ''}
             onChange={handleChange('address')}
             readOnly={!isEditing}
+            onClick={() => !isEditing && formData.address && copyToClipboard('address', formData.address)}
           />
           {!isEditing && formData.address && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button 
-                  type="button"
-                  onClick={() => copyToClipboard('address', formData.address)}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                <div 
+                  className={`
+                    absolute right-3 top-3 
+                    text-muted-foreground hover:text-primary transition-all duration-200
+                    ${copiedField === 'address' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                    cursor-pointer
+                  `}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard('address', formData.address);
+                  }}
                 >
                   {copiedField === 'address' ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
-                </button>
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>{copiedField === 'address' ? "Copied!" : "Copy to clipboard"}</p>
+              <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                <p>{copiedField === 'address' ? "Copied!" : "Click to copy"}</p>
               </TooltipContent>
             </Tooltip>
           )}

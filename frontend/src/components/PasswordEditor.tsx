@@ -113,16 +113,16 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       // Show toast notification
       const fieldLabel = getFieldLabel(field);
       toast({
-        title: "Copied to clipboard",
-        description: `${fieldLabel} has been copied to your clipboard.`,
+        title: `Copied ${fieldLabel.toLowerCase()}`,
+        description: null, // Remove description for a cleaner notification
         variant: "default",
-        duration: 3000,
+        duration: 2000, // Shortened duration for less intrusion
       });
     }).catch(err => {
       console.error('Copy failed:', err);
       toast({
         title: "Copy failed",
-        description: "Could not copy to clipboard. Please try again.",
+        description: "Could not copy to clipboard.",
         variant: "destructive"
       });
     });

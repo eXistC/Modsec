@@ -6,6 +6,7 @@ import { useState } from "react";
 import { IdentityEntry, PasswordEntry, PasswordType } from "@/types/password";
 import { NewItemTypeOverlay } from "./Overlays/NewItemTypeOverlay";
 import { NewItemCreateOverlay } from "./Overlays/NewItemCreateOverlay";
+import { useColorSettings } from "@/context/ColorSettingsContext";
 
 // Export the interface separately
 export interface PasswordListProps {
@@ -52,6 +53,7 @@ export function PasswordList({
   const [searchQuery, setSearchQuery] = useState("");
   const [showTypeOverlay, setShowTypeOverlay] = useState(false);
   const [selectedType, setSelectedType] = useState<PasswordType | null>(null);
+  const { colors } = useColorSettings();
 
   const toggleBookmark = (id: string) => (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -86,6 +88,38 @@ export function PasswordList({
     console.log("New item created:", entry);
     setSelectedType(null);
     // You might want to add the new item to the passwords list here
+  };
+
+  const getIconStyle = (type: string): React.CSSProperties => {
+    switch (type) {
+      case "website":
+        return { 
+          backgroundColor: `${colors.website}20`, // 20 is hex for 12% opacity
+          color: colors.website 
+        };
+      case "identity":
+        return { 
+          backgroundColor: `${colors.identity}20`,
+          color: colors.identity 
+        };
+      case "card":
+        return { 
+          backgroundColor: `${colors.card}20`,
+          color: colors.card
+        };
+      case "crypto":
+        return { 
+          backgroundColor: `${colors.crypto}20`,
+          color: colors.crypto 
+        };
+      case "memo":
+        return { 
+          backgroundColor: `${colors.memo}20`,
+          color: colors.memo 
+        };
+      default:
+        return { color: 'var(--muted-foreground)' };
+    }
   };
 
   return (
@@ -126,29 +160,13 @@ export function PasswordList({
               onClick={() => onSelectPassword?.(entry)}
             >
               <div className="flex items-center gap-3 w-full min-h-[36px]">
-                <div className={`
-                  flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg
-                  ${entry.type === "website" ? "bg-blue-500/10" : ""}
-                  ${entry.type === "identity" ? "bg-green-500/10" : ""}
-                  ${entry.type === "card" ? "bg-purple-500/10" : ""}
-                  ${entry.type === "crypto" ? "bg-amber-500/10" : ""}
-                  ${entry.type === "memo" ? "bg-slate-500/10" : ""}
-                `}>
-                  {entry.type === "website" && (
-                    <Globe className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
-                  )}
-                  {entry.type === "identity" && (
-                    <User className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
-                  )}
-                  {entry.type === "card" && (
-                    <CreditCard className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
-                  )}
-                  {entry.type === "crypto" && (
-                    <Wallet className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
-                  )}
-                  {entry.type === "memo" && (
-                    <File className={`h-[18px] w-[18px] ${getIconColorClass(entry.type)}`} />
-                  )}
+                <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg"
+                     style={getIconStyle(entry.type)}>
+                  {entry.type === "website" && <Globe className="h-[18px] w-[18px]" />}
+                  {entry.type === "identity" && <User className="h-[18px] w-[18px]" />}
+                  {entry.type === "card" && <CreditCard className="h-[18px] w-[18px]" />}
+                  {entry.type === "crypto" && <Wallet className="h-[18px] w-[18px]" />}
+                  {entry.type === "memo" && <File className="h-[18px] w-[18px]" />}
                 </div>
                 <div className="text-left flex-1 min-w-0">
                   <div className="font-medium text-sm truncate pr-8">{entry.title}</div>

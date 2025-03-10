@@ -7,6 +7,7 @@ import { PasswordManager } from "./PasswordManager";
 import { PasswordGenerator } from "./Generators/PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
 import { PasswordEntry } from "@/types/password";
+import { ColorSettingsProvider } from "@/context/ColorSettingsContext";
 
 export function Layout() {
   const { isAuthenticated, login, register } = useAuth();
@@ -35,52 +36,51 @@ export function Layout() {
     }
   };
 
-  // Show authentication pages if not authenticated
-  if (!isAuthenticated) {
-    if (showRegister) {
-      return (
-        <RegisterPage 
-          onRegister={handleRegister}
-          onLoginClick={() => setShowRegister(false)}
-        />
-      );
-    }
-    return (
-      <LoginPage 
-        onLogin={handleLogin}
-        onRegisterClick={() => setShowRegister(true)}
-      />
-    );
-  }
-
-  // Show main application layout when authenticated
   return (
-    <div className="h-screen bg-[#1E1E1E]">
-      <div className="grid h-full md:grid-cols-[240px_280px_1fr]">
-        <Sidebar 
-          currentView={currentView} 
-          onViewChange={setCurrentView} 
-        />
-        <div className="border-r border-border">
-          {currentView === "generator" ? (
-            <PasswordGenerator />
-          ) : (
-            <PasswordManager 
-              currentView={currentView}
-              onSelectPassword={handleSelectPassword}
-              selectedPassword={selectedPassword}
+    <ColorSettingsProvider>
+      {!isAuthenticated ? (
+        // Authentication UI
+        showRegister ? (
+          <RegisterPage 
+            onRegister={handleRegister}
+            onLoginClick={() => setShowRegister(false)}
+          />
+        ) : (
+          <LoginPage 
+            onLogin={handleLogin}
+            onRegisterClick={() => setShowRegister(true)}
+          />
+        )
+      ) : (
+        // Main application UI
+        <div className="h-screen bg-[#1E1E1E]">
+          <div className="grid h-full md:grid-cols-[240px_280px_1fr]">
+            <Sidebar 
+              currentView={currentView} 
+              onViewChange={setCurrentView} 
             />
-          )}
+            <div className="border-r border-border">
+              {currentView === "generator" ? (
+                <PasswordGenerator />
+              ) : (
+                <PasswordManager 
+                  currentView={currentView}
+                  onSelectPassword={handleSelectPassword}
+                  selectedPassword={selectedPassword}
+                />
+              )}
+            </div>
+            <div className="border-0 border-border">
+              {selectedPassword && (
+                <PasswordEditor
+                  password={selectedPassword}
+                  isOpen={true}
+                />
+              )}
+            </div>
+          </div>
         </div>
-        <div className="border-0 border-border">
-          {selectedPassword && (
-            <PasswordEditor
-              password={selectedPassword}
-              isOpen={true}
-            />
-          )}
-        </div>
-      </div>
-    </div>
+      )}
+    </ColorSettingsProvider>
   );
 }

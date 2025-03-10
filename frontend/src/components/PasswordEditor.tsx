@@ -15,7 +15,7 @@ import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { calculateCategoryCounts } from "@/data/mockPasswords";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
-
+import { useColorSettings } from "@/context/ColorSettingsContext";
 
 interface PasswordEditorProps {
   password: PasswordEntry;
@@ -27,6 +27,7 @@ const NO_CATEGORY = "uncategorized";
 
 export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const { toast } = useToast();
+  const { getIconBackgroundClass } = useColorSettings();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<PasswordEntry & { category?: string | null }>(password);
   const [showPassword, setShowPassword] = useState(false);
@@ -167,20 +168,39 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   };
 
   // Helper function to determine icon background color based on entry type
-  const getIconBackgroundClass = (type: string): string => {
+  const getIconBackgroundStyle = (type: string): React.CSSProperties => {
+    const { colors } = useColorSettings();
     switch (type) {
       case "website":
-        return "bg-blue-500/10 text-blue-500";
+        return { 
+          backgroundColor: `${colors.website}20`, // 20 is hex for 12% opacity
+          color: colors.website 
+        };
       case "identity":
-        return "bg-green-500/10 text-green-500";
+        return { 
+          backgroundColor: `${colors.identity}20`,
+          color: colors.identity
+        };
       case "card":
-        return "bg-purple-500/10 text-purple-500";
+        return { 
+          backgroundColor: `${colors.card}20`,
+          color: colors.card
+        };
       case "crypto":
-        return "bg-amber-500/10 text-amber-500";
+        return { 
+          backgroundColor: `${colors.crypto}20`,
+          color: colors.crypto
+        };
       case "memo":
-        return "bg-slate-500/10 text-slate-500";
+        return { 
+          backgroundColor: `${colors.memo}20`,
+          color: colors.memo
+        };
       default:
-        return "bg-secondary/60";
+        return { 
+          backgroundColor: 'var(--secondary)', 
+          opacity: 0.6 
+        };
     }
   };
 
@@ -339,11 +359,8 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
           {/* Item name - enhanced with stylish icon and typography */}
           <div className="space-y-3">
             <div className="flex gap-4 items-center">
-              <div className={`
-                flex items-center justify-center h-12 w-12 rounded-xl 
-                ${getIconBackgroundClass(formData.type)} 
-                shadow-sm
-              `}>
+              <div className="flex items-center justify-center h-12 w-12 rounded-xl shadow-sm"
+                   style={getIconBackgroundStyle(formData.type)}>
                 {getStyledIcon()}
               </div>
               <div className="relative w-full">

@@ -1,31 +1,53 @@
 import { Button } from "@/components/ui/button";
 import { Globe, User, CreditCard, Wallet, File, X } from "lucide-react";
 import { PasswordType } from "@/types/password";
+import { useColorSettings } from "@/context/ColorSettingsContext";
 
 interface NewItemTypeOverlayProps {
   onSelect: (type: PasswordType) => void;
   onClose: () => void;
 }
 
-// Helper function to determine icon background color based on entry type
-const getIconBackgroundClass = (type: string): string => {
-  switch (type) {
-    case "website":
-      return "bg-blue-500/10 text-blue-500";
-    case "identity":
-      return "bg-green-500/10 text-green-500";
-    case "card":
-      return "bg-purple-500/10 text-purple-500";
-    case "crypto":
-      return "bg-amber-500/10 text-amber-500";
-    case "memo":
-      return "bg-slate-500/10 text-slate-500";
-    default:
-      return "bg-secondary/60 text-muted-foreground";
-  }
-};
-
 export function NewItemTypeOverlay({ onSelect, onClose }: NewItemTypeOverlayProps) {
+  // Use the color settings from context instead of hardcoded values
+  const { colors } = useColorSettings();
+
+  // Updated helper function to determine icon background and text color
+  const getIconStyle = (type: string): React.CSSProperties => {
+    switch (type) {
+      case "website":
+        return { 
+          backgroundColor: `${colors.website}20`, // 20 is hex for 12% opacity
+          color: colors.website 
+        };
+      case "identity":
+        return { 
+          backgroundColor: `${colors.identity}20`,
+          color: colors.identity
+        };
+      case "card":
+        return { 
+          backgroundColor: `${colors.card}20`,
+          color: colors.card
+        };
+      case "crypto":
+        return { 
+          backgroundColor: `${colors.crypto}20`,
+          color: colors.crypto
+        };
+      case "memo":
+        return { 
+          backgroundColor: `${colors.memo}20`,
+          color: colors.memo
+        };
+      default:
+        return { 
+          backgroundColor: 'var(--secondary)', 
+          opacity: 0.6 
+        };
+    }
+  };
+
   const types = [
     { type: "website" as PasswordType, icon: Globe, label: "Website", description: "Store login credentials for websites" },
     { type: "identity" as PasswordType, icon: User, label: "Identity", description: "Save personal identification details" },
@@ -64,12 +86,8 @@ export function NewItemTypeOverlay({ onSelect, onClose }: NewItemTypeOverlayProp
                 onClick={() => onSelect(type)}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`
-                    rounded-lg p-2.5 
-                    ${getIconBackgroundClass(type)} 
-                    group-hover:bg-opacity-20 transition-all duration-200
-                    shadow-sm
-                  `}>
+                  <div className="rounded-lg p-2.5 shadow-sm group-hover:bg-opacity-20 transition-all duration-200"
+                       style={getIconStyle(type)}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="flex flex-col items-start">

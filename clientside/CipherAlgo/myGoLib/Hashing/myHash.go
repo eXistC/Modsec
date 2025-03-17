@@ -65,10 +65,9 @@ func PBKDF2Function_modified(password, salt []byte, iterations int) []byte {
 	// Output as byte
 
 	//loop sha256 for iterations
-	for i := range iterations {
+	for i := 0; i < iterations; i++ {
 		combined := append(password, salt...)
 		password = SHA256Function(combined)
-		i++
 	}
 	// Return the key as a base64 string
 	return password

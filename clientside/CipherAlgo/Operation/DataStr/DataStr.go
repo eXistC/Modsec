@@ -11,4 +11,6 @@ type ResData struct {
 
 type LoginData struct {
 	EncryptedHp1_HpR string `json:"encrypted_hp1_hpr"`
+	PackHqT          string `json:"pack_hqt"`
+	EmailHash        string `json:"email_hash"`
 }

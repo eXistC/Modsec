@@ -1,13 +1,21 @@
 package main
 
 import (
+	"Modsec/clientside/CipherAlgo/Operation/DataStr"
+	myConvert "Modsec/clientside/CipherAlgo/utils"
+	myEncrypt "Modsec/clientside/CipherAlgo/utils"
+	myGenVal "Modsec/clientside/CipherAlgo/utils"
+	myHash "Modsec/clientside/CipherAlgo/utils"
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
 	"strings"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -146,51 +154,97 @@ func (a *App) DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte
 	return plaintext, nil
 }
 
-// 	var myPassword string = "Whatsup"
-// 	var myEmail string = "soMeth!ng@email.com"
-// 	var myMessage string = "Something wong"
-// 	fmt.Println("Test password:", myPassword)
-// 	fmt.Println("Test Email:", myEmail)
-// 	fmt.Println("Test Message", myMessage)
-// 	// Creating Master key which is 32 byte(256) for AES256
-// 	MasterKey := PBKDF2Function(myPassword, string(emailToSHA256(myEmail)), 1, 32)
-// 	fmt.Println("Master key: 256 bits", MasterKey)
+// RegisterUser handles the user registration process
+func (a *App) RegisterUser(email string, password string) (bool, error) {
+	log.Println("Registration attempt for email:", email)
 
-// 	// Creating Streact email hash with SHA256
-// 	StreschEmailHash := emailToSHA256(myEmail)
-// 	fmt.Println("StreschEmailHash:", StreschEmailHash)
+	// Generate master key from password
+	masterKey := myHash.MasterPasswordGen(password)
 
-// 	// Creating Session key which is 32 byte(256) for AES256
-// 	sessionKey, err := generateSessionKey()
-// 	if err != nil {
-// 		fmt.Println("Error generating session key:", err)
-// 		return
-// 	}
-// 	fmt.Println("Session Key (byte) 256 bits:", sessionKey)
+	// Generate Sandwich hash for registration
+	answer, iterations := myHash.SandwichRegisOP(password, email)
 
-// 	// Creating IV for AES256 which is 12 byte(96)
-// 	iv, err := generateIV()
-// 	if err != nil {
-// 		fmt.Println("Error generating IV:", err)
-// 		return
-// 	}
-// 	fmt.Println("IV (byte) 96 bits:", iv)
+	// Convert byte arrays to base64 strings
+	baseAnswer := make([]string, 0, len(answer))
+	for _, b := range answer {
+		baseAnswer = append(baseAnswer, myConvert.BytToBa64(b))
+	}
 
-// 	//AES Encrypting
-// 	Plaintext := []byte(myMessage)
-// 	Ciphertext, err := encryptAES256GCM(Plaintext, sessionKey, iv)
-// 	if err != nil {
-// 		fmt.Println("Error Encrpyting AES", err)
-// 		return
-// 	}
-// 	Translate := hex.EncodeToString(Ciphertext[:])
-// 	fmt.Println("Transgender: ", Translate)
-// 	fmt.Println("Encrypting successful", Ciphertext)
-// 	//Decrypting
-// 	Deciphertext, err := decryptAES256GCM(Ciphertext, sessionKey, iv)
-// 	if err != nil {
-// 		fmt.Println("Error Encrpyting AES", err)
-// 		return
-// 	}
-// 	Translate = string(Deciphertext)
-// 	fmt.Println("Decrypting successful", Translate)
+	// Convert iterations to strings
+	iterationStrings := make([]string, len(iterations))
+	for i, num := range iterations {
+		iterationStrings[i] = strconv.Itoa(num)
+	}
+
+	// Join the arrays into strings with delimiters
+	hp1HpR := strings.Join(baseAnswer, "|")
+	iterationString := strings.Join(iterationStrings, "|")
+
+	// Generate initialization vector
+	iv, err := myGenVal.GenerateIV()
+	if err != nil {
+		log.Printf("Failed to generate IV: %v", err)
+		return false, err
+	}
+
+	// Generate session key
+	sessionKey, err := myGenVal.GenerateSessionKey()
+	if err != nil {
+		log.Printf("Failed to generate session key: %v", err)
+		return false, err
+	}
+
+	// Generate vault key
+	vaultKey, err := myGenVal.GenerateSessionKey()
+	if err != nil {
+		log.Printf("Failed to generate vault key: %v", err)
+		return false, err
+	}
+
+	// Encrypt Hp1-HpR with session key
+	encryptedHp1HpR, err := myEncrypt.EncryptAES256GCM(hp1HpR, sessionKey, iv)
+	if err != nil {
+		log.Printf("Failed to encrypt Hp1-HpR: %v", err)
+		return false, err
+	}
+
+	// Encrypt iterations with session key
+	encryptedIteration, err := myEncrypt.EncryptAES256GCM(iterationString, sessionKey, iv)
+	if err != nil {
+		log.Printf("Failed to encrypt iterations: %v", err)
+		return false, err
+	}
+
+	// Encrypt vault key with master key
+	protectedVaultKey, err := myEncrypt.EncryptAES256GCM(string(vaultKey), masterKey, iv)
+	if err != nil {
+		log.Printf("Failed to encrypt vault key: %v", err)
+		return false, err
+	}
+
+	// Create response data structure
+	resData := DataStr.ResData{
+		EncryptedHp1_HpR:   encryptedHp1HpR,
+		EncryptedIteration: encryptedIteration,
+		ProtectedVaultKey:  protectedVaultKey,
+		Email:              email,
+		IV:                 iv,
+		Sessionkey:         sessionKey,
+	}
+
+	// Serialize data to JSON
+	jsonResData, err := json.Marshal(resData)
+	if err != nil {
+		log.Printf("Failed to encode JSON: %v", err)
+		return false, err
+	}
+
+	// TODO: Send data to your backend server
+	// This would involve making an HTTP request to your registration endpoint
+	// For now, we'll just log it
+	log.Println("Registration data prepared:", string(jsonResData))
+
+	// Simulate successful registration
+	// In a real implementation, you would return the result from your API call
+	return true, nil
+}

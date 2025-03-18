@@ -15,4 +15,6 @@ export function Greet(arg1:string):Promise<string>;
 
 export function PBKDF2Function(arg1:string,arg2:string,arg3:number,arg4:number):Promise<string>;
 
+export function RegisterUser(arg1:string,arg2:string):Promise<boolean>;
+
 export function SimplePOC(arg1:string):Promise<void>;

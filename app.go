@@ -1,22 +1,17 @@
 package main
 
 import (
-	"Modsec/clientside/CipherAlgo/Operation/DataStr"
-	myConvert "Modsec/clientside/CipherAlgo/utils"
-	myEncrypt "Modsec/clientside/CipherAlgo/utils"
-	myGenVal "Modsec/clientside/CipherAlgo/utils"
-	myHash "Modsec/clientside/CipherAlgo/utils"
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
+
+	"Modsec/clientside/auth"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/pbkdf2"
@@ -36,6 +31,7 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	log.Println("ModSec application starting...")
 }
 
 func (a *App) Greet(name string) string {
@@ -156,95 +152,40 @@ func (a *App) DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte
 
 // RegisterUser handles the user registration process
 func (a *App) RegisterUser(email string, password string) (bool, error) {
-	log.Println("Registration attempt for email:", email)
-
-	// Generate master key from password
-	masterKey := myHash.MasterPasswordGen(password)
-
-	// Generate Sandwich hash for registration
-	answer, iterations := myHash.SandwichRegisOP(password, email)
-
-	// Convert byte arrays to base64 strings
-	baseAnswer := make([]string, 0, len(answer))
-	for _, b := range answer {
-		baseAnswer = append(baseAnswer, myConvert.BytToBa64(b))
+	// Validate input
+	if !auth.ValidateEmailFormat(email) {
+		return false, fmt.Errorf("invalid email format")
 	}
 
-	// Convert iterations to strings
-	iterationStrings := make([]string, len(iterations))
-	for i, num := range iterations {
-		iterationStrings[i] = strconv.Itoa(num)
+	valid, msg := auth.ValidatePasswordStrength(password)
+	if !valid {
+		return false, fmt.Errorf(msg)
 	}
 
-	// Join the arrays into strings with delimiters
-	hp1HpR := strings.Join(baseAnswer, "|")
-	iterationString := strings.Join(iterationStrings, "|")
+	// Call the modularized registration function
+	return auth.RegisterUser(email, password)
+}
 
-	// Generate initialization vector
-	iv, err := myGenVal.GenerateIV()
+// LoginUser handles the user login process
+func (a *App) LoginUser(email string, password string) (map[string]interface{}, error) {
+	// Validate input
+	if !auth.ValidateEmailFormat(email) {
+		return nil, fmt.Errorf("invalid email format")
+	}
+
+	// Call the modularized login function
+	response, err := auth.LoginUser(email, password)
 	if err != nil {
-		log.Printf("Failed to generate IV: %v", err)
-		return false, err
+		return nil, err
 	}
 
-	// Generate session key
-	sessionKey, err := myGenVal.GenerateSessionKey()
-	if err != nil {
-		log.Printf("Failed to generate session key: %v", err)
-		return false, err
+	// Convert to a map for frontend consumption
+	result := map[string]interface{}{
+		"success":        response.Success,
+		"message":        response.Message,
+		"sessionToken":   response.SessionToken,
+		"encryptedVault": response.EncryptedVault,
 	}
 
-	// Generate vault key
-	vaultKey, err := myGenVal.GenerateSessionKey()
-	if err != nil {
-		log.Printf("Failed to generate vault key: %v", err)
-		return false, err
-	}
-
-	// Encrypt Hp1-HpR with session key
-	encryptedHp1HpR, err := myEncrypt.EncryptAES256GCM(hp1HpR, sessionKey, iv)
-	if err != nil {
-		log.Printf("Failed to encrypt Hp1-HpR: %v", err)
-		return false, err
-	}
-
-	// Encrypt iterations with session key
-	encryptedIteration, err := myEncrypt.EncryptAES256GCM(iterationString, sessionKey, iv)
-	if err != nil {
-		log.Printf("Failed to encrypt iterations: %v", err)
-		return false, err
-	}
-
-	// Encrypt vault key with master key
-	protectedVaultKey, err := myEncrypt.EncryptAES256GCM(string(vaultKey), masterKey, iv)
-	if err != nil {
-		log.Printf("Failed to encrypt vault key: %v", err)
-		return false, err
-	}
-
-	// Create response data structure
-	resData := DataStr.ResData{
-		EncryptedHp1_HpR:   encryptedHp1HpR,
-		EncryptedIteration: encryptedIteration,
-		ProtectedVaultKey:  protectedVaultKey,
-		Email:              email,
-		IV:                 iv,
-		Sessionkey:         sessionKey,
-	}
-
-	// Serialize data to JSON
-	jsonResData, err := json.Marshal(resData)
-	if err != nil {
-		log.Printf("Failed to encode JSON: %v", err)
-		return false, err
-	}
-
-	// TODO: Send data to your backend server
-	// This would involve making an HTTP request to your registration endpoint
-	// For now, we'll just log it
-	log.Println("Registration data prepared:", string(jsonResData))
-
-	// Simulate successful registration
-	// In a real implementation, you would return the result from your API call
-	return true, nil
+	return result, nil
 }

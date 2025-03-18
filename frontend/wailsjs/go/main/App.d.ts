@@ -13,6 +13,8 @@ export function GenerateSessionKey():Promise<Array<number>>;
 
 export function Greet(arg1:string):Promise<string>;
 
+export function LoginUser(arg1:string,arg2:string):Promise<{[key: string]: any}>;
+
 export function PBKDF2Function(arg1:string,arg2:string,arg3:number,arg4:number):Promise<string>;
 
 export function RegisterUser(arg1:string,arg2:string):Promise<boolean>;

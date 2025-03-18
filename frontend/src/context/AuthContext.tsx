@@ -1,27 +1,57 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { RegisterUser } from '../../wailsjs/go/main/App';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (masterPassword: string) => Promise<void>;
-  register: (password: string) => Promise<void>;
+  login: (password: string) => Promise<void>;
+  register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
+  // ... other properties
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  login: async () => {},
+  register: async () => {},
+  logout: () => {},
+  // ... other properties
+});
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // ... other state variables
 
-  const login = async (masterPassword: string) => {
-    // Authentication logic here
-    await new Promise(resolve => setTimeout(resolve, 400)); // Simulated delay
-    setIsAuthenticated(true);
+  const login = async (password: string) => {
+    try {
+      // Your existing login logic
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
-  const register = async (password: string) => {
-    // Registration logic here
-    await new Promise(resolve => setTimeout(resolve, 400)); // Simulated delay
-    setIsAuthenticated(true);
+  const register = async (email: string, password: string, confirmPassword: string) => {
+    try {
+      // Check if passwords match
+      if (password !== confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+      
+      // Call the Go function to register the user
+      const success = await RegisterUser(email, password);
+      
+      if (success) {
+        // Auto-login after successful registration
+        setIsAuthenticated(true);
+        return;
+      } else {
+        throw new Error('Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
@@ -29,16 +59,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{
+      isAuthenticated,
+      login,
+      register,
+      logout,
+      // ... other properties
+    }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+export const useAuth = () => useContext(AuthContext);

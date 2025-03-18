@@ -8,7 +8,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"strings"
+
+	"Modsec/clientside/auth"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/pbkdf2"
@@ -28,6 +31,7 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	log.Println("ModSec application starting...")
 }
 
 func (a *App) Greet(name string) string {
@@ -146,51 +150,42 @@ func (a *App) DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte
 	return plaintext, nil
 }
 
-// 	var myPassword string = "Whatsup"
-// 	var myEmail string = "soMeth!ng@email.com"
-// 	var myMessage string = "Something wong"
-// 	fmt.Println("Test password:", myPassword)
-// 	fmt.Println("Test Email:", myEmail)
-// 	fmt.Println("Test Message", myMessage)
-// 	// Creating Master key which is 32 byte(256) for AES256
-// 	MasterKey := PBKDF2Function(myPassword, string(emailToSHA256(myEmail)), 1, 32)
-// 	fmt.Println("Master key: 256 bits", MasterKey)
+// RegisterUser handles the user registration process
+func (a *App) RegisterUser(email string, password string) (bool, error) {
+	// Validate input
+	if !auth.ValidateEmailFormat(email) {
+		return false, fmt.Errorf("invalid email format")
+	}
 
-// 	// Creating Streact email hash with SHA256
-// 	StreschEmailHash := emailToSHA256(myEmail)
-// 	fmt.Println("StreschEmailHash:", StreschEmailHash)
+	valid, msg := auth.ValidatePasswordStrength(password)
+	if !valid {
+		return false, fmt.Errorf(msg)
+	}
 
-// 	// Creating Session key which is 32 byte(256) for AES256
-// 	sessionKey, err := generateSessionKey()
-// 	if err != nil {
-// 		fmt.Println("Error generating session key:", err)
-// 		return
-// 	}
-// 	fmt.Println("Session Key (byte) 256 bits:", sessionKey)
+	// Call the modularized registration function
+	return auth.RegisterUser(email, password)
+}
 
-// 	// Creating IV for AES256 which is 12 byte(96)
-// 	iv, err := generateIV()
-// 	if err != nil {
-// 		fmt.Println("Error generating IV:", err)
-// 		return
-// 	}
-// 	fmt.Println("IV (byte) 96 bits:", iv)
+// LoginUser handles the user login process
+func (a *App) LoginUser(email string, password string) (map[string]interface{}, error) {
+	// Validate input
+	if !auth.ValidateEmailFormat(email) {
+		return nil, fmt.Errorf("invalid email format")
+	}
 
-// 	//AES Encrypting
-// 	Plaintext := []byte(myMessage)
-// 	Ciphertext, err := encryptAES256GCM(Plaintext, sessionKey, iv)
-// 	if err != nil {
-// 		fmt.Println("Error Encrpyting AES", err)
-// 		return
-// 	}
-// 	Translate := hex.EncodeToString(Ciphertext[:])
-// 	fmt.Println("Transgender: ", Translate)
-// 	fmt.Println("Encrypting successful", Ciphertext)
-// 	//Decrypting
-// 	Deciphertext, err := decryptAES256GCM(Ciphertext, sessionKey, iv)
-// 	if err != nil {
-// 		fmt.Println("Error Encrpyting AES", err)
-// 		return
-// 	}
-// 	Translate = string(Deciphertext)
-// 	fmt.Println("Decrypting successful", Translate)
+	// Call the modularized login function
+	response, err := auth.LoginUser(email, password)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert to a map for frontend consumption
+	result := map[string]interface{}{
+		"success":        response.Success,
+		"message":        response.Message,
+		"sessionToken":   response.SessionToken,
+		"encryptedVault": response.EncryptedVault,
+	}
+
+	return result, nil
+}

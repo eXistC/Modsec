@@ -14,7 +14,7 @@ func main() {
 	// Testing simpler Sanwich Registeration Operation
 	// I'm tired
 	fmt.Println("===== Begin Operation =====")
-	var myPassword string = "Whatsup"
+	var myPassword string = "12345678"
 	var myEmail string = "soMeth!ng@email.com"
 	var myMessage string = "Something wong"
 	fmt.Println("Test password:", myPassword)

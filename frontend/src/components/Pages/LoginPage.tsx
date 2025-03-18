@@ -4,13 +4,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { LockKeyhole, ArrowRightCircle, Check } from "lucide-react";
-import { group } from "console";
-import { text } from "stream/consumers";
 import { AnimatedCard } from "../ui/animated-card";
 
 interface LoginPageProps {
-  onLogin: (email: string, masterPassword: string) => void;
-  onRegisterClick: () => void; 
+  onLogin: (email: string, password: string) => void;
+  onRegisterClick: () => void;
 }
 
 export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
@@ -21,19 +19,22 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) return;
+    
     setIsLoggingIn(true);
-
+    
     try {
-      // Simulate login delay
+      // Visual delay for animation
       await new Promise(resolve => setTimeout(resolve, 500));
       setIsSuccess(true);
       
-      // Delay before calling onLogin to show success animation
+      // Wait for success animation before proceeding with login
       setTimeout(() => {
         onLogin(email, password);
       }, 800);
     } catch (error) {
       setIsLoggingIn(false);
+      setIsSuccess(false);
     }
   };
 

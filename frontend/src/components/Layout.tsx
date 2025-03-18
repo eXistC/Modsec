@@ -8,31 +8,51 @@ import { PasswordGenerator } from "./Generators/PasswordGenerator";
 import { PasswordEditor } from "./PasswordEditor";
 import { PasswordEntry } from "@/types/password";
 import { ColorSettingsProvider } from "@/context/ColorSettingsContext";
+import { useToast } from "@/components/ui/use-toast";
 
 export function Layout() {
   const { isAuthenticated, login, register } = useAuth();
   const [currentView, setCurrentView] = useState("passwords");
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
   const [showRegister, setShowRegister] = useState(false);
+  const { toast } = useToast();
 
   const handleSelectPassword = (password: PasswordEntry) => {
     setSelectedPassword(password);
   };
 
-  const handleLogin = async (masterPassword: string) => {
+  const handleLogin = async (email: string, password: string) => {
     try {
-      await login(masterPassword);
+      await login(password);
+      toast({
+        title: "Login successful",
+        description: "Welcome to ModSec!"
+      });
     } catch (error) {
       console.error("Login failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "Invalid email or password. Please try again."
+      });
     }
   };
 
-  const handleRegister = async (password: string, confirmPassword: string) => {
+  const handleRegister = async (email: string, password: string, confirmPassword: string) => {
     try {
-      await register(password);
+      await register(email, password, confirmPassword);
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created successfully!"
+      });
       setShowRegister(false);
     } catch (error) {
       console.error("Registration failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: "There was a problem creating your account. Please try again."
+      });
     }
   };
 

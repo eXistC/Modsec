@@ -1,9 +1,8 @@
-package myHash
+package utils
 
 import (
 	"crypto/sha256"
 	"strings"
-	myGenVal "test/myGoLib/Generate"
 
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/pbkdf2"
@@ -100,7 +99,7 @@ func SandwichRegisOP(Password, Email string) (Answer [][]byte, Ran []int) {
 	}
 
 	for i := 0; i < 8; i++ {
-		RandNum := myGenVal.RandomInt(60000, 800000)
+		RandNum := RandomInt(60000, 800000)
 		// Predefine the Value Regis 60k - 800k
 		// Loging 1k - 60k-1
 		derivedKey := PBKDF2Function_modified(HashMasterPassword, chunks[i], RandNum)
@@ -134,7 +133,7 @@ func SandwichLoginOP(Password, Email string) (Answer [][]byte, Ran []int) {
 	}
 
 	for i := 0; i < 8; i++ {
-		RandNum := myGenVal.RandomInt(1000, 59999)
+		RandNum := RandomInt(1000, 59999)
 		// Predefine the Value Regis 60k - 800k
 		// Loging 1k - 60k-1
 		derivedKey := PBKDF2Function_modified(HashMasterPassword, chunks[i], RandNum)

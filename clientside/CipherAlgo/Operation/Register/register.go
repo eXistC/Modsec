@@ -1,16 +1,13 @@
 package main
 
 import (
+	"Modsec/clientside/CipherAlgo/Operation/DataStr"
+	"Modsec/clientside/CipherAlgo/utils"
 	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
-	"test/Operation/DataStr"
-	myConvert "test/myGoLib/Convert"
-	myEncrypt "test/myGoLib/Encrypt"
-	myGenVal "test/myGoLib/Generate"
-	myHash "test/myGoLib/Hashing"
 )
 
 func main() {
@@ -26,8 +23,8 @@ func main() {
 
 	fmt.Println("===== Data send =====")
 	//MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
-	Masterkey := myHash.MasterPasswordGen(myPassword)
-	Answer, Ran := myHash.SandwichRegisOP(myPassword, myEmail) //Hpt but without concat
+	Masterkey := utils.MasterPasswordGen(myPassword)
+	Answer, Ran := utils.SandwichRegisOP(myPassword, myEmail) //Hpt but without concat
 
 	//fmt.Println("Master Password Hash", MasterPasswordHash)
 	//fmt.Println("Master Key", Masterkey)
@@ -35,7 +32,7 @@ func main() {
 
 	BaseAnswer := make([]string, 0, len(Answer)) // Initilization and size allocation for better performance
 	for _, b := range Answer {
-		BaseAnswer = append(BaseAnswer, myConvert.BytToBa64(b))
+		BaseAnswer = append(BaseAnswer, utils.BytToBa64(b))
 	}
 
 	// Convert Ran numbers to strings
@@ -50,17 +47,17 @@ func main() {
 	//myEmail string = "soMeth!ng@email.com"
 
 	// Generate IV and encrypt data
-	iv, err := myGenVal.GenerateIV()
+	iv, err := utils.GenerateIV()
 	if err != nil {
 		log.Fatalf("Failed to generate IV: %v", err)
 	}
 
-	sessionkey, err := myGenVal.GenerateSessionKey()
+	sessionkey, err := utils.GenerateSessionKey()
 	if err != nil {
 		log.Fatalf("Failed to generate sessionkey: %v", err)
 	}
 
-	vaultkey, err := myGenVal.GenerateSessionKey()
+	vaultkey, err := utils.GenerateSessionKey()
 	if err != nil {
 		log.Fatalf("Failed to generate vaultkey: %v", err)
 	}
@@ -73,18 +70,18 @@ func main() {
 
 	//Note: Key is MasterPasswordHash but need to be Randomnum
 	// Encrypt Hp1-HpR
-	EncryptedHp1_HpR, err := myEncrypt.EncryptAES256GCM(Hp1_HpR, sessionkey, iv)
+	EncryptedHp1_HpR, err := utils.EncryptAES256GCM(Hp1_HpR, sessionkey, iv)
 	if err != nil {
 		log.Fatalf("Failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt combined hash data
-	EncryptedIteration, err := myEncrypt.EncryptAES256GCM(Iteration, sessionkey, iv)
+	EncryptedIteration, err := utils.EncryptAES256GCM(Iteration, sessionkey, iv)
 	if err != nil {
 		log.Fatalf("Failed to encrypt Iteration: %v", err)
 	}
 
-	Protectedvaultkey, err := myEncrypt.EncryptAES256GCM(string(vaultkey), Masterkey, iv)
+	Protectedvaultkey, err := utils.EncryptAES256GCM(string(vaultkey), Masterkey, iv)
 	if err != nil {
 		log.Fatalf("Failed to encrypt vaultkey: %v", err)
 	}

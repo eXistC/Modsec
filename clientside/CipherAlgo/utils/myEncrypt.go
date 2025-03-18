@@ -1,10 +1,9 @@
-package myEncrypt
+package utils
 
 import (
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
-	myConvert "test/myGoLib/Convert"
 )
 
 // Return Byte, Error use to encrypt data(byte)
@@ -26,7 +25,7 @@ func EncryptAES256GCM(plaintext string, key []byte, IV []byte) (string, error) {
 	ciphertext := gcm.Seal(nil, IV, []byte(plaintext), nil)
 
 	// Return only the ciphertext (nonce should be stored separately)
-	return myConvert.BytToBa64(ciphertext), nil
+	return BytToBa64(ciphertext), nil
 }
 
 // Return Byte, Error use to Decrypt data(Byte)

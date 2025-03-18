@@ -1,4 +1,4 @@
-package myGenVal
+package utils
 
 import (
 	"crypto/rand"

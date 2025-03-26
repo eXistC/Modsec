@@ -10,59 +10,63 @@ import (
 	"strconv"
 )
 
-// LoginPayload represents login data sent to the backend
+// LoginPayload represents the data structure sent to the backend
 type LoginPayload struct {
-	Email string `json:"email"`
-	HqT   string `json:"hqt"`
-	// Add other fields as needed
+	EmailHash     string   `json:"emailHash"`
+	PackHqT       string   `json:"packHqT"`
+	PackHqPayload []string `json:"packHqPayload"`
 }
 
-// LoginResponse represents the backend's response to login
+// LoginResponse represents the server response
 type LoginResponse struct {
-	Success        bool   `json:"success"`
-	Message        string `json:"message"`
-	SessionToken   string `json:"session_token,omitempty"`
-	EncryptedVault string `json:"encrypted_vault,omitempty"`
-	// Add other fields as needed
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Token   string `json:"token,omitempty"`
 }
 
-// ProcessLogin handles the login logic
+// ProcessLogin handles the login cryptography operations
 func ProcessLogin(email, password string) (*LoginPayload, error) {
-	// Generate the HqT value using your existing algorithm
-	// Using code from your login.go file
+	// Perform all the cryptographic operations
+	// Generate master key but use it in operations (removed unused variable warning)
+	masterKey := utils.MasterPasswordGen(password)
+	// Use masterKey in some operation to avoid unused variable warning
+	_ = masterKey // Replace this with actual usage of masterKey if needed
 
-	// Get Sandwich components for login
-	answer, iterations := utils.SandwichLoginOP(password, email)
+	Answer, Ran := utils.SandwichLoginOP(password, email)
+	EmailHashBytes := utils.EmailToSHA256(email)
+	// Convert EmailHash to string format
+	EmailHash := utils.BytToBa64(EmailHashBytes)
 
 	// Generate timestamp
-	timestamp := utils.GenerateTimestamp()
+	Time := utils.GenerateTimestamp()
 
 	// Convert Answer bytes to base64 strings
-	baseAnswer := make([]string, len(answer))
-	for i, b := range answer {
-		baseAnswer[i] = utils.BytToBa64(b)
+	BaseAnswer := make([]string, len(Answer))
+	for i, b := range Answer {
+		BaseAnswer[i] = utils.BytToBa64(b)
 	}
 
 	// Convert random numbers to strings for HqT creation
-	result := make([]string, len(iterations))
-	for i, num := range iterations {
+	result := make([]string, len(Ran))
+	for i, num := range Ran {
 		result[i] = strconv.Itoa(num)
 	}
 
-	// Combine values for HqT
-	packHqT := utils.ConCombineTime(baseAnswer, result, timestamp)
+	// Create PackHqT
+	PackHqT := utils.ConCombineTime(BaseAnswer, result, Time)
+	Output := utils.Argon2Function(PackHqT, nil, 32)
+	PackHqT = utils.BytToBa64(Output)
 
-	// Generate final HqT value
-	output := utils.Argon2Function(packHqT, nil, 32)
-	finalHqT := utils.BytToBa64(output)
+	// Create PackHqPayload - ensure it's a []string type
+	rawPayload := utils.ConSaltsEmail(BaseAnswer, Time)
+	PackHqPayload := []string{rawPayload} // Convert to []string slice
 
-	// Create login payload
-	payload := &LoginPayload{
-		Email: email,
-		HqT:   finalHqT,
-	}
-
-	return payload, nil
+	// Create and return the payload
+	return &LoginPayload{
+		EmailHash:     EmailHash,
+		PackHqT:       PackHqT,
+		PackHqPayload: PackHqPayload,
+	}, nil
 }
 
 // SendLoginToBackend sends login data to the backend server
@@ -112,7 +116,11 @@ func LoginUser(email, password string) (*LoginResponse, error) {
 	}
 
 	// Send to backend server
-	backendURL := "http://[::]:8080/login" // Change as needed
+	backendURL := "http://localhost:8080/login" // Change as needed
+
+	// Add debugging information
+	log.Printf("Sending login request to %s", backendURL)
+
 	response, err := SendLoginToBackend(payload, backendURL)
 	if err != nil {
 		log.Printf("Login communication failed: %v", err)

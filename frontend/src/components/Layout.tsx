@@ -21,23 +21,6 @@ export function Layout() {
     setSelectedPassword(password);
   };
 
-  const handleLogin = async (email: string, password: string) => {
-    try {
-      await login(password);
-      toast({
-        title: "Login successful",
-        description: "Welcome to ModSec!"
-      });
-    } catch (error) {
-      console.error("Login failed:", error);
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: "Invalid email or password. Please try again."
-      });
-    }
-  };
-
   const handleRegister = async (email: string, password: string, confirmPassword: string) => {
     try {
       await register(email, password, confirmPassword);
@@ -67,7 +50,6 @@ export function Layout() {
           />
         ) : (
           <LoginPage 
-            onLogin={handleLogin}
             onRegisterClick={() => setShowRegister(true)}
           />
         )

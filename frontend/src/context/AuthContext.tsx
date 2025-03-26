@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { RegisterUser } from '../../wailsjs/go/main/App';
+import { RegisterUser, LoginUser } from '../../wailsjs/go/main/App';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
+  sessionToken?: string;
+  encryptedVault?: string;
   // ... other properties
 }
 
@@ -19,12 +21,22 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sessionToken, setSessionToken] = useState<string | undefined>(undefined);
+  const [encryptedVault, setEncryptedVault] = useState<string | undefined>(undefined);
   // ... other state variables
 
-  const login = async (password: string) => {
+  const login = async (email: string, password: string) => {
     try {
-      // Your existing login logic
-      setIsAuthenticated(true);
+      // Call the Go function to login the user
+      const response = await LoginUser(email, password);
+      
+      if (response.success) {
+        setIsAuthenticated(true);
+        setSessionToken(response.sessionToken);
+        setEncryptedVault(response.encryptedVault);
+      } else {
+        throw new Error(response.message || "Login failed");
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -43,8 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (success) {
         // Auto-login after successful registration
-        setIsAuthenticated(true);
-        return;
+        await login(email, password);
       } else {
         throw new Error('Registration failed');
       }
@@ -56,6 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setIsAuthenticated(false);
+    setSessionToken(undefined);
+    setEncryptedVault(undefined);
   };
 
   return (
@@ -64,6 +77,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       register,
       logout,
+      sessionToken,
+      encryptedVault,
       // ... other properties
     }}>
       {children}

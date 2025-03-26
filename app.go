@@ -181,10 +181,8 @@ func (a *App) LoginUser(email string, password string) (map[string]interface{}, 
 
 	// Convert to a map for frontend consumption
 	result := map[string]interface{}{
-		"success":        response.Success,
-		"message":        response.Message,
-		"sessionToken":   response.SessionToken,
-		"encryptedVault": response.EncryptedVault,
+		"success": response.Success,
+		"message": response.Message,
 	}
 
 	return result, nil

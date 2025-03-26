@@ -5,17 +5,20 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { LockKeyhole, ArrowRightCircle, Check } from "lucide-react";
 import { AnimatedCard } from "../ui/animated-card";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 interface LoginPageProps {
-  onLogin: (email: string, password: string) => void;
   onRegisterClick: () => void;
 }
 
-export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
+export function LoginPage({ onRegisterClick }: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { login } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,17 +27,28 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
     setIsLoggingIn(true);
     
     try {
-      // Visual delay for animation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await login(email, password);
+      
+      // Visual success feedback
       setIsSuccess(true);
       
-      // Wait for success animation before proceeding with login
+      // Reset the form after successful login (animation will handle transition)
       setTimeout(() => {
-        onLogin(email, password);
+        setEmail("");
+        setPassword("");
+        setIsLoggingIn(false);
       }, 800);
+      
     } catch (error) {
       setIsLoggingIn(false);
       setIsSuccess(false);
+      
+      // Show error toast
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "Please check your credentials and try again",
+      });
     }
   };
 
@@ -64,7 +78,7 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
             Welcome to Modsec
           </CardTitle>
           <CardDescription className="animate-in slide-in-from-bottom-2 duration-500 delay-300">
-            Enter your master password to unlock
+            Enter your email and master password to unlock
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -105,7 +119,6 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your master password"
-                    autoFocus
                     disabled={isLoggingIn}
                     className={`
                       pr-10
@@ -116,55 +129,56 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
                       ${isSuccess ? 'border-green-500 ring-green-500' : ''}
                     `}
                   />
-    <Button 
-      type="submit"
-      size="icon"
-      variant="ghost"
-      disabled={isLoggingIn}
-      className="
-        absolute
-        right-0
-        top-0
-        h-full
-        px-2
-        hover:bg-transparent
-        group
-        transition-all
-        duration-300
-        hover:scale-110
-      "
-    >
-      <ArrowRightCircle className={`
-        h-5
-        w-5
-        transition-all
-        duration-300
-        ${isSuccess 
-          ? 'text-green-500 scale-110 rotate-90' 
-          : 'text-muted-foreground/70 group-hover:text-primary group-hover:translate-x-1'
-        }
-      `} />
-    </Button>
-  </div>
-</div>
-            <Button
-              type="button"
-              variant="link"
-              onClick={onRegisterClick}
-              className="
-                text-sm 
-                text-muted-foreground 
-                hover:text-primary 
-                transition-all 
-                duration-300 
-                hover:scale-105
-              "
-            >
-              Don't have an account? Register here
-            </Button>
-          </div>
-        </CardContent>
-      </form>
-    </AnimatedCard>
-  </div>
-  )};
+                  <Button 
+                    type="submit"
+                    size="icon"
+                    variant="ghost"
+                    disabled={isLoggingIn}
+                    className="
+                      absolute
+                      right-0
+                      top-0
+                      h-full
+                      px-2
+                      hover:bg-transparent
+                      group
+                      transition-all
+                      duration-300
+                      hover:scale-110
+                    "
+                  >
+                    <ArrowRightCircle className={`
+                      h-5
+                      w-5
+                      transition-all
+                      duration-300
+                      ${isSuccess 
+                        ? 'text-green-500 scale-110 rotate-90' 
+                        : 'text-muted-foreground/70 group-hover:text-primary group-hover:translate-x-1'
+                      }
+                    `} />
+                  </Button>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="link"
+                onClick={onRegisterClick}
+                className="
+                  text-sm 
+                  text-muted-foreground 
+                  hover:text-primary 
+                  transition-all 
+                  duration-300 
+                  hover:scale-105
+                "
+              >
+                Don't have an account? Register here
+              </Button>
+            </div>
+          </CardContent>
+        </form>
+      </AnimatedCard>
+    </div>
+  );
+}

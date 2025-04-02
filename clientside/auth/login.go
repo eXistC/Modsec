@@ -8,13 +8,15 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // LoginPayload represents login data sent to the backend
 type LoginPayload struct {
-	Email string `json:"email"`
-	HqT   string `json:"hqt"`
-	// Add other fields as needed
+	Email     string `json:"email"`
+	HqT       string `json:"hqt"`
+	Hp1_Hp8   string `json:"hq1-hq8"`
+	Timestamp string `json:"timestamp"`
 }
 
 // LoginResponse represents the backend's response to login
@@ -32,15 +34,15 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	// Using code from your login.go file
 
 	// Get Sandwich components for login
-	answer, iterations := utils.SandwichLoginOP(password, email)
+	ArrayHp1_Hp8, iterations := utils.SandwichLoginOP(password, email)
 
 	// Generate timestamp
 	timestamp := utils.GenerateTimestamp()
 
 	// Convert Answer bytes to base64 strings
-	baseAnswer := make([]string, len(answer))
-	for i, b := range answer {
-		baseAnswer[i] = utils.BytToBa64(b)
+	Hp1_Hp8 := make([]string, len(ArrayHp1_Hp8))
+	for i, b := range ArrayHp1_Hp8 {
+		Hp1_Hp8[i] = utils.BytToBa64(b)
 	}
 
 	// Convert random numbers to strings for HqT creation
@@ -50,16 +52,19 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	}
 
 	// Combine values for HqT
-	packHqT := utils.ConCombineTime(baseAnswer, result, timestamp)
+	packHqT := utils.ConCombineTime(Hp1_Hp8, result, timestamp)
 
 	// Generate final HqT value
 	output := utils.Argon2Function(packHqT, nil, 32)
 	finalHqT := utils.BytToBa64(output)
+	comHp1_Hp8 := strings.Join(Hp1_Hp8, "|")
 
 	// Create login payload
 	payload := &LoginPayload{
-		Email: email,
-		HqT:   finalHqT,
+		Email:     email,
+		HqT:       finalHqT,
+		Hp1_Hp8:   comHp1_Hp8,
+		Timestamp: timestamp,
 	}
 
 	return payload, nil

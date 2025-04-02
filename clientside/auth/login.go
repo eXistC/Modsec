@@ -3,6 +3,7 @@ package auth
 import (
 	"Modsec/clientside/CipherAlgo/utils"
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,10 +14,12 @@ import (
 
 // LoginPayload represents login data sent to the backend
 type LoginPayload struct {
-	Email     string `json:"email"`
-	HqT       string `json:"hqt"`
-	Hp1_Hp8   string `json:"hq1-hq8"`
-	Timestamp string `json:"timestamp"`
+	Email      string `json:"email"`
+	HqT        string `json:"hqt"`
+	Hp1_HpR    string `json:"hq1-hqr"`
+	Timestamp  string `json:"timestamp"`
+	Sessionkey string `json:"sessionkey"`
+	IV         []byte `json:"iv"`
 }
 
 // LoginResponse represents the backend's response to login
@@ -30,19 +33,17 @@ type LoginResponse struct {
 
 // ProcessLogin handles the login logic
 func ProcessLogin(email, password string) (*LoginPayload, error) {
-	// Generate the HqT value using your existing algorithm
-	// Using code from your login.go file
 
 	// Get Sandwich components for login
-	ArrayHp1_Hp8, iterations := utils.SandwichLoginOP(password, email)
+	ArrayHp1_HpR, iterations := utils.SandwichLoginOP(password, email)
 
 	// Generate timestamp
 	timestamp := utils.GenerateTimestamp()
 
 	// Convert Answer bytes to base64 strings
-	Hp1_Hp8 := make([]string, len(ArrayHp1_Hp8))
-	for i, b := range ArrayHp1_Hp8 {
-		Hp1_Hp8[i] = utils.BytToBa64(b)
+	Hp1_HpR := make([]string, len(ArrayHp1_HpR))
+	for i, b := range ArrayHp1_HpR {
+		Hp1_HpR[i] = utils.BytToBa64(b)
 	}
 
 	// Convert random numbers to strings for HqT creation
@@ -52,19 +53,43 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	}
 
 	// Combine values for HqT
-	packHqT := utils.ConCombineTime(Hp1_Hp8, result, timestamp)
+	packHqT := utils.ConCombineTime(Hp1_HpR, result, timestamp)
 
 	// Generate final HqT value
 	output := utils.Argon2Function(packHqT, nil, 32)
 	finalHqT := utils.BytToBa64(output)
-	comHp1_Hp8 := strings.Join(Hp1_Hp8, "|")
+	comHp1_HpR := strings.Join(Hp1_HpR, "|")
+
+	//get iteration hash into 32 bytes for Key
+	sq32 := sha256.Sum256([]byte(strings.Join(result, "|")))
+	sq := sq32[:]
+	fmt.Println("Salt/Key:", sq)
+
+	// Generate initialization vector
+	iv, err := utils.GenerateIV()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate IV: %v", err)
+	}
+
+	sessionKey, err := utils.GenerateSessionKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate session key: %v", err)
+	}
+
+	// Encrypt session key with sq
+	encryptedSessionkey, err := utils.EncryptAES256GCM(string(sessionKey), sq, iv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
+	}
 
 	// Create login payload
 	payload := &LoginPayload{
-		Email:     email,
-		HqT:       finalHqT,
-		Hp1_Hp8:   comHp1_Hp8,
-		Timestamp: timestamp,
+		Email:      email,
+		HqT:        finalHqT,
+		Hp1_HpR:    comHp1_HpR,
+		Timestamp:  timestamp,
+		Sessionkey: encryptedSessionkey,
+		IV:         iv,
 	}
 
 	return payload, nil

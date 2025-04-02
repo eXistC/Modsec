@@ -3,7 +3,6 @@ package auth
 import (
 	"Modsec/clientside/CipherAlgo/utils"
 	"bytes"
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -16,7 +15,7 @@ import (
 type LoginPayload struct {
 	Email      string `json:"email"`
 	HqT        string `json:"hqt"`
-	Hp1_HpR    string `json:"hq1-hqr"`
+	Hq1_HqR    string `json:"hq1-hqr"`
 	Timestamp  string `json:"timestamp"`
 	Sessionkey string `json:"sessionkey"`
 	IV         []byte `json:"iv"`
@@ -35,15 +34,15 @@ type LoginResponse struct {
 func ProcessLogin(email, password string) (*LoginPayload, error) {
 
 	// Get Sandwich components for login
-	ArrayHp1_HpR, iterations := utils.SandwichLoginOP(password, email)
+	ArrayHq1_HqR, iterations := utils.SandwichLoginOP(password, email)
 
 	// Generate timestamp
 	timestamp := utils.GenerateTimestamp()
 
 	// Convert Answer bytes to base64 strings
-	Hp1_HpR := make([]string, len(ArrayHp1_HpR))
-	for i, b := range ArrayHp1_HpR {
-		Hp1_HpR[i] = utils.BytToBa64(b)
+	Hq1_HqR := make([]string, len(ArrayHq1_HqR))
+	for i, b := range ArrayHq1_HqR {
+		Hq1_HqR[i] = utils.BytToBa64(b)
 	}
 
 	// Convert random numbers to strings for HqT creation
@@ -53,16 +52,15 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	}
 
 	// Combine values for HqT
-	packHqT := utils.ConCombineTime(Hp1_HpR, result, timestamp)
+	packHqT := utils.ConCombineTime(Hq1_HqR, result, timestamp)
 
 	// Generate final HqT value
 	output := utils.Argon2Function(packHqT, nil, 32)
 	finalHqT := utils.BytToBa64(output)
-	comHp1_HpR := strings.Join(Hp1_HpR, "|")
+	comHq1_HqR := strings.Join(Hq1_HqR, "|")
 
 	//get iteration hash into 32 bytes for Key
-	sq32 := sha256.Sum256([]byte(strings.Join(result, "|")))
-	sq := sq32[:]
+	sq := utils.SHA256Function([]byte(strings.Join(result, "|")))
 	fmt.Println("Salt/Key:", sq)
 
 	// Generate initialization vector
@@ -86,7 +84,7 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	payload := &LoginPayload{
 		Email:      email,
 		HqT:        finalHqT,
-		Hp1_HpR:    comHp1_HpR,
+		Hq1_HqR:    comHq1_HqR,
 		Timestamp:  timestamp,
 		Sessionkey: encryptedSessionkey,
 		IV:         iv,

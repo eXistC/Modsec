@@ -78,8 +78,14 @@ func MasterPasswordHashGen(Password string) []byte {
 	return HashedMasterPassword[:]
 }
 
-func MasterPasswordGen(Password string) []byte {
-	MasterPassword := Argon2Function(Password, nil, 32) // 32 byte or 256 bit(MUST BE ONLY)
+func MasterPasswordGen(Password string, salt string) []byte { //For masterkey only
+	var saltBytes []byte
+	if salt != "" {
+		saltBytes = []byte(salt)
+	} else {
+		saltBytes = nil
+	}
+	MasterPassword := Argon2Function(Password, saltBytes, 32) // 32 byte or 256 bit(MUST BE ONLY)
 	return MasterPassword[:]
 }
 

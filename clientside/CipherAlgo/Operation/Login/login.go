@@ -18,7 +18,7 @@ func main() {
 	fmt.Println("Test Message", myMessage)
 
 	MasterPasswordHash := utils.MasterPasswordHashGen(myPassword)
-	Masterkey := utils.MasterPasswordGen(myPassword)
+	Masterkey := utils.MasterPasswordGen(myPassword, myEmail)
 	Answer, Ran := utils.SandwichLoginOP(myPassword, myEmail) //Already Fix
 	EmailHash := utils.EmailToSHA256(myEmail)
 

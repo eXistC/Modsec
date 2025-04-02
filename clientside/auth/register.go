@@ -24,7 +24,7 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 	log.Println("Processing registration for email:", email)
 
 	// Generate master key from password
-	masterKey := utils.MasterPasswordGen(password)
+	masterKey := utils.MasterPasswordGen(password, email)
 
 	// Generate Sandwich hash for registration
 	answer, iterations := utils.SandwichRegisOP(password, email)

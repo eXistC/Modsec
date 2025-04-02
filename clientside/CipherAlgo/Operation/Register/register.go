@@ -23,7 +23,7 @@ func main() {
 
 	fmt.Println("===== Data send =====")
 	//MasterPasswordHash := myHash.MasterPasswordHashGen(myPassword)
-	Masterkey := utils.MasterPasswordGen(myPassword)
+	Masterkey := utils.MasterPasswordGen(myPassword, myEmail)
 	Answer, Ran := utils.SandwichRegisOP(myPassword, myEmail) //Hpt but without concat
 
 	//fmt.Println("Master Password Hash", MasterPasswordHash)

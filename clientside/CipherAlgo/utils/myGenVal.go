@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math/big"
 	"time"
+
+	"github.com/tyler-smith/go-bip39"
 )
 
 func GenerateRandomBytes(size int) ([]byte, error) {
@@ -65,6 +67,22 @@ func RandomInt(min, max int) int {
 	}
 
 	return int(nBig.Int64()) + min
+}
+
+func Gen12SeedPhrase() (string, error) {
+	// Generate 128-bit entropy (suitable for a 12-word mnemonic)
+	entropy, err := bip39.NewEntropy(128)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate entropy: %w", err)
+	}
+
+	// Generate the mnemonic from the entropy
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate mnemonic: %w", err)
+	}
+
+	return mnemonic, nil
 }
 
 func GenerateTimestamp() string {

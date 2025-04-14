@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"Modsec/clientside/CipherAlgo/keymaster"
 	"Modsec/clientside/CipherAlgo/utils"
 	"bytes"
 	"encoding/json"
@@ -69,13 +70,13 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 		return nil, fmt.Errorf("failed to generate IV: %v", err)
 	}
 
-	sessionKey, err := utils.GenerateSessionKey()
+	keymaster.Sessionkey, err = utils.GenerateSessionKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate session key: %v", err)
 	}
 
 	// Encrypt session key with sq
-	encryptedSessionkey, err := utils.EncryptAES256GCM(string(sessionKey), sq, iv)
+	encryptedSessionkey, err := utils.EncryptAES256GCM(string(keymaster.Sessionkey), sq, iv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
 	}

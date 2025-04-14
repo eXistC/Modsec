@@ -2,6 +2,7 @@ package auth
 
 import (
 	"Modsec/clientside/CipherAlgo/Operation/DataStr"
+	"Modsec/clientside/CipherAlgo/keymaster"
 	"Modsec/clientside/CipherAlgo/utils"
 	"bytes"
 	"encoding/json"
@@ -24,7 +25,8 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 	log.Println("Processing registration for email:", email)
 
 	// Generate master key from password
-	masterKey := utils.MasterPasswordGen(password, email)
+	// masterKey := utils.MasterPasswordGen(password, email)
+	keymaster.Masterkey = utils.MasterPasswordGen(password, email)
 
 	// Generate Sandwich hash for registration
 	answer, iterations := utils.SandwichRegisOP(password, email)
@@ -52,31 +54,33 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 	}
 
 	// Generate session key
-	sessionKey, err := utils.GenerateSessionKey()
+	// sessionKey, err := utils.GenerateSessionKey()
+	keymaster.Sessionkey, err = utils.GenerateSessionKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate session key: %v", err)
 	}
 
 	// Generate vault key
-	vaultKey, err := utils.GenerateSessionKey()
+	// vaultKey, err := utils.GenerateSessionKey()
+	keymaster.Vaultkey, err = utils.GenerateSessionKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate vault key: %v", err)
 	}
 
 	// Encrypt Hp1-HpR with session key
-	encryptedHp1HpR, err := utils.EncryptAES256GCM(hp1HpR, sessionKey, iv)
+	encryptedHp1HpR, err := utils.EncryptAES256GCM(hp1HpR, keymaster.Sessionkey, iv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt iterations with session key
-	encryptedIteration, err := utils.EncryptAES256GCM(iterationString, sessionKey, iv)
+	encryptedIteration, err := utils.EncryptAES256GCM(iterationString, keymaster.Sessionkey, iv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
 	}
 
 	// Encrypt vault key with master key
-	protectedVaultKey, err := utils.EncryptAES256GCM(string(vaultKey), masterKey, iv)
+	protectedVaultKey, err := utils.EncryptAES256GCM(string(keymaster.Vaultkey), keymaster.Masterkey, iv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt vault key: %v", err)
 	}
@@ -88,7 +92,7 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 		EncryptedIteration: encryptedIteration,
 		ProtectedVaultKey:  protectedVaultKey,
 		IV:                 iv,
-		Sessionkey:         sessionKey,
+		Sessionkey:         keymaster.Sessionkey,
 	}
 
 	return resData, nil

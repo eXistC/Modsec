@@ -141,7 +141,7 @@ func LoginUser(email, password string) (*LoginResponse, error) {
 	}
 
 	// Send to backend server
-	backendURL := "http://[::]:8080/login" // Change as needed
+	backendURL := "http://localhost:8080/login" // Change as needed
 	response, err := SendLoginToBackend(payload, backendURL)
 	if err != nil {
 		log.Printf("Login communication failed: %v", err)

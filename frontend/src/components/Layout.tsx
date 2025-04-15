@@ -23,7 +23,7 @@ export function Layout() {
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      await login(password);
+      await login(email, password);
       toast({
         title: "Login successful",
         description: "Welcome to ModSec!"

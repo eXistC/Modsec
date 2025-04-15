@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { RegisterUser } from '../../wailsjs/go/main/App';
+import { LoginUser, RegisterUser } from '../../wailsjs/go/main/App';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
   // ... other properties
@@ -21,10 +21,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // ... other state variables
 
-  const login = async (password: string) => {
+  const login = async (email: string, password: string) => {
     try {
       // Your existing login logic
-      setIsAuthenticated(true);
+      const success = await LoginUser(email, password);
+      
+      if (success) {
+        // Auto-login after successful registration
+        setIsAuthenticated(true);
+        return;
+      } else {
+        throw new Error('Login failed');
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

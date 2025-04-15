@@ -50,6 +50,7 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	result := make([]string, len(iterations))
 	for i, num := range iterations {
 		result[i] = strconv.Itoa(num)
+		fmt.Print("Resutlfrom I =", result[i])
 	}
 
 	// Combine values for HqT

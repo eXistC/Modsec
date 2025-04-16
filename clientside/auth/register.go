@@ -15,9 +15,10 @@ import (
 
 // RegisterResponse represents the response from the backend
 type RegisterResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	UserID  string `json:"user_id,omitempty"`
+	Success    bool   `json:"success"`
+	Message    string `json:"message"`
+	SeedPhrase []byte `json:"seedphrase"`
+	UserID     string `json:"user_id,omitempty"`
 }
 
 // ProcessRegistration handles the core registration logic
@@ -52,6 +53,7 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate IV: %v", err)
 	}
+	keymaster.IVKey = iv
 
 	// Generate session key
 	// sessionKey, err := utils.GenerateSessionKey()
@@ -68,19 +70,19 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 	}
 
 	// Encrypt Hp1-HpR with session key
-	encryptedHp1HpR, err := utils.EncryptAES256GCM(hp1HpR, keymaster.Sessionkey, iv)
+	encryptedHp1HpR, err := utils.EncryptAES256GCM(hp1HpR, keymaster.Sessionkey, keymaster.IVKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt iterations with session key
-	encryptedIteration, err := utils.EncryptAES256GCM(iterationString, keymaster.Sessionkey, iv)
+	encryptedIteration, err := utils.EncryptAES256GCM(iterationString, keymaster.Sessionkey, keymaster.IVKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
 	}
 
 	// Encrypt vault key with master key
-	protectedVaultKey, err := utils.EncryptAES256GCM(string(keymaster.Vaultkey), keymaster.Masterkey, iv)
+	protectedVaultKey, err := utils.EncryptAES256GCM(string(keymaster.Vaultkey), keymaster.Masterkey, keymaster.IVKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt vault key: %v", err)
 	}
@@ -91,7 +93,7 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 		EncryptedHp1_HpR:   encryptedHp1HpR,
 		EncryptedIteration: encryptedIteration,
 		ProtectedVaultKey:  protectedVaultKey,
-		IV:                 iv,
+		IV:                 keymaster.IVKey,
 		Sessionkey:         keymaster.Sessionkey,
 	}
 
@@ -106,7 +108,7 @@ func SendRegistrationToBackend(payload *DataStr.ResData, backendURL string) (*Re
 		EncryptedIteration: payload.EncryptedIteration,
 		ProtectedVaultKey:  payload.ProtectedVaultKey,
 		Email:              payload.Email,
-		IV:                 payload.IV,
+		IV:                 payload.IV, // I'm not sure to change this to keymaster.IVKey
 		Sessionkey:         payload.Sessionkey,
 	}
 
@@ -164,5 +166,15 @@ func RegisterUser(email, password string) (bool, error) {
 
 	// Log success and return result
 	log.Printf("Registration result: %v - %s", response.Success, response.Message)
+
+	DecrySeedPhrase, err := utils.DecryptAES256GCM(response.SeedPhrase, keymaster.Sessionkey, keymaster.IVKey)
+	if err != nil {
+		log.Printf("Decrypt SeedPhrase failed: %v", err)
+		return false, err
+	}
+	seedPhrase := string(DecrySeedPhrase)
+	log.Printf("Decrypted Seed Phrase: %s", seedPhrase)
+	// Send this to front End Displayed it! /\
+
 	return response.Success, nil
 }

@@ -6,6 +6,7 @@ package keymaster
 var Masterkey []byte
 var Vaultkey []byte
 var Sessionkey []byte
+var IVKey []byte
 
 func GetSessionkey() []byte {
 	return Sessionkey

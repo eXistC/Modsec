@@ -5,6 +5,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isRegistrationComplete: boolean;
   seedPhrase: string | null;
+  userEmail: string | null; // Added userEmail to the interface
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   confirmSeedPhrase: () => void;
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isRegistrationComplete: false,
   seedPhrase: null,
+  userEmail: null, // Added default value
   login: async () => {},
   register: async () => {},
   confirmSeedPhrase: () => {},
@@ -25,6 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(true);
   const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null); // Added state for userEmail
 
   const login = async (email: string, password: string) => {
     try {
@@ -32,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (success) {
         setIsAuthenticated(true);
+        setUserEmail(email); // Store email on successful login
         return;
       } else {
         throw new Error('Login failed');
@@ -59,6 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsRegistrationComplete(false);
         // Set as authenticated since registration was successful
         setIsAuthenticated(true);
+        // Store the user's email
+        setUserEmail(email);
       } else {
         throw new Error('Registration failed');
       }
@@ -75,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setIsAuthenticated(false);
     setSeedPhrase(null);
+    setUserEmail(null); // Clear email on logout
   };
 
   return (
@@ -82,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated,
       isRegistrationComplete,
       seedPhrase,
+      userEmail, // Include userEmail in the context value
       login,
       register,
       confirmSeedPhrase,

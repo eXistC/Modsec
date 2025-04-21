@@ -13,7 +13,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Sidebar({ className, currentView = "passwords", onViewChange }: SidebarProps) {
-  const { logout } = useAuth();
+  const { logout, userEmail } = useAuth();
   const { toast } = useToast();
 
   const handleLogout = () => {
@@ -32,7 +32,9 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
   return (
     <div className={cn("border-r bg-[#1E1E1E]", className)}>
       <div className="flex h-[60px] items-center px-6 border-b border-border">
-        <span className="text-sm">example@gmail.com</span>
+        <span className="text-sm font-medium truncate" title={userEmail || ""}>
+          {userEmail || "Not logged in"}
+        </span>
         <div className="ml-auto">
           <SettingsDropdown 
             variant="settings"
@@ -59,7 +61,6 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
               <Bookmark className="mr-2 h-4 w-4" />
               Bookmark
             </Button>
-            {/* Update the Generator button to handle clicks and show active state */}
             <Button 
               variant={currentView === "generator" ? "secondary" : "ghost"}
               className="w-full justify-start text-sm h-9"

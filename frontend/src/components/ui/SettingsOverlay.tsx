@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/context/AuthContext"; // Import useAuth
 
 interface SettingsOverlayProps {
   open: boolean;
@@ -21,6 +22,7 @@ export function SettingsOverlay({ open, onOpenChange }: SettingsOverlayProps) {
   const [darkMode, setDarkMode] = useState(true);
   const [autoLogout, setAutoLogout] = useState(true);
   const [logoutTime, setLogoutTime] = useState(5);
+  const { userEmail } = useAuth(); // Get the user's email from auth context
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,9 +89,15 @@ export function SettingsOverlay({ open, onOpenChange }: SettingsOverlayProps) {
           <TabsContent value="account" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="example@gmail.com" disabled />
+              <Input 
+                id="email" 
+                type="email" 
+                value={userEmail || ""} 
+                placeholder="No email available" 
+                disabled 
+              />
               <p className="text-sm text-muted-foreground">
-                Contact support to change your email
+                We cannot change your email
               </p>
             </div>
             

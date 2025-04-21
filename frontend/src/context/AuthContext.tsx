@@ -3,31 +3,34 @@ import { LoginUser, RegisterUser } from '../../wailsjs/go/main/App';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isRegistrationComplete: boolean;
+  seedPhrase: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, confirmPassword: string) => Promise<void>;
+  confirmSeedPhrase: () => void;
   logout: () => void;
-  // ... other properties
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
+  isRegistrationComplete: false,
+  seedPhrase: null,
   login: async () => {},
   register: async () => {},
+  confirmSeedPhrase: () => {},
   logout: () => {},
-  // ... other properties
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // ... other state variables
+  const [isRegistrationComplete, setIsRegistrationComplete] = useState(true);
+  const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
 
   const login = async (email: string, password: string) => {
     try {
-      // Your existing login logic
       const success = await LoginUser(email, password);
       
       if (success) {
-        // Auto-login after successful registration
         setIsAuthenticated(true);
         return;
       } else {
@@ -47,12 +50,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       // Call the Go function to register the user
-      const success = await RegisterUser(email, password);
+      const response = await RegisterUser(email, password);
       
-      if (success) {
-        // Auto-login after successful registration
+      if (response) {
+        // Store the seed phrase returned from the backend
+        setSeedPhrase(response);
+        // Set registration as incomplete so the seed phrase page shows
+        setIsRegistrationComplete(false);
+        // Set as authenticated since registration was successful
         setIsAuthenticated(true);
-        return;
       } else {
         throw new Error('Registration failed');
       }
@@ -62,17 +68,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const confirmSeedPhrase = () => {
+    setIsRegistrationComplete(true);
+  };
+
   const logout = () => {
     setIsAuthenticated(false);
+    setSeedPhrase(null);
   };
 
   return (
     <AuthContext.Provider value={{
       isAuthenticated,
+      isRegistrationComplete,
+      seedPhrase,
       login,
       register,
+      confirmSeedPhrase,
       logout,
-      // ... other properties
     }}>
       {children}
     </AuthContext.Provider>

@@ -148,12 +148,12 @@ func SendRegistrationToBackend(payload *DataStr.ResData, backendURL string) (*Re
 }
 
 // RegisterUser combines processing and backend communication
-func RegisterUser(email, password string) (bool, error) {
+func RegisterUser(email, password string) (string, error) {
 	// Create a registration payload
 	payload, err := ProcessRegistration(email, password)
 	if err != nil {
 		log.Printf("Registration processing failed: %v", err)
-		return false, err
+		return "", err
 	}
 
 	// Send to backend server
@@ -161,20 +161,24 @@ func RegisterUser(email, password string) (bool, error) {
 	response, err := SendRegistrationToBackend(payload, backendURL)
 	if err != nil {
 		log.Printf("Registration communication failed: %v", err)
-		return false, err
+		return "", err
 	}
 
 	// Log success and return result
 	log.Printf("Registration result: %v - %s", response.Success, response.Message)
 
+	if !response.Success {
+		return "", fmt.Errorf("registration failed: %s", response.Message)
+	}
+
 	DecrySeedPhrase, err := utils.DecryptAES256GCM(response.SeedPhrase, keymaster.Sessionkey, keymaster.IVKey)
 	if err != nil {
 		log.Printf("Decrypt SeedPhrase failed: %v", err)
-		return false, err
+		return "", err
 	}
 	seedPhrase := string(DecrySeedPhrase)
 	log.Printf("Decrypted Seed Phrase: %s", seedPhrase)
-	// Send this to front End Displayed it! /\
 
-	return response.Success, nil
+	// Return the actual seed phrase instead of just success status
+	return seedPhrase, nil
 }

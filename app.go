@@ -151,18 +151,18 @@ func (a *App) DecryptAES256GCM(ciphertext []byte, key []byte, IV []byte) ([]byte
 }
 
 // RegisterUser handles the user registration process
-func (a *App) RegisterUser(email string, password string) (bool, error) {
+func (a *App) RegisterUser(email string, password string) (string, error) {
 	// Validate input
 	if !auth.ValidateEmailFormat(email) {
-		return false, fmt.Errorf("invalid email format")
+		return "", fmt.Errorf("invalid email format")
 	}
 
 	valid, msg := auth.ValidatePasswordStrength(password)
 	if !valid {
-		return false, fmt.Errorf(msg)
+		return "", fmt.Errorf(msg)
 	}
 
-	// Call the modularized registration function
+	// Call the modularized registration function that now returns seedPhrase
 	return auth.RegisterUser(email, password)
 }
 

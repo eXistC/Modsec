@@ -9,9 +9,10 @@ import { PasswordEditor } from "./PasswordEditor";
 import { PasswordEntry } from "@/types/password";
 import { ColorSettingsProvider } from "@/context/ColorSettingsContext";
 import { useToast } from "@/components/ui/use-toast";
+import { SeedPhraseConfirmationPage } from './Pages/SeedPhraseConfirmationPage';
 
 export function Layout() {
-  const { isAuthenticated, login, register } = useAuth();
+  const { isAuthenticated, login, register, isRegistrationComplete } = useAuth();
   const [currentView, setCurrentView] = useState("passwords");
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
   const [showRegister, setShowRegister] = useState(false);
@@ -71,6 +72,9 @@ export function Layout() {
             onRegisterClick={() => setShowRegister(true)}
           />
         )
+      ) : !isRegistrationComplete ? (
+        // Show seed phrase confirmation page for new users
+        <SeedPhraseConfirmationPage />
       ) : (
         // Main application UI
         <div className="h-screen bg-[#1E1E1E]">

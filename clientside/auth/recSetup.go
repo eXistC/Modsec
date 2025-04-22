@@ -34,14 +34,17 @@ func ProcessRecoverySetup(UserHashEmail, SeedPhrase string) (*RecSetupPayload, e
 
 	// Encrypt Recovery key with SeedPhrase
 	// Result in Base64
-	encryptedRecoveryKey, err := utils.EncryptAES256GCM(Result, []byte(SeedPhrase), RecoveryIV)
+
+	SeedToKey := utils.SHA256Function([]byte(SeedPhrase)) //Convert FIRST!!!!
+
+	encryptedRecoveryKey, err := utils.EncryptAES256GCM(Result, SeedToKey, RecoveryIV)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Recovery key: %v", err)
 	}
 
 	// Create response data structure using DataStr.ResData
 	payload := &RecSetupPayload{
-		HashEmail:            "",
+		HashEmail:            UserHashEmail,
 		EncryptedRecoveryKey: encryptedRecoveryKey,
 		IV:                   RecoveryIV,
 	}

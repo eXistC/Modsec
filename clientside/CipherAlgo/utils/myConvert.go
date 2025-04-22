@@ -62,3 +62,30 @@ func SplitSaltsEmail(concatenated string) ([]string, string, error) {
 	email := parts[len(parts)-1]
 	return arrasy, email, nil
 }
+
+func ConcatKeyAndSeed(key []byte, seedPhrase string) string {
+	encodedKey := BytToBa64(key)
+	encodedSeed := BytToBa64([]byte(seedPhrase))
+
+	// Use a unique delimiter that's unlikely to appear in base64
+	return encodedKey + ":::" + encodedSeed
+}
+
+func DeconcatKeyAndSeed(RecoveryVaultKey string) ([]byte, string, error) {
+	parts := strings.SplitN(RecoveryVaultKey, ":::", 2)
+	if len(parts) != 2 {
+		return nil, "", fmt.Errorf("invalid format: missing delimiter")
+	}
+
+	key, err := Ba64ToByt(parts[0])
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to decode key: %w", err)
+	}
+
+	seedBytes, err := Ba64ToByt(parts[1])
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to decode seed phrase: %w", err)
+	}
+
+	return key, string(seedBytes), nil
+}

@@ -171,9 +171,12 @@ func RegisterUser(email, password string) (string, error) {
 		return "", fmt.Errorf("registration failed: %s", response.Message)
 	}
 
-	seedPhrase := utils.RandomSeedPhrase()
-	log.Printf("Decrypted Seed Phrase: %s", seedPhrase)
-	// SeedPhrase set up heres
+	seedPhrase, err := RecoverySetup(email) // may remove Email in the future
+	if err != nil {
+		log.Printf("Recovery Setup failed: %v", err)
+		return "", err
+	}
+	log.Printf("Seed Phrase: %s", seedPhrase)
 
 	// Return the actual seed phrase instead of just success status
 	return seedPhrase, nil

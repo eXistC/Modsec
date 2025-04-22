@@ -3,8 +3,11 @@ package utils
 import (
 	"crypto/rand"
 	"fmt"
+	"log"
 	"math/big"
 	"time"
+
+	"github.com/tyler-smith/go-bip39"
 )
 
 func GenerateRandomBytes(size int) ([]byte, error) {
@@ -69,4 +72,17 @@ func RandomInt(min, max int) int {
 
 func GenerateTimestamp() string {
 	return time.Now().Format("20060102150405")
+}
+
+func RandomSeedPhrase() string {
+	// Generate 128 bits (16 bytes) of entropy (12 word)
+	entropy, err := bip39.NewEntropy(128)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return mnemonic
 }

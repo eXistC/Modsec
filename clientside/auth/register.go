@@ -171,13 +171,9 @@ func RegisterUser(email, password string) (string, error) {
 		return "", fmt.Errorf("registration failed: %s", response.Message)
 	}
 
-	DecrySeedPhrase, err := utils.DecryptAES256GCM(response.SeedPhrase, keymaster.Sessionkey, keymaster.IVKey)
-	if err != nil {
-		log.Printf("Decrypt SeedPhrase failed: %v", err)
-		return "", err
-	}
-	seedPhrase := string(DecrySeedPhrase)
+	seedPhrase := utils.RandomSeedPhrase()
 	log.Printf("Decrypted Seed Phrase: %s", seedPhrase)
+	// SeedPhrase set up heres
 
 	// Return the actual seed phrase instead of just success status
 	return seedPhrase, nil

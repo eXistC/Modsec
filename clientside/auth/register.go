@@ -4,6 +4,7 @@ import (
 	"Modsec/clientside/CipherAlgo/Operation/DataStr"
 	"Modsec/clientside/CipherAlgo/keymaster"
 	"Modsec/clientside/CipherAlgo/utils"
+	"Modsec/clientside/client"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -127,10 +128,16 @@ func SendRegistrationToBackend(payload *DataStr.ResData, backendURL string) (*Re
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	// token := "your-jwt-token-here" // replace with actual token
+	// req.AddCookie(&http.Cookie{
+	// 	Name:  "auth_token",
+	// 	Value: token,
+	// })
+
+	// Added this part in theory it will share cookie
+	resp, err := client.SharedClient.Do(req) // <---- using shared client
 	if err != nil {
-		return nil, fmt.Errorf("failed to send registration data to backend: %v", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 

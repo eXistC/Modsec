@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"strconv"
 	"strings"
 )
@@ -113,7 +114,15 @@ func SendLoginToBackend(payload *LoginPayload, backendURL string) (*LoginRespons
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
-	client := &http.Client{}
+	// Create a cookie jar to handle cookies
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create cookie jar: %v", err)
+	}
+
+	client := &http.Client{
+		Jar: jar,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send login data to backend: %v", err)

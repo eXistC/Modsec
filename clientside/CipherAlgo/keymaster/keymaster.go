@@ -1,5 +1,9 @@
 package keymaster
 
+import (
+	"sync"
+)
+
 // This will be critical part for encryption act similar to global varible but only function that has this package
 // can access these key
 
@@ -7,16 +11,26 @@ var Masterkey []byte
 var Vaultkey []byte
 var Sessionkey []byte
 var IVKey []byte
+var JWTToken string
+
+// Add mutex for thread-safe access to sensitive data
+var mu sync.RWMutex
 
 func GetSessionkey() []byte {
+	mu.RLock()
+	defer mu.RUnlock()
 	return Sessionkey
 }
 
 func GetMasterkey() []byte {
+	mu.RLock()
+	defer mu.RUnlock()
 	return Masterkey
 }
 
 func GetVaultkey() []byte {
+	mu.RLock()
+	defer mu.RUnlock()
 	return Vaultkey
 }
 

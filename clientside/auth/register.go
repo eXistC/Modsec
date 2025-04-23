@@ -15,10 +15,9 @@ import (
 
 // RegisterResponse represents the response from the backend
 type RegisterResponse struct {
-	Success    bool   `json:"success"`
-	Message    string `json:"message"`
-	SeedPhrase []byte `json:"seedphrase"`
-	UserID     string `json:"user_id,omitempty"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	UserID  string `json:"user_id,omitempty"`
 }
 
 // ProcessRegistration handles the core registration logic
@@ -125,6 +124,8 @@ func SendRegistrationToBackend(payload *DataStr.ResData, backendURL string) (*Re
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

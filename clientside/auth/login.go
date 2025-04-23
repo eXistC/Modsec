@@ -110,6 +110,8 @@ func SendLoginToBackend(payload *LoginPayload, backendURL string) (*LoginRespons
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

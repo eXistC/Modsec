@@ -5,11 +5,11 @@ import (
 	"net/http/cookiejar"
 )
 
-var SharedClient *http.Client
+var HMClient *http.Client
 
-func init() {
+func InitClient() {
 	jar, _ := cookiejar.New(nil)
-	SharedClient = &http.Client{
+	HMClient = &http.Client{
 		Jar: jar,
 	}
 }

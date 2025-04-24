@@ -3,6 +3,7 @@ package auth
 import (
 	"Modsec/clientside/CipherAlgo/keymaster"
 	"Modsec/clientside/CipherAlgo/utils"
+	"Modsec/clientside/client"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -70,10 +71,9 @@ func SendRecoverySetupoBackend(payload *RecSetupPayload, backendURL string) (*Re
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.HMClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to send registration data to backend: %v", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 

@@ -3,6 +3,7 @@ package auth
 import (
 	"Modsec/clientside/CipherAlgo/keymaster"
 	"Modsec/clientside/CipherAlgo/utils"
+	"Modsec/clientside/client"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -113,10 +114,9 @@ func SendLoginToBackend(payload *LoginPayload, backendURL string) (*LoginRespons
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.HMClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to send login data to backend: %v", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { LoginUser, RegisterUser } from '../../wailsjs/go/main/App';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { LoginUser, RegisterUser, CheckSession } from '../../wailsjs/go/main/App';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -10,6 +10,7 @@ interface AuthContextType {
   register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   confirmSeedPhrase: () => void;
   logout: () => void;
+  checkSession: () => Promise<boolean>; // Added checkSession to the interface
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   register: async () => {},
   confirmSeedPhrase: () => {},
   logout: () => {},
+  checkSession: async () => false, // Added default implementation
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -84,6 +86,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserEmail(null); // Clear email on logout
   };
 
+  const checkSession = useCallback(async () => {
+    try {
+      const response = await CheckSession();
+      
+      if (response && response.Success) {
+        setIsAuthenticated(true);
+        setUserEmail(response.Email);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Session check failed:', error);
+      return false;
+    }
+  }, []);
+
   return (
     <AuthContext.Provider value={{
       isAuthenticated,
@@ -94,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       register,
       confirmSeedPhrase,
       logout,
+      checkSession, // Include checkSession in the context value
     }}>
       {children}
     </AuthContext.Provider>

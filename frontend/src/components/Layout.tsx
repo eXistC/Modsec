@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { LoginPage } from "./Pages/LoginPage";
 import { RegisterPage } from "./Pages/RegisterPage";
@@ -12,11 +12,36 @@ import { useToast } from "@/components/ui/use-toast";
 import { SeedPhraseConfirmationPage } from './Pages/SeedPhraseConfirmationPage';
 
 export function Layout() {
-  const { isAuthenticated, login, register, isRegistrationComplete } = useAuth();
+  const { isAuthenticated, login, register, isRegistrationComplete, checkSession } = useAuth();
   const [currentView, setCurrentView] = useState("passwords");
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
   const [showRegister, setShowRegister] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Check for existing session on load
+  useEffect(() => {
+    const verifySession = async () => {
+      try {
+        await checkSession();
+      } catch (error) {
+        console.error("Session verification failed:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifySession();
+  }, [checkSession]);
+
+  // Show loading indicator while checking session
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#1E1E1E]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const handleSelectPassword = (password: PasswordEntry) => {
     setSelectedPassword(password);

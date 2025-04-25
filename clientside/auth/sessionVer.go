@@ -17,7 +17,7 @@ type SessionCheckResponse struct {
 
 // SendSessionCheckToBackend sends a session check request
 func SendSessionCheckToBackend(backendURL string) (*SessionCheckResponse, error) {
-	req, err := http.NewRequest("GET", backendURL, nil)
+	req, err := http.NewRequest("POST", backendURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session check request: %v", err)
 	}

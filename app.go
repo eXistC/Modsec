@@ -189,3 +189,20 @@ func (a *App) LoginUser(email string, password string) (map[string]interface{}, 
 
 	return result, nil
 }
+
+// CheckSession verifies if the user has a valid session
+func (a *App) CheckSession() map[string]interface{} {
+	response, err := auth.SessionCheckUser()
+	if err != nil {
+		return map[string]interface{}{
+			"Success": false,
+			"Message": "Session invalid",
+		}
+	}
+
+	return map[string]interface{}{
+		"Success": response.Success,
+		"Message": response.Message,
+		"Email":   response.Email,
+	}
+}

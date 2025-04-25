@@ -1,72 +1,70 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { LoginUser, RegisterUser, CheckSession } from '../../wailsjs/go/main/App';
+import { LoginUser, RegisterUser, CheckSession, LogoutUser } from '../../wailsjs/go/main/App';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isRegistrationComplete: boolean;
   seedPhrase: string | null;
-  userEmail: string | null; // Added userEmail to the interface
-  login: (email: string, password: string) => Promise<void>;
+  userEmail: string | null;
+  login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   confirmSeedPhrase: () => void;
-  logout: () => void;
-  checkSession: () => Promise<boolean>; // Added checkSession to the interface
+  logout: () => Promise<boolean>;
+  checkSession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isRegistrationComplete: false,
   seedPhrase: null,
-  userEmail: null, // Added default value
-  login: async () => {},
+  userEmail: null,
+  login: async () => false,
   register: async () => {},
   confirmSeedPhrase: () => {},
-  logout: () => {},
-  checkSession: async () => false, // Added default implementation
+  logout: async () => false,
+  checkSession: async () => false,
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isRegistrationComplete, setIsRegistrationComplete] = useState(true);
-  const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null); // Added state for userEmail
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-  const login = async (email: string, password: string) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isRegistrationComplete, setIsRegistrationComplete] = useState<boolean>(true);
+  const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    return localStorage.getItem('userEmail') || '';
+  });
+
+  const login = useCallback(async (email: string, password: string) => {
     try {
       const success = await LoginUser(email, password);
-      
       if (success) {
         setIsAuthenticated(true);
-        setUserEmail(email); // Store email on successful login
-        return;
-      } else {
-        throw new Error('Login failed');
+        setUserEmail(email);
+        localStorage.setItem('userEmail', email);
+        return true;
       }
+      return false;
     } catch (error) {
       console.error('Login failed:', error);
-      throw error;
+      return false;
     }
-  };
+  }, []);
 
   const register = async (email: string, password: string, confirmPassword: string) => {
     try {
-      // Check if passwords match
       if (password !== confirmPassword) {
         throw new Error('Passwords do not match');
       }
-      
-      // Call the Go function to register the user
       const response = await RegisterUser(email, password);
-      
       if (response) {
-        // Store the seed phrase returned from the backend
         setSeedPhrase(response);
-        // Set registration as incomplete so the seed phrase page shows
         setIsRegistrationComplete(false);
-        // Set as authenticated since registration was successful
         setIsAuthenticated(true);
-        // Store the user's email
         setUserEmail(email);
+        localStorage.setItem('userEmail', email);
       } else {
         throw new Error('Registration failed');
       }
@@ -80,20 +78,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsRegistrationComplete(true);
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setSeedPhrase(null);
-    setUserEmail(null); // Clear email on logout
-  };
+  const logout = useCallback(async () => {
+    try {
+      // LogoutUser returns {success, message} object not a boolean
+      const response = await LogoutUser();
+      
+      // Check if the response indicates success
+      if (response && response.Success) {
+        setIsAuthenticated(false);
+        setUserEmail('');
+        localStorage.removeItem('userEmail');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Logout failed:', error);
+      return false;
+    }
+  }, []);
 
   const checkSession = useCallback(async () => {
     try {
       const response = await CheckSession();
-      
       if (response && response.Success) {
         setIsAuthenticated(true);
-        setUserEmail(response.Email);
         return true;
+      } else {
+        setIsAuthenticated(false);
+        setUserEmail('');
+        localStorage.removeItem('userEmail');
       }
       return false;
     } catch (error) {
@@ -107,12 +120,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated,
       isRegistrationComplete,
       seedPhrase,
-      userEmail, // Include userEmail in the context value
+      userEmail,
       login,
       register,
       confirmSeedPhrase,
       logout,
-      checkSession, // Include checkSession in the context value
+      checkSession,
     }}>
       {children}
     </AuthContext.Provider>

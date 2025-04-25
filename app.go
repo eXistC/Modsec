@@ -206,3 +206,19 @@ func (a *App) CheckSession() map[string]interface{} {
 		"Email":   response.Email,
 	}
 }
+
+// Add this function to your App struct to expose the LogoutUser functionality
+func (a *App) LogoutUser() map[string]interface{} {
+	response, err := auth.LogoutUser()
+	if err != nil {
+		return map[string]interface{}{
+			"Success": false,
+			"Message": err.Error(),
+		}
+	}
+
+	return map[string]interface{}{
+		"Success": response.Success,
+		"Message": response.Message,
+	}
+}

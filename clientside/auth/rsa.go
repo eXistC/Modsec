@@ -11,7 +11,7 @@ import (
 )
 
 type PublicKeyResponse struct {
-	PublicKey string `json:"public_key"`
+	PublicKey string `json:"PublicKey"`
 }
 
 func FetchPubKeyFromBackend(backendURL string) (string, error) {
@@ -40,12 +40,11 @@ func FetchPubKeyFromBackend(backendURL string) (string, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return "", fmt.Errorf("failed to decode response: %v", err)
 	}
-
 	return response.PublicKey, nil
 }
 
-func PubKeyRequest(email string) (*rsa.PublicKey, error) {
-	backendURL := "http://localhost:8080/recovery/setup" // Change as needed
+func PubKeyRequest() (*rsa.PublicKey, error) {
+	backendURL := "http://localhost:8080/publickey"
 
 	publicKey, err := FetchPubKeyFromBackend(backendURL)
 	if err != nil {

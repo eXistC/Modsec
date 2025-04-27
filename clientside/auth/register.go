@@ -27,7 +27,7 @@ type RegisterPayload struct {
 	ProtectedVaultKey  string `json:"protected_vault_key"`
 	Email              string `json:"email"`
 	IV                 []byte `json:"iv"`
-	Sessionkey         []byte `json:"sessionkey"`
+	Sessionkey         []byte `json:"sessionkey"` // This one is encrypted with public key
 }
 
 // ProcessRegistration handles the core registration logic
@@ -71,11 +71,26 @@ func ProcessRegistration(email, password string) (*RegisterPayload, error) {
 		return nil, fmt.Errorf("failed to generate session key: %v", err)
 	}
 
+	//Get the Public key
+	publickey, err := PubKeyRequest()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch Publickey: %v", err)
+	}
+	encryptedSession, err := utils.EncryptWithPublicKey(publickey, keymaster.Sessionkey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to Encrypt Session key: %v", err)
+	}
+
 	// Generate vault key
 	// vaultKey, err := utils.GenerateSessionKey()
 	keymaster.Vaultkey, err = utils.GenerateSessionKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate vault key: %v", err)
+	}
+
+	encryptedEmail, err := utils.EncryptAES256GCM(email, keymaster.Sessionkey, keymaster.IVKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt Hp1-HpR with session key
@@ -98,12 +113,12 @@ func ProcessRegistration(email, password string) (*RegisterPayload, error) {
 
 	// Create response data structure using DataStr.ResData
 	resData := &RegisterPayload{
-		Email:              email,
+		Email:              encryptedEmail,
 		EncryptedHp1_HpR:   encryptedHp1HpR,
 		EncryptedIteration: encryptedIteration,
 		ProtectedVaultKey:  protectedVaultKey,
 		IV:                 keymaster.IVKey,
-		Sessionkey:         keymaster.Sessionkey,
+		Sessionkey:         encryptedSession,
 	}
 
 	return resData, nil

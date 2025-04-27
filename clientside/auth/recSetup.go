@@ -102,7 +102,7 @@ func RecoverySetup(email string) (string, error) {
 	}
 
 	// Send to backend server
-	backendURL := "http://localhost:8080/recoverysetup" // Change as needed
+	backendURL := "http://localhost:8080/recovery/setup" // Change as needed
 	response, err := SendRecoverySetupoBackend(payload, backendURL)
 	if err != nil {
 		log.Printf("Recovery setup communication failed: %v", err)

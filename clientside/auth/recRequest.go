@@ -52,7 +52,8 @@ func ProcessRecoveryRequest(email string) (*RecRequestPayload, error) {
 		return nil, fmt.Errorf("failed to Encrypt Session key: %v", err)
 	}
 
-	encryptedEmail, err := utils.EncryptAES256GCM(email, keymaster.Sessionkey, keymaster.IVKey)
+	HashEmail := utils.BytToBa64(utils.EmailToSHA256(email))
+	encryptedEmail, err := utils.EncryptAES256GCM(HashEmail, keymaster.Sessionkey, keymaster.IVKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}

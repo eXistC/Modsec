@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"Modsec/clientside/CipherAlgo/Operation/DataStr"
 	"Modsec/clientside/CipherAlgo/keymaster"
 	"Modsec/clientside/CipherAlgo/utils"
 	"Modsec/clientside/client"
@@ -22,8 +21,17 @@ type RegisterResponse struct {
 	UserID  string `json:"user_id,omitempty"`
 }
 
+type RegisterPayload struct {
+	EncryptedHp1_HpR   string `json:"encrypted_hp1_hpr"`
+	EncryptedIteration string `json:"encrypted_iteration"`
+	ProtectedVaultKey  string `json:"protected_vault_key"`
+	Email              string `json:"email"`
+	IV                 []byte `json:"iv"`
+	Sessionkey         []byte `json:"sessionkey"`
+}
+
 // ProcessRegistration handles the core registration logic
-func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
+func ProcessRegistration(email, password string) (*RegisterPayload, error) {
 	log.Println("Processing registration for email:", email)
 
 	// Generate master key from password
@@ -89,7 +97,7 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 	}
 
 	// Create response data structure using DataStr.ResData
-	resData := &DataStr.ResData{
+	resData := &RegisterPayload{
 		Email:              email,
 		EncryptedHp1_HpR:   encryptedHp1HpR,
 		EncryptedIteration: encryptedIteration,
@@ -102,9 +110,9 @@ func ProcessRegistration(email, password string) (*DataStr.ResData, error) {
 }
 
 // SendRegistrationToBackend sends registration data to the backend server
-func SendRegistrationToBackend(payload *DataStr.ResData, backendURL string) (*RegisterResponse, error) {
+func SendRegistrationToBackend(payload *RegisterPayload, backendURL string) (*RegisterResponse, error) {
 	// Use the payload parameter directly
-	jsonPayload := DataStr.ResData{
+	jsonPayload := RegisterPayload{
 		EncryptedHp1_HpR:   payload.EncryptedHp1_HpR,
 		EncryptedIteration: payload.EncryptedIteration,
 		ProtectedVaultKey:  payload.ProtectedVaultKey,

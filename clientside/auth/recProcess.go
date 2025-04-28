@@ -15,9 +15,12 @@ import (
 )
 
 type RecProcessPayload struct {
-	EncryptedHp1_HpR   string `json:"encrypted_hp1_hpr"`   // session key
-	EncryptedIteration string `json:"encrypted_iteration"` // session key
-	ProtectedVaultKey  string `json:"protected_vault_key"` // vault key
+	EncryptedEmail     string `json:"encrypted_email"`      // session key
+	EncryptedHp1_HpR   string `json:"encrypted_hp1_hpr"`    // session key
+	EncryptedIteration string `json:"encrypted_iteration"`  // session key
+	ProtectedVaultKey  string `json:"protected_vault_key"`  // New Master key
+	Sessionkey         []byte `json:"encrypted_sessionkey"` // public key
+	IV                 []byte `json:"iv"`
 }
 
 type RecProcessResponse struct {
@@ -29,6 +32,12 @@ type RecProcessResponse struct {
 // ProcessRegistration handles the core registration logic
 func ProcessRecoveryProcess(email, password string, vaultKey []byte) (*RecProcessPayload, error) {
 	log.Println("Processing registration for email:", email)
+
+	//Get the Public key
+	publickey, err := PubKeyRequest()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch Publickey: %v", err)
+	}
 
 	keymaster.Vaultkey = vaultKey
 
@@ -54,6 +63,11 @@ func ProcessRecoveryProcess(email, password string, vaultKey []byte) (*RecProces
 	hp1HpR := strings.Join(baseAnswer, "|")
 	iterationString := strings.Join(iterationStrings, "|")
 
+	encryptedEmail, err := utils.EncryptAES256GCM(email, keymaster.Sessionkey, keymaster.IVKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
+	}
+
 	// Encrypt Hp1-HpR with session key
 	encryptedHp1HpR, err := utils.EncryptAES256GCM(hp1HpR, keymaster.Sessionkey, keymaster.IVKey)
 	if err != nil {
@@ -72,11 +86,19 @@ func ProcessRecoveryProcess(email, password string, vaultKey []byte) (*RecProces
 		return nil, fmt.Errorf("failed to encrypt vault key: %v", err)
 	}
 
+	encryptedSession, err := utils.EncryptWithPublicKey(publickey, keymaster.Sessionkey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to Encrypt Session key: %v", err)
+	}
+
 	// Create response data structure using DataStr.ResData
 	resData := &RecProcessPayload{
+		EncryptedEmail:     encryptedEmail,
 		EncryptedHp1_HpR:   encryptedHp1HpR,
 		EncryptedIteration: encryptedIteration,
 		ProtectedVaultKey:  protectedVaultKey,
+		Sessionkey:         encryptedSession,
+		IV:                 keymaster.IVKey,
 	}
 
 	return resData, nil
@@ -86,9 +108,12 @@ func ProcessRecoveryProcess(email, password string, vaultKey []byte) (*RecProces
 func SendRecoveryProcessBackend(payload *RecProcessPayload, backendURL string) (*RecProcessResponse, error) {
 	// Use the payload parameter directly
 	jsonPayload := RecProcessPayload{
+		EncryptedEmail:     payload.EncryptedEmail,
 		EncryptedHp1_HpR:   payload.EncryptedHp1_HpR,
 		EncryptedIteration: payload.EncryptedIteration,
 		ProtectedVaultKey:  payload.ProtectedVaultKey,
+		Sessionkey:         payload.Sessionkey,
+		IV:                 payload.IV,
 	}
 
 	// Convert payload to JSON
@@ -165,7 +190,7 @@ func SendRecoveryProcessBackend(payload *RecProcessPayload, backendURL string) (
 // RecoveryProcess combines processing and backend communication
 func RecoveryProcess(email, password, SeedPhrase string) (string, error) {
 	// Create a Recovery request payload
-	result, err := RecoveryRequest(email)
+	result, err := RecoveryRequest(email) // <=== Called Recovery Request here
 	if err != nil {
 		log.Printf("Recovery processing failed: %v", err)
 		return "nil", err

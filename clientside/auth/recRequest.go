@@ -14,13 +14,11 @@ import (
 type RecRequestPayload struct {
 	Email      string `json:"encrypted_email"`
 	Sessionkey []byte `json:"encrypted_sessionkey"` // This one is encrypted with public key
-	IV         []byte `json:"iv"`
 }
 
 type RecRequestResponse struct {
 	Success             bool   `json:"success"`
 	EncryptedReVaultkey string `json:"encrypted_revaultkey,omitempty"`
-	ReIV                []byte `json:"reiv"`
 }
 
 // ProcessRegistration handles the core registration logic
@@ -52,17 +50,15 @@ func ProcessRecoveryRequest(email string) (*RecRequestPayload, error) {
 		return nil, fmt.Errorf("failed to Encrypt Session key: %v", err)
 	}
 
-	HashEmail := utils.BytToBa64(utils.EmailToSHA256(email))
-	encryptedEmail, err := utils.EncryptAES256GCM(HashEmail, keymaster.Sessionkey, keymaster.IVKey)
+	encryptedEmail, err := utils.EncryptAES256GCM(utils.EmailToSHA256(email), keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Create response data structure using DataStr.ResData
 	resData := &RecRequestPayload{
-		Email:      encryptedEmail,
+		Email:      utils.BytToBa64(encryptedEmail),
 		Sessionkey: encryptedSession,
-		IV:         keymaster.IVKey,
 	}
 
 	return resData, nil
@@ -74,7 +70,6 @@ func SendRecoveryRequestBackend(payload *RecRequestPayload, backendURL string) (
 	jsonPayload := RecRequestPayload{
 		Email:      payload.Email,
 		Sessionkey: payload.Sessionkey,
-		IV:         payload.IV,
 	}
 
 	// Convert payload to JSON

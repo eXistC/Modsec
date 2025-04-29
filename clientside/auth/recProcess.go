@@ -20,13 +20,11 @@ type RecProcessPayload struct {
 	EncryptedIteration string `json:"encrypted_iteration"`  // session key
 	ProtectedVaultKey  string `json:"protected_vault_key"`  // New Master key
 	Sessionkey         []byte `json:"encrypted_sessionkey"` // public key
-	IV                 []byte `json:"iv"`
 }
 
 type RecProcessResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
-	ReIV    []byte `json:"reiv"`
 }
 
 // ProcessRegistration handles the core registration logic
@@ -63,25 +61,25 @@ func ProcessRecoveryProcess(email, password string, vaultKey []byte) (*RecProces
 	hp1HpR := strings.Join(baseAnswer, "|")
 	iterationString := strings.Join(iterationStrings, "|")
 
-	encryptedEmail, err := utils.EncryptAES256GCM(email, keymaster.Sessionkey, keymaster.IVKey)
+	encryptedEmail, err := utils.EncryptAES256GCM([]byte(email), keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt Hp1-HpR with session key
-	encryptedHp1HpR, err := utils.EncryptAES256GCM(hp1HpR, keymaster.Sessionkey, keymaster.IVKey)
+	encryptedHp1HpR, err := utils.EncryptAES256GCM([]byte(hp1HpR), keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt iterations with session key
-	encryptedIteration, err := utils.EncryptAES256GCM(iterationString, keymaster.Sessionkey, keymaster.IVKey)
+	encryptedIteration, err := utils.EncryptAES256GCM([]byte(iterationString), keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
 	}
 
 	// Encrypt vault key with master key
-	protectedVaultKey, err := utils.EncryptAES256GCM(string(vaultKey), keymaster.Masterkey, keymaster.IVKey)
+	protectedVaultKey, err := utils.EncryptAES256GCM(vaultKey, keymaster.Masterkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt vault key: %v", err)
 	}
@@ -93,12 +91,11 @@ func ProcessRecoveryProcess(email, password string, vaultKey []byte) (*RecProces
 
 	// Create response data structure using DataStr.ResData
 	resData := &RecProcessPayload{
-		EncryptedEmail:     encryptedEmail,
-		EncryptedHp1_HpR:   encryptedHp1HpR,
-		EncryptedIteration: encryptedIteration,
-		ProtectedVaultKey:  protectedVaultKey,
+		EncryptedEmail:     utils.BytToBa64(encryptedEmail),
+		EncryptedHp1_HpR:   utils.BytToBa64(encryptedHp1HpR),
+		EncryptedIteration: utils.BytToBa64(encryptedIteration),
+		ProtectedVaultKey:  utils.BytToBa64(protectedVaultKey),
 		Sessionkey:         encryptedSession,
-		IV:                 keymaster.IVKey,
 	}
 
 	return resData, nil
@@ -113,7 +110,6 @@ func SendRecoveryProcessBackend(payload *RecProcessPayload, backendURL string) (
 		EncryptedIteration: payload.EncryptedIteration,
 		ProtectedVaultKey:  payload.ProtectedVaultKey,
 		Sessionkey:         payload.Sessionkey,
-		IV:                 payload.IV,
 	}
 
 	// Convert payload to JSON
@@ -205,7 +201,7 @@ func RecoveryProcess(email, password, SeedPhrase string) (string, error) {
 		log.Printf("Unable convert ReVault key: %v", err)
 		return "nil", err
 	}
-	ConcatKey, err := utils.DecryptAES256GCM(EnReVaultkey, SeedToKey, result.ReIV)
+	ConcatKey, err := utils.DecryptAES256GCM(EnReVaultkey, SeedToKey)
 	if err != nil {
 		log.Printf("Unable to decrypt ReVault key: %v", err)
 		return "nil", err

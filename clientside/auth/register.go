@@ -26,7 +26,6 @@ type RegisterPayload struct {
 	EncryptedIteration string `json:"encrypted_iteration"`
 	ProtectedVaultKey  string `json:"protected_vault_key"`
 	Email              string `json:"email"`
-	IV                 []byte `json:"iv"`
 	Sessionkey         []byte `json:"sessionkey"` // This one is encrypted with public key
 }
 
@@ -58,24 +57,23 @@ func ProcessRegistration(email, password string) (*RegisterPayload, error) {
 	iterationString := strings.Join(iterationStrings, "|")
 
 	// Generate initialization vector
-	iv, err := utils.GenerateIV()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate IV: %v", err)
-	}
-	keymaster.IVKey = iv
+	// iv, err := utils.GenerateIV()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to generate IV: %v", err)
+	// }
+	// keymaster.IVKey = iv
 
 	// Generate session key
 	// sessionKey, err := utils.GenerateSessionKey()
-	keymaster.Sessionkey, err = utils.GenerateSessionKey()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate session key: %v", err)
-	}
 
 	//Get the Public key
 	publickey, err := PubKeyRequest()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Publickey: %v", err)
 	}
+
+	keymaster.Sessionkey, _ = utils.GenerateSessionKey()
+
 	encryptedSession, err := utils.EncryptWithPublicKey(publickey, keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to Encrypt Session key: %v", err)
@@ -88,36 +86,35 @@ func ProcessRegistration(email, password string) (*RegisterPayload, error) {
 		return nil, fmt.Errorf("failed to generate vault key: %v", err)
 	}
 
-	encryptedEmail, err := utils.EncryptAES256GCM(email, keymaster.Sessionkey, keymaster.IVKey)
+	encryptedEmail, err := utils.EncryptAES256GCM([]byte(email), keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt Hp1-HpR with session key
-	encryptedHp1HpR, err := utils.EncryptAES256GCM(hp1HpR, keymaster.Sessionkey, keymaster.IVKey)
+	encryptedHp1HpR, err := utils.EncryptAES256GCM([]byte(hp1HpR), keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Hp1-HpR: %v", err)
 	}
 
 	// Encrypt iterations with session key
-	encryptedIteration, err := utils.EncryptAES256GCM(iterationString, keymaster.Sessionkey, keymaster.IVKey)
+	encryptedIteration, err := utils.EncryptAES256GCM([]byte(iterationString), keymaster.Sessionkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
 	}
 
 	// Encrypt vault key with master key
-	protectedVaultKey, err := utils.EncryptAES256GCM(string(keymaster.Vaultkey), keymaster.Masterkey, keymaster.IVKey)
+	protectedVaultKey, err := utils.EncryptAES256GCM(keymaster.Vaultkey, keymaster.Masterkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt vault key: %v", err)
 	}
 
 	// Create response data structure using DataStr.ResData
 	resData := &RegisterPayload{
-		Email:              encryptedEmail,
-		EncryptedHp1_HpR:   encryptedHp1HpR,
-		EncryptedIteration: encryptedIteration,
-		ProtectedVaultKey:  protectedVaultKey,
-		IV:                 keymaster.IVKey,
+		Email:              utils.BytToBa64(encryptedEmail),
+		EncryptedHp1_HpR:   utils.BytToBa64(encryptedHp1HpR),
+		EncryptedIteration: utils.BytToBa64(encryptedIteration),
+		ProtectedVaultKey:  utils.BytToBa64(protectedVaultKey),
 		Sessionkey:         encryptedSession,
 	}
 
@@ -132,7 +129,6 @@ func SendRegistrationToBackend(payload *RegisterPayload, backendURL string) (*Re
 		EncryptedIteration: payload.EncryptedIteration,
 		ProtectedVaultKey:  payload.ProtectedVaultKey,
 		Email:              payload.Email,
-		IV:                 payload.IV, // I'm not sure to change this to keymaster.IVKey
 		Sessionkey:         payload.Sessionkey,
 	}
 

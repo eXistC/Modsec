@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Copy, Check, LockKeyhole } from "lucide-react";
 import { RecoveryProcess } from "../../../wailsjs/go/main/App";
+import { PasswordStrengthMeter, isPasswordValid } from "@/components/PasswordStrength/PasswordStrengthMeter";
 
 interface RecoveryFormProps {
   onBack: () => void;
@@ -55,10 +56,11 @@ export function RecoveryForm({ onBack }: RecoveryFormProps) {
       return;
     }
     
-    if (newPassword.length < 8) {
+    // Use the isPasswordValid helper function from our component with email parameter
+    if (!isPasswordValid(newPassword, email)) {
       setRecoveryMessage({ 
         type: "error", 
-        message: "Password must be at least 8 characters" 
+        message: "Password does not meet security requirements" 
       });
       return;
     }
@@ -172,6 +174,11 @@ export function RecoveryForm({ onBack }: RecoveryFormProps) {
               placeholder="Enter new password"
               disabled={isRecovering}
             />
+            
+            {/* Add the password strength meter with email */}
+            {newPassword.length > 0 && (
+              <PasswordStrengthMeter password={newPassword} email={email} />
+            )}
           </div>
           
           <div className="space-y-2">

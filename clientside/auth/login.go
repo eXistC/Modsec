@@ -107,6 +107,9 @@ func SendLoginToBackend(payload *LoginPayload, backendURL string) (*LoginRespons
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
+	//Delete after test
+	fmt.Printf("Login data:", req)
+
 	resp, err := client.HMClient.Do(req)
 	if err != nil {
 		return nil, err

@@ -35,6 +35,8 @@ type LoginResponse struct {
 // ProcessLogin handles the login logic
 func ProcessLogin(email, password string) (*LoginPayload, error) {
 
+	keymaster.Masterkey = utils.MasterPasswordGen(password, email) // Forgot too added in first place
+
 	// Get Sandwich components for login
 	ArrayHq1_HqR, iterations := utils.SandwichLoginOP(password, email)
 

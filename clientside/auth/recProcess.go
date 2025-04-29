@@ -207,12 +207,16 @@ func RecoveryProcess(email, password, SeedPhrase string) (string, error) {
 		return "nil", err
 	}
 
-	vaultKey, SeedInside, err := utils.DeconcatKeyAndSeed(utils.BytToBa64(ConcatKey))
+	vaultKey, SeedInside, err := utils.DeconcatKeyAndSeed(string(ConcatKey))
+	if err != nil {
+		log.Printf("Failed to decode concatenated key: %v", err)
+		return "", err
+	}
 
 	// Authentication for seed key
 	if SeedInside != SeedPhrase {
-		log.Printf("Seed isn't a match: %v", err)
-		return "", err
+		log.Printf("Seed phrase doesn't match the stored value")
+		return "", fmt.Errorf("incorrect seed phrase provided")
 	}
 
 	payload, err := ProcessRecoveryProcess(email, password, vaultKey)

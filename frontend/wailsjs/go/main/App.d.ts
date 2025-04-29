@@ -21,6 +21,10 @@ export function LogoutUser():Promise<{[key: string]: any}>;
 
 export function PBKDF2Function(arg1:string,arg2:string,arg3:number,arg4:number):Promise<string>;
 
+export function RecoveryProcess(arg1:string,arg2:string,arg3:string):Promise<string>;
+
+export function RecoverySetup(arg1:string):Promise<string>;
+
 export function RegisterUser(arg1:string,arg2:string):Promise<string>;
 
 export function SimplePOC(arg1:string):Promise<void>;

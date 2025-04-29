@@ -43,7 +43,7 @@ func (a *App) SimplePOC(title string) {
 }
 
 func (a *App) EmailToSHA256(email string) string {
-	// This function turn email Sinto sha256
+	// This function turn email SInto sha256
 	// which will be used as salt in the future. or maybe store in database
 	// Input as string
 	// Output as string
@@ -221,4 +221,15 @@ func (a *App) LogoutUser() map[string]interface{} {
 		"Success": response.Success,
 		"Message": response.Message,
 	}
+}
+
+// Add this function to expose RecoveryProcess to the frontend
+func (a *App) RecoveryProcess(email, password, seedPhrase string) (string, error) {
+	// Call the auth package's RecoveryProcess function
+	return auth.RecoveryProcess(email, password, seedPhrase)
+}
+
+// Add this function to expose RecoverySetup to the frontend if needed
+func (a *App) RecoverySetup(email string) (string, error) {
+	return auth.RecoverySetup(email)
 }

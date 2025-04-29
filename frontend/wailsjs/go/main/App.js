@@ -42,6 +42,14 @@ export function PBKDF2Function(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['PBKDF2Function'](arg1, arg2, arg3, arg4);
 }
 
+export function RecoveryProcess(arg1, arg2, arg3) {
+  return window['go']['main']['App']['RecoveryProcess'](arg1, arg2, arg3);
+}
+
+export function RecoverySetup(arg1) {
+  return window['go']['main']['App']['RecoverySetup'](arg1);
+}
+
 export function RegisterUser(arg1, arg2) {
   return window['go']['main']['App']['RegisterUser'](arg1, arg2);
 }

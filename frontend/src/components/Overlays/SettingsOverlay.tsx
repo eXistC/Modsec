@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CreditCard, File, Globe, User, Wallet } from "lucide-react";
 import { useColorSettings } from "@/context/ColorSettingsContext";
+import { RecoveryForm } from "@/components/Recovery/RecoveryForm";
 
 interface SettingsOverlayProps {
   open: boolean;
@@ -24,6 +25,9 @@ export function SettingsOverlay({ open, onOpenChange }: SettingsOverlayProps) {
   const [autoLogout, setAutoLogout] = useState(true);
   const [logoutTime, setLogoutTime] = useState(5);
   const [localColors, setLocalColors] = useState(colors);
+  
+  // Add recovery mode state
+  const [recoveryMode, setRecoveryMode] = useState(false);
   
   // Update local colors when context colors change or dialog opens
   useEffect(() => {
@@ -67,6 +71,7 @@ export function SettingsOverlay({ open, onOpenChange }: SettingsOverlayProps) {
             <TabsTrigger value="account">Account</TabsTrigger>
           </TabsList>
           
+          {/* Appearance tab content */}
           <TabsContent value="appearance" className="space-y-6 mt-4">
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -81,6 +86,7 @@ export function SettingsOverlay({ open, onOpenChange }: SettingsOverlayProps) {
               </div>
               
               <div className="space-y-4">
+                {/* Color inputs remain unchanged */}
                 <div className="flex items-center gap-3">
                   <div className={`flex items-center justify-center h-8 w-8 rounded-lg bg-opacity-10`} 
                     style={{ backgroundColor: `${localColors.website}20`, color: localColors.website }}>
@@ -229,26 +235,38 @@ export function SettingsOverlay({ open, onOpenChange }: SettingsOverlayProps) {
           </TabsContent>
           
           <TabsContent value="account" className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="example@gmail.com" disabled />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Change Password</Label>
-              <Button variant="outline" className="w-full">Change Password</Button>
-            </div>
+            {!recoveryMode ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="password-management">Password Recovery</Label>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Recover your account using your seed phrase if you forgot your password
+                  </p>
+                  <Button 
+                    variant="secondary" 
+                    className="w-full"
+                    onClick={() => setRecoveryMode(true)}
+                  >
+                    Recover with Seed Phrase
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <RecoveryForm onBack={() => setRecoveryMode(false)} />
+            )}
           </TabsContent>
         </Tabs>
         
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>
-            Save Changes
-          </Button>
-        </div>
+        {!recoveryMode && (
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>
+              Save Changes
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -20,7 +20,6 @@ type LoginPayload struct {
 	Hq1_HqR    string `json:"hq1-hqr"`
 	Timestamp  string `json:"timestamp"`
 	Sessionkey string `json:"sessionkey"`
-	IV         []byte `json:"iv"`
 }
 
 // LoginResponse represents the backend's response to login
@@ -69,18 +68,11 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	fmt.Println("Salt/Key:", sq)
 
 	// Generate initialization vector
-	iv, err := utils.GenerateIV()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate IV: %v", err)
-	}
 
-	keymaster.Sessionkey, err = utils.GenerateSessionKey()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate session key: %v", err)
-	}
+	keymaster.Sessionkey, _ = utils.GenerateSessionKey()
 
 	// Encrypt session key with sq
-	encryptedSessionkey, err := utils.EncryptAES256GCM(string(keymaster.Sessionkey), sq, iv)
+	encryptedSessionkey, err := utils.EncryptAES256GCM(keymaster.Sessionkey, sq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
 	}
@@ -91,8 +83,7 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 		HqT:        finalHqT,
 		Hq1_HqR:    comHq1_HqR,
 		Timestamp:  timestamp,
-		Sessionkey: encryptedSessionkey,
-		IV:         iv,
+		Sessionkey: utils.BytToBa64(encryptedSessionkey),
 	}
 
 	return payload, nil

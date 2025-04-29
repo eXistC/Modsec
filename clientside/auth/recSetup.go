@@ -20,7 +20,6 @@ type RecSetupResponse struct {
 type RecSetupPayload struct {
 	HashEmail            string `json:"hashemail"`
 	EncryptedRecoveryKey string `json:"encrypted_recoverykey"`
-	IV                   []byte `json:"iv"`
 }
 
 // ProcessRegistration handles the core recovery setup logic
@@ -28,17 +27,12 @@ func ProcessRecoverySetup(UserHashEmail, SeedPhrase string) (*RecSetupPayload, e
 
 	Result := utils.ConcatKeyAndSeed(keymaster.Vaultkey, SeedPhrase)
 
-	RecoveryIV, err := utils.GenerateIV()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate IV: %v", err)
-	}
-
 	// Encrypt Recovery key with SeedPhrase
 	// Result in Base64
 
 	SeedToKey := utils.SHA256Function([]byte(SeedPhrase)) //Convert FIRST!!!!
 
-	encryptedRecoveryKey, err := utils.EncryptAES256GCM(Result, SeedToKey, RecoveryIV)
+	encryptedRecoveryKey, err := utils.EncryptAES256GCM([]byte(Result), SeedToKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Recovery key: %v", err)
 	}
@@ -46,8 +40,7 @@ func ProcessRecoverySetup(UserHashEmail, SeedPhrase string) (*RecSetupPayload, e
 	// Create response data structure using DataStr.ResData
 	payload := &RecSetupPayload{
 		HashEmail:            UserHashEmail,
-		EncryptedRecoveryKey: encryptedRecoveryKey,
-		IV:                   RecoveryIV,
+		EncryptedRecoveryKey: utils.BytToBa64(encryptedRecoveryKey),
 	}
 
 	return payload, nil

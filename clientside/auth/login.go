@@ -147,6 +147,17 @@ func LoginUser(email, password string) (*LoginResponse, error) {
 		return nil, err
 	}
 
+	EncryptedVaultByte, err := utils.Ba64ToByt(response.EncryptedVault)
+	if err != nil {
+		log.Printf("Change base64 to byte failed: %v", err)
+		return nil, err
+	}
+
+	keymaster.Vaultkey, err = utils.DecryptAES256GCM(EncryptedVaultByte, keymaster.Masterkey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt vault key: %v", err)
+	}
+
 	// Log success and return result
 	log.Printf("Login result: %v - %s", response.Success, response.Message)
 	return response, nil

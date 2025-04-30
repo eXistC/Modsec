@@ -6,6 +6,10 @@ export function CheckSession() {
   return window['go']['main']['App']['CheckSession']();
 }
 
+export function CreateItemClient(arg1, arg2, arg3) {
+  return window['go']['main']['App']['CreateItemClient'](arg1, arg2, arg3);
+}
+
 export function DecryptAES256GCM(arg1, arg2, arg3) {
   return window['go']['main']['App']['DecryptAES256GCM'](arg1, arg2, arg3);
 }

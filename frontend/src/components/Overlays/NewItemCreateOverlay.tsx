@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { CardEntry, CryptoEntry, IdentityEntry, MemoEntry, PasswordEntry, PasswordType, WebsiteEntry } from "@/types/password";
@@ -10,6 +9,8 @@ import { CardFields } from "../ItemTypes/CardFields";
 import { CryptoFields } from "../ItemTypes/CryptoFields";
 import { MemoFields } from "../ItemTypes/MemoFields";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "@/components/ui/use-toast";
+import { CreateItemClient } from '@/wailsjs/go/main/App';
 
 interface NewItemCreateOverlayProps {
   type: PasswordType;
@@ -20,13 +21,11 @@ interface NewItemCreateOverlayProps {
 export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOverlayProps) {
   const [formData, setFormData] = useState<Partial<PasswordEntry>>({ type });
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = true;
   
-  // Since this is a creation form, we don't need real copy functionality,
-  // but we need to provide the props for the field components
-  const dummyCopyToClipboard = (_field: string, _value: string) => {
-    // Do nothing - copying isn't needed in creation mode
-  };
+  // Dummy copy function for creation mode
+  const dummyCopyToClipboard = (_field: string, _value: string) => {};
   const copiedField = null;
 
   const handleChange = (field: string) => (
@@ -38,10 +37,69 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Map frontend type name to backend type name
+  const mapTypeNameToBackend = (frontendType: PasswordType): string => {
+    switch (frontendType) {
+      case "website": return "login";
+      case "identity": return "identity";
+      case "card": return "credit";
+      case "crypto": return "cryptowallet";
+      case "memo": return "note";
+      default: return frontendType;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.title) {
-      onSave(formData as PasswordEntry);
+    
+    if (!formData.title) {
+      toast({
+        title: "Error",
+        description: "Title is required",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Extract title and type, map type to backend format
+      const { title } = formData;
+      const backendType = mapTypeNameToBackend(type);
+      
+      // Remove type and id properties from the data to send
+      const { type: _, id: __, ...itemData } = formData;
+      
+      // Call Go CreateItemClient function through Wails
+      const response = await CreateItemClient(title as string, backendType, itemData);
+      
+      // Create the complete item with response data
+      const savedItem = {
+        ...formData,
+        id: response.item_id
+      } as PasswordEntry;
+      
+      // Pass the saved item to parent component
+      onSave(savedItem);
+      
+      toast({
+        title: "Success",
+        description: response.message || "Item created successfully"
+      });
+      
+      // Close the overlay
+      onClose();
+      
+    } catch (error) {
+      console.error("Failed to create item:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create item",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -112,6 +170,7 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
     >
       <div 
         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] animate-in zoom-in duration-300"
+        onClick={e => e.stopPropagation()}
       >
         <form onSubmit={handleSubmit} className="h-full">
           <div className="rounded-xl border bg-card text-card-foreground shadow-lg flex flex-col h-full max-h-[calc(90vh-2rem)]">
@@ -123,6 +182,7 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
                 size="sm"
                 className="h-8 w-8 p-0 hover:bg-secondary/80"
                 onClick={onClose}
+                disabled={isSubmitting}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -147,14 +207,16 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
                 type="button"
                 variant="ghost"
                 onClick={onClose}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 variant="default"
+                disabled={isSubmitting}
               >
-                Create
+                {isSubmitting ? "Creating..." : "Create"}
               </Button>
             </div>
           </div>

@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"Modsec/clientside/auth"
+	"Modsec/clientside/service"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/pbkdf2"
@@ -232,4 +233,10 @@ func (a *App) RecoveryProcess(email, password, seedPhrase string) (string, error
 // Add this function to expose RecoverySetup to the frontend if needed
 func (a *App) RecoverySetup(email string) (string, error) {
 	return auth.RecoverySetup(email)
+}
+
+// CreateItemClient exposes the client-side service function to the frontend
+func (a *App) CreateItemClient(title, typename string, ItemData map[string]interface{}) (*service.CreateItemResponse, error) {
+	log.Printf("CreateItemClient called with title: %s, type: %s", title, typename)
+	return service.CreateItemClient(title, typename, ItemData)
 }

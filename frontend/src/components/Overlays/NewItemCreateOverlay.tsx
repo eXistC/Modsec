@@ -77,7 +77,7 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
       // Create the complete item with response data
       const savedItem = {
         ...formData,
-        id: response.item_id
+        id: String(response.item_id) // Convert the numeric ID to string
       } as PasswordEntry;
       
       // Pass the saved item to parent component

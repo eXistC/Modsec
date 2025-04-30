@@ -19,7 +19,7 @@ type CreateItemPayload struct {
 }
 
 type CreateItemResponse struct {
-	ItemID   string    `json:"item_id"`
+	ItemID   uint      `json:"item_id"`
 	Title    string    `json:"title"`
 	CreateAt time.Time `json:"createAt"`
 	Message  string    `json:"message"`
@@ -108,6 +108,6 @@ func CreateItemClient(title, typename string, ItemData map[string]interface{}) (
 	}
 
 	// Log success and return result
-	log.Printf("CreateItem result: ItemID:%v, %s", response.ItemID, response.Message)
+	log.Printf("CreateItem result: ItemID:%d, %s", response.ItemID, response.Message)
 	return response, nil
 }

@@ -1,7 +1,7 @@
 export namespace service {
 	
 	export class CreateItemResponse {
-	    item_id: string;
+	    item_id: number;
 	    title: string;
 	    // Go type: time
 	    createAt: any;

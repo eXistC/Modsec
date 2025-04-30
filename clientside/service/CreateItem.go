@@ -36,12 +36,19 @@ func ProcessCreateItem(title, typename string, itemdata map[string]interface{}) 
 	// Encrypt data with sq
 	encryptedItemdata, err := utils.EncryptAES256GCM(itemdatabyte, keymaster.Vaultkey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
+		return nil, fmt.Errorf("failed to encrypt Itemdata: %v", err)
 	}
+
+	encryptedTitle, err := utils.EncryptAES256GCM([]byte(title), keymaster.Vaultkey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt Title: %v", err)
+	}
+
+	StrencryptedTitle := utils.BytToBa64(encryptedTitle)
 
 	// Create login payload
 	payload := &CreateItemPayload{
-		Title: title,
+		Title: StrencryptedTitle,
 		Type:  typename,
 		Data:  encryptedItemdata,
 	}

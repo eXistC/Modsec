@@ -75,7 +75,7 @@ func SendCreateItemToBackend(payload *CreateItemPayload, backendURL string) (*Cr
 	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
 	//Delete after test
-	fmt.Printf("Item data:", req)
+	fmt.Println("Item data:", req)
 
 	resp, err := client.HMClient.Do(req)
 	if err != nil {

@@ -91,7 +91,7 @@ func CreateCategoryClient(categoryname string) (*CreateCategoryResponse, error) 
 	backendURL := "http://localhost:8080/createCategory" // Change as needed
 	response, err := SendCreateCategoryToBackend(payload, backendURL)
 	if err != nil {
-		log.Printf("CreateItem communication failed: %v", err)
+		log.Printf("CreateCategory communication failed: %v", err)
 		return nil, err
 	}
 

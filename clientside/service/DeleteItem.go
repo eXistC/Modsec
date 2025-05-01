@@ -9,17 +9,17 @@ import (
 	"net/http"
 )
 
-type DeleteCategoryPayload struct {
-	CategoryID uint `json:"category_id"`
+type DeleteItemPayload struct {
+	ItemID uint `json:"item_id"`
 }
 
-type DeleteCategoryResponse struct {
-	CategoryID uint   `json:"category_id"`
-	Status     string `json:"status"`
+type DeleteItemResponse struct {
+	ItemID uint   `json:"item_id"`
+	Status string `json:"status"`
 }
 
 // SendLoginToBackend sends login data to the backend server
-func SendDeleteCategoryToBackend(payload *DeleteCategoryPayload, backendURL string) (*DeleteCategoryResponse, error) {
+func SendDeleteItemToBackend(payload *DeleteItemPayload, backendURL string) (*DeleteItemResponse, error) {
 	// Convert payload to JSON
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
@@ -44,11 +44,11 @@ func SendDeleteCategoryToBackend(payload *DeleteCategoryPayload, backendURL stri
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("DeleteCategory failed with status: %d", resp.StatusCode)
+		return nil, fmt.Errorf("DeleteItem failed with status: %d", resp.StatusCode)
 	}
 
 	// Parse response
-	var result DeleteCategoryResponse
+	var result DeleteItemResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
@@ -56,21 +56,21 @@ func SendDeleteCategoryToBackend(payload *DeleteCategoryPayload, backendURL stri
 	return &result, nil
 }
 
-func DeleteCategoryClient(category_id uint) (*DeleteCategoryResponse, error) {
+func DeleteItemClient(item_id uint) (*DeleteItemResponse, error) {
 	// Create a item payload
-	payload := &DeleteCategoryPayload{
-		CategoryID: category_id,
+	payload := &DeleteItemPayload{
+		ItemID: item_id,
 	}
 
 	// Send to backend server
-	backendURL := "http://localhost:8080/deleteCategory" // Change as needed
-	response, err := SendDeleteCategoryToBackend(payload, backendURL)
+	backendURL := "http://localhost:8080/deleteItem" // Change as needed
+	response, err := SendDeleteItemToBackend(payload, backendURL)
 	if err != nil {
-		log.Printf("DeleteCategory communication failed: %v", err)
+		log.Printf("DeleteItem communication failed: %v", err)
 		return nil, err
 	}
 
 	// Log success and return result
-	log.Printf("DeleteCategory result: ItemID:%d, %s", response.CategoryID, response.Status)
+	log.Printf("DeleteItem result: ItemID:%d, %s", response.ItemID, response.Status)
 	return response, nil
 }

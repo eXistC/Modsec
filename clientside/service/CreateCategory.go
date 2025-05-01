@@ -83,7 +83,7 @@ func CreateCategoryClient(categoryname string) (*CreateCategoryResponse, error) 
 	// Create a item payload
 	payload, err := ProcessCreateCategory(categoryname)
 	if err != nil {
-		log.Printf("Login processing failed: %v", err)
+		log.Printf("CreateCategory processing failed: %v", err)
 		return nil, err
 	}
 

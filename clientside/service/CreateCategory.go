@@ -9,55 +9,37 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 )
 
-type CreateItemPayload struct {
-	Title string `json:"title"`
-	Type  string `json:"type"`
-	Data  []byte `json:"data"`
+type CreateCategoryPayload struct {
+	Category string `json:"category"`
 }
 
-type CreateItemResponse struct {
-	ItemID   uint      `json:"item_id"`
-	Title    string    `json:"title"`
-	CreateAt time.Time `json:"createAt"`
-	Message  string    `json:"message"`
+type CreateCategoryResponse struct {
+	Category string `json:"Category"`
+	Status   string `json:"status"`
 }
 
-func ProcessCreateItem(title, typename string, itemdata map[string]interface{}) (*CreateItemPayload, error) {
-
-	//Encode JSON to byte
-	itemdatabyte, err := json.Marshal(itemdata)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode JSON: %v", err)
-	}
+func ProcessCreateCategory(categoryname string) (*CreateCategoryPayload, error) {
 
 	// Encrypt data with sq
-	encryptedItemdata, err := utils.EncryptAES256GCM(itemdatabyte, keymaster.Vaultkey)
+	encryptedCategory, err := utils.EncryptAES256GCM([]byte(categoryname), keymaster.Vaultkey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt Itemdata: %v", err)
 	}
 
-	encryptedTitle, err := utils.EncryptAES256GCM([]byte(title), keymaster.Vaultkey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt Title: %v", err)
-	}
-
-	StrencryptedTitle := utils.BytToBa64(encryptedTitle)
+	StrencryptedCategory := utils.BytToBa64(encryptedCategory)
 
 	// Create login payload
-	payload := &CreateItemPayload{
-		Title: StrencryptedTitle,
-		Type:  typename,
-		Data:  encryptedItemdata,
+	payload := &CreateCategoryPayload{
+		Category: StrencryptedCategory,
 	}
 
 	return payload, nil
 }
 
 // SendLoginToBackend sends login data to the backend server
-func SendCreateItemToBackend(payload *CreateItemPayload, backendURL string) (*CreateItemResponse, error) {
+func SendCreateCategoryToBackend(payload *CreateCategoryPayload, backendURL string) (*CreateCategoryResponse, error) {
 	// Convert payload to JSON
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
@@ -89,7 +71,7 @@ func SendCreateItemToBackend(payload *CreateItemPayload, backendURL string) (*Cr
 	}
 
 	// Parse response
-	var result CreateItemResponse
+	var result CreateCategoryResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
@@ -97,23 +79,23 @@ func SendCreateItemToBackend(payload *CreateItemPayload, backendURL string) (*Cr
 	return &result, nil
 }
 
-func CreateItemClient(title, typename string, ItemData map[string]interface{}) (*CreateItemResponse, error) {
+func CreateCategoryClient(categoryname string) (*CreateCategoryResponse, error) {
 	// Create a item payload
-	payload, err := ProcessCreateItem(title, typename, ItemData)
+	payload, err := ProcessCreateCategory(categoryname)
 	if err != nil {
 		log.Printf("Login processing failed: %v", err)
 		return nil, err
 	}
 
 	// Send to backend server
-	backendURL := "http://localhost:8080/createItem" // Change as needed
-	response, err := SendCreateItemToBackend(payload, backendURL)
+	backendURL := "http://localhost:8080/createCategory" // Change as needed
+	response, err := SendCreateCategoryToBackend(payload, backendURL)
 	if err != nil {
 		log.Printf("CreateItem communication failed: %v", err)
 		return nil, err
 	}
 
 	// Log success and return result
-	log.Printf("CreateItem result: ItemID:%d, %s", response.ItemID, response.Message)
+	log.Printf("CreateCategory result: %s", response.Status)
 	return response, nil
 }

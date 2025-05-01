@@ -27,7 +27,7 @@ type Item struct {
 	TypeName   string    `json:"TypeName"`
 	DateCreate time.Time `json:"DateCreate"`
 	DateModify time.Time `json:"DateModify"`
-	Data       string    `json:"Data"` // base64 encoded string
+	Data       string    `json:"Data"`
 	IsBookmark bool      `json:"IsBookmark"`
 }
 

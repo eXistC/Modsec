@@ -9,16 +9,18 @@ import (
 	"net/http"
 )
 
-type DeleteItemPayload struct {
-	ItemID uint `json:"item_id"`
+type BookmarkPayload struct {
+	Item_Id  uint `json:"item_id"`
+	Bookmark bool `json:"bookmark"`
 }
 
-type DeleteItemResponse struct {
-	ItemID uint   `json:"item_id"`
-	Status string `json:"status"`
+type BookmarkResponse struct {
+	Item_Id uint   `json:"item_id"`
+	Status  string `json:"status"`
 }
 
-func SendDeleteItemToBackend(payload *DeleteItemPayload, backendURL string) (*DeleteItemResponse, error) {
+// SendLoginToBackend sends login data to the backend server
+func SendBookmarkToBackend(payload *BookmarkPayload, backendURL string) (*BookmarkResponse, error) {
 	// Convert payload to JSON
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
@@ -43,11 +45,11 @@ func SendDeleteItemToBackend(payload *DeleteItemPayload, backendURL string) (*De
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("DeleteItem failed with status: %d", resp.StatusCode)
+		return nil, fmt.Errorf("DeleteCategory failed with status: %d", resp.StatusCode)
 	}
 
 	// Parse response
-	var result DeleteItemResponse
+	var result BookmarkResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
@@ -55,21 +57,22 @@ func SendDeleteItemToBackend(payload *DeleteItemPayload, backendURL string) (*De
 	return &result, nil
 }
 
-func DeleteItemClient(item_id uint) (*DeleteItemResponse, error) {
+func BookmarkClient(item_id uint, bookmark bool) (*BookmarkResponse, error) {
 	// Create a item payload
-	payload := &DeleteItemPayload{
-		ItemID: item_id,
+	payload := &BookmarkPayload{
+		Item_Id:  item_id,
+		Bookmark: bookmark,
 	}
 
 	// Send to backend server
-	backendURL := "http://localhost:8080/deleteItem" // Change as needed
-	response, err := SendDeleteItemToBackend(payload, backendURL)
+	backendURL := "http://localhost:8080/bookmark" // Change as needed
+	response, err := SendBookmarkToBackend(payload, backendURL)
 	if err != nil {
-		log.Printf("DeleteItem communication failed: %v", err)
+		log.Printf("Bookmark communication failed: %v", err)
 		return nil, err
 	}
 
 	// Log success and return result
-	log.Printf("DeleteItem result: ItemID:%d, %s", response.ItemID, response.Status)
+	log.Printf("Bookmark result: ItemID:%d, %s", response.Item_Id, response.Status)
 	return response, nil
 }

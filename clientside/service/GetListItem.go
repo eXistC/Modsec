@@ -77,7 +77,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 			eachitem := AfterItem{
 				ItemID:     item.ItemID,
 				Title:      titleValue,
-				TypeName:   item.TypeName,
+				TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 				Data:       dataMap,
 				DateCreate: item.DateCreate,
 				DateModify: item.DateModify,
@@ -97,7 +97,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 			eachitem := AfterItem{
 				ItemID:     item.ItemID,
 				Title:      fmt.Sprintf("[Item %d]", item.ItemID),
-				TypeName:   item.TypeName,
+				TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 				Data:       make(map[string]interface{}),
 				DateCreate: item.DateCreate,
 				DateModify: item.DateModify,
@@ -116,7 +116,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 			eachitem := AfterItem{
 				ItemID:     item.ItemID,
 				Title:      fmt.Sprintf("[Item %d]", item.ItemID),
-				TypeName:   item.TypeName,
+				TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 				Data:       make(map[string]interface{}),
 				DateCreate: item.DateCreate,
 				DateModify: item.DateModify,
@@ -150,7 +150,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 		eachitem := AfterItem{
 			ItemID:     item.ItemID,
 			Title:      string(decryptedTitle),
-			TypeName:   item.TypeName,
+			TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 			Data:       dataMap,
 			DateCreate: item.DateCreate,
 			DateModify: item.DateModify,
@@ -189,6 +189,25 @@ func isBase64(s string) bool {
 	// Try actual decoding
 	_, err := utils.Ba64ToByt(s)
 	return err == nil
+}
+
+// Add this function to map backend types to frontend types
+func mapTypeNameToFrontend(backendType string) string {
+	switch backendType {
+	case "login":
+		return "website"
+	case "cryptowallet":
+		return "crypto"
+	case "identity":
+		return "identity"
+	case "note":
+		return "memo"
+	case "card":
+		return "card"
+	default:
+		log.Printf("Unknown type name: %s, using as-is", backendType)
+		return backendType
+	}
 }
 
 // SendLoginToBackend sends login data to the backend server

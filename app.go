@@ -240,3 +240,56 @@ func (a *App) CreateItemClient(title, typename string, ItemData map[string]inter
 	log.Printf("CreateItemClient called with title: %s, type: %s", title, typename)
 	return service.CreateItemClient(title, typename, ItemData)
 }
+
+// Add this function to your App struct methods
+
+func (a *App) GetPasswordList() (*[]service.AfterItem, error) {
+	return service.GetListItemClient()
+}
+
+// Add this function to your App struct methods
+
+func (a *App) ToggleBookmark(itemId uint, bookmark bool) (*service.BookmarkResponse, error) {
+	return service.BookmarkClient(itemId, bookmark)
+}
+
+// Add these functions to your App struct methods
+
+// Function to get the list of categories with their counts - placeholder implementation
+func (a *App) GetCategoryList() ([]map[string]interface{}, error) {
+	// Placeholder data for testing
+	categories := []map[string]interface{}{
+		{
+			"CategoryID":   uint(1),
+			"CategoryName": "Personal",
+			"ItemCount":    5,
+		},
+		{
+			"CategoryID":   uint(2),
+			"CategoryName": "Work",
+			"ItemCount":    3,
+		},
+		{
+			"CategoryID":   uint(3),
+			"CategoryName": "Finance",
+			"ItemCount":    2,
+		},
+		{
+			"CategoryID":   uint(4),
+			"CategoryName": "Uncategorized",
+			"ItemCount":    1,
+		},
+	}
+
+	return categories, nil
+}
+
+// Function to create a new category
+func (a *App) CreateCategoryClient(categoryName string) (*service.CreateCategoryResponse, error) {
+	return service.CreateCategoryClient(categoryName)
+}
+
+// Function to delete a category
+func (a *App) DeleteCategoryClient(categoryId uint) (*service.DeleteCategoryResponse, error) {
+	return service.DeleteCategoryClient(categoryId)
+}

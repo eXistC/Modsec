@@ -35,38 +35,176 @@ export function CryptoFields({
     handleChange(field as string)(e);
   };
 
-  return (
-    <>
+  // Helper component for copyable inputs
+  const CopyableInput = ({ 
+    label, 
+    value, 
+    fieldName,
+    placeholder = "",
+    className = "",
+    isPassword = false,
+    isTextArea = false
+  }: { 
+    label: string;
+    value: string | undefined;
+    fieldName: string;
+    placeholder?: string;
+    className?: string;
+    isPassword?: boolean;
+    isTextArea?: boolean;
+  }) => {
+    if (isTextArea) {
+      return (
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">{label}</label>
+          <div className="relative group">
+            <Textarea
+              name={fieldName}
+              placeholder={placeholder}
+              className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
+                ${!isEditing && value ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
+                border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10 min-h-[80px] ${className}`}
+              value={value || ''}
+              onChange={handleChange(fieldName)}
+              style={{ 
+                WebkitTextSecurity: (isPassword && (!isEditing || !showPassword)) ? 'disc' : 'none'
+              } as React.CSSProperties}
+              onFocus={handleFieldFocus}
+              onBlur={() => {
+                if (isEditing && isPassword) {
+                  setShowPassword(false);
+                }
+              }}
+              readOnly={!isEditing}
+              onClick={() => !isEditing && value && copyToClipboard(fieldName, value)}
+            />
+            {!isEditing && value && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div 
+                    className="absolute right-10 top-3 
+                      text-muted-foreground hover:text-primary transition-colors
+                      opacity-0 group-hover:opacity-80 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(fieldName, value);
+                    }}
+                  >
+                    {copiedField === fieldName ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                  <p>{copiedField === fieldName ? "Copied!" : "Click to copy"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {isPassword && !isEditing && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-[40px] px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4 text-muted-foreground/70" />
+                ) : (
+                  <Eye className="h-4 w-4 text-muted-foreground/70" />
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    if (isPassword) {
+      return (
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">{label}</label>
+          <div className="relative group">
+            <PasswordInput 
+              name={fieldName}
+              placeholder={placeholder}
+              value={value || ''}
+              onChange={handlePasswordChange(fieldName as keyof CryptoEntry)}
+              isEditing={isEditing}
+              showPassword={showPassword}
+              onPasswordVisibilityChange={setShowPassword}
+              onPasswordFocus={handleFieldFocus}
+              className={`font-mono ${!isEditing && value ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''} ${className}`}
+              onClick={() => !isEditing && value && copyToClipboard(fieldName, value)}
+            />
+            {!isEditing && value && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div 
+                    className={`
+                      absolute right-10 top-1/2 transform -translate-y-1/2 
+                      text-muted-foreground hover:text-primary transition-all duration-200
+                      ${copiedField === fieldName ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                      cursor-pointer
+                    `}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(fieldName, value);
+                    }}
+                  >
+                    {copiedField === fieldName ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="bg-primary text-primary-foreground">
+                  <p>{copiedField === fieldName ? "Copied!" : "Click to copy"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    return (
       <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">Wallet Address</label>
+        <label className="text-sm font-medium text-muted-foreground">{label}</label>
         <div className="relative group">
           <Input
-            name="walletAddress" // Added name attribute to maintain focus
-            placeholder="Enter wallet address"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
-              ${!isEditing && formData.walletAddress ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
-              border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10`}
-            value={formData.walletAddress}
-            onChange={handleChange('walletAddress')}
+            name={fieldName}
+            placeholder={placeholder}
+            className={`
+              ${!isEditing ? 'bg-background' : 'bg-secondary'} 
+              ${!isEditing && value ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+              border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background pr-10 ${className}
+            `}
+            value={value || ''}
+            onChange={handleChange(fieldName)}
             readOnly={!isEditing}
-            onClick={() => !isEditing && formData.walletAddress && copyToClipboard('walletAddress', formData.walletAddress)}
+            onClick={() => !isEditing && value && copyToClipboard(fieldName, value)}
           />
-          {!isEditing && formData.walletAddress && (
+          {!isEditing && value && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <div 
                   className={`
                     absolute right-3 top-1/2 transform -translate-y-1/2 
                     text-muted-foreground hover:text-primary transition-all duration-200
-                    ${copiedField === 'walletAddress' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                    ${copiedField === fieldName ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
                     cursor-pointer
                   `}
                   onClick={(e) => {
                     e.stopPropagation();
-                    copyToClipboard('walletAddress', formData.walletAddress);
+                    copyToClipboard(fieldName, value);
                   }}
                 >
-                  {copiedField === 'walletAddress' ? (
+                  {copiedField === fieldName ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
@@ -74,120 +212,48 @@ export function CryptoFields({
                 </div>
               </TooltipTrigger>
               <TooltipContent side="left" className="bg-primary text-primary-foreground">
-                <p>{copiedField === 'walletAddress' ? "Copied!" : "Click to copy"}</p>
+                <p>{copiedField === fieldName ? "Copied!" : "Click to copy"}</p>
               </TooltipContent>
             </Tooltip>
           )}
         </div>
       </div>
+    );
+  };
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">Password</label>
-        <div className="relative group">
-          <PasswordInput 
-            name="password" // Added name attribute to maintain focus
-            placeholder="Enter password"
-            value={formData.password || ''}
-            onChange={handlePasswordChange('password')}
-            isEditing={isEditing}
-            showPassword={showPassword}
-            onPasswordVisibilityChange={setShowPassword}
-            onPasswordFocus={handleFieldFocus}
-            className={`font-mono ${!isEditing && formData.password ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
-            onClick={() => !isEditing && formData.password && copyToClipboard('password', formData.password)}
-          />
-          {!isEditing && formData.password && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div 
-                  className={`
-                    absolute right-10 top-1/2 transform -translate-y-1/2 
-                    text-muted-foreground hover:text-primary transition-all duration-200
-                    ${copiedField === 'password' ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
-                    cursor-pointer
-                  `}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyToClipboard('password', formData.password || "");
-                  }}
-                >
-                  {copiedField === 'password' ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="left" className="bg-primary text-primary-foreground">
-                <p>{copiedField === 'password' ? "Copied!" : "Click to copy"}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      </div>
+  return (
+    <>
+      <CopyableInput
+        label="Wallet Name"
+        value={formData.walletName}
+        fieldName="walletName"
+        placeholder="Enter wallet name"
+      />
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">Recovery Phrase</label>
-        <div className="relative group">
-          <Textarea
-            name="recoveryPhrase" // Added name attribute to maintain focus
-            placeholder="Enter recovery phrase"
-            className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
-              ${!isEditing && formData.recoveryPhrase ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
-              border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background font-mono pr-10 min-h-[80px]`}
-            value={formData.recoveryPhrase || ''}
-            onChange={handleChange('recoveryPhrase')}
-            style={{ 
-              WebkitTextSecurity: (!isEditing || !showPassword) ? 'disc' : 'none'
-            } as React.CSSProperties}
-            onFocus={handleFieldFocus}
-            onBlur={() => {
-              if (isEditing) {
-                setShowPassword(false);
-              }
-            }}
-            readOnly={!isEditing}
-            onClick={() => !isEditing && formData.recoveryPhrase && copyToClipboard('recoveryPhrase', formData.recoveryPhrase)}
-          />
-          {!isEditing && formData.recoveryPhrase && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div 
-                  className="absolute right-10 top-3 
-                    text-muted-foreground hover:text-primary transition-colors
-                    opacity-70 group-hover:opacity-100 cursor-pointer"
-                  onClick={() => copyToClipboard('recoveryPhrase', formData.recoveryPhrase)}
-                >
-                  {copiedField === 'recoveryPhrase' ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="left" className="bg-primary text-primary-foreground">
-                <p>{copiedField === 'recoveryPhrase' ? "Copied!" : "Click to copy"}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          {!isEditing && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-[40px] px-3 py-2 hover:bg-transparent"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground/70" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground/70" />
-              )}
-            </Button>
-          )}
-        </div>
-      </div>
+      <CopyableInput
+        label="Wallet Address"
+        value={formData.address}
+        fieldName="address"
+        placeholder="Enter wallet address"
+        className="font-mono"
+      />
+
+      <CopyableInput
+        label="Private Key"
+        value={formData.privateKey}
+        fieldName="privateKey"
+        placeholder="Enter private key"
+        isPassword={true}
+        className="font-mono"
+      />
+
+      <CopyableInput
+        label="Notes"
+        value={formData.notes}
+        fieldName="notes"
+        placeholder="Enter notes"
+        isTextArea={true}
+      />
     </>
   );
 }

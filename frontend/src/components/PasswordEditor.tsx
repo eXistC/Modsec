@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet, Tag, Copy, Check } from "lucide-react";
+import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet, Tag, Copy, Check, File } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CardEntry, CryptoEntry, IdentityEntry, MemoEntry, PasswordEntry, WebsiteEntry } from "@/types/password";
 import { Calendar } from "lucide-react";
@@ -12,10 +12,10 @@ import { IdentityFields } from './ItemTypes/IdentityFields';
 import { WebsiteFields } from './ItemTypes/WebsiteFields';
 import { MemoFields } from './ItemTypes/MemoFields';
 import { SettingsDropdown } from "./ui/SettingsDropdown";
-import { calculateCategoryCounts } from "@/data/mockPasswords";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useColorSettings } from "@/context/ColorSettingsContext";
+import { GetCategoryList } from "@/wailsjs/go/main/App";
 
 interface PasswordEditorProps {
   password: PasswordEntry;
@@ -31,8 +31,32 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<PasswordEntry & { category?: string | null }>(password);
   const [showPassword, setShowPassword] = useState(false);
-  const [categories, setCategories] = useState(calculateCategoryCounts().map(cat => cat.name));
+  const [categories, setCategories] = useState<string[]>([]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+
+  // Load categories from the backend using the app.go binding
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      try {
+        const categoryData = await GetCategoryList();
+        if (categoryData) {
+          // Extract category names from the response
+          const categoryNames = categoryData.map(cat => cat.CategoryName as string);
+          setCategories(categoryNames);
+        }
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+        // Fallback to some defaults in case of error
+        setCategories(["Personal", "Work", "Finance", "Uncategorized"]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Make sure password changes are properly reflected in the component
   useEffect(() => {
@@ -50,6 +74,11 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     setIsEditing(false);
     // Add code to save the changes to your data store
     console.log("Saving updated entry:", formData);
+    
+    toast({
+      title: "Changes saved",
+      description: "Your item has been updated successfully.",
+    });
   };
 
   const handleEdit = () => {
@@ -93,6 +122,12 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const handleDelete = () => {
     // Add delete logic here
     console.log("Deleting item...");
+    
+    toast({
+      title: "Item deleted",
+      description: "Your item has been removed successfully.",
+      variant: "destructive",
+    });
   };
 
   // Enhanced function to copy field content to clipboard with toast notification
@@ -140,12 +175,13 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       'email': 'Email address',
       'cardNumber': 'Card number',
       'cardholderName': 'Cardholder name',
-      'expiryDate': 'Expiry date',
+      'expirationMonth': 'Expiration month',
+      'expirationYear': 'Expiration year',
       'cvv': 'CVV',
       'notes': 'Notes',
       'content': 'Content',
-      'seedPhrase': 'Seed phrase',
-      'publicKey': 'Public key',
+      'walletName': 'Wallet name',
+      'address': 'Address',
       'privateKey': 'Private key'
     };
 
@@ -163,7 +199,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       case "crypto":
         return <Wallet className="h-5 w-5" />;
       case "memo":
-        return <Pen className="h-5 w-5" />;
+        return <File className="h-5 w-5" />;
     }
   };
 
@@ -216,7 +252,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       case "crypto":
         return <Wallet className="h-6 w-6" />;
       case "memo":
-        return <Pen className="h-6 w-6" />;
+        return <File className="h-6 w-6" />;
       default:
         return <Globe className="h-6 w-6" />;
     }
@@ -496,6 +532,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
                 <Select
                   value={formData.category || NO_CATEGORY}
                   onValueChange={handleCategoryChange}
+                  disabled={isLoadingCategories}
                 >
                   <SelectTrigger className="w-full bg-secondary border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background">
                     <SelectValue placeholder="Select a category" />

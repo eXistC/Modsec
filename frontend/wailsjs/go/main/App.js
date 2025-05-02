@@ -6,12 +6,20 @@ export function CheckSession() {
   return window['go']['main']['App']['CheckSession']();
 }
 
+export function CreateCategoryClient(arg1) {
+  return window['go']['main']['App']['CreateCategoryClient'](arg1);
+}
+
 export function CreateItemClient(arg1, arg2, arg3) {
   return window['go']['main']['App']['CreateItemClient'](arg1, arg2, arg3);
 }
 
 export function DecryptAES256GCM(arg1, arg2, arg3) {
   return window['go']['main']['App']['DecryptAES256GCM'](arg1, arg2, arg3);
+}
+
+export function DeleteCategoryClient(arg1) {
+  return window['go']['main']['App']['DeleteCategoryClient'](arg1);
 }
 
 export function EmailToSHA256(arg1) {
@@ -28,6 +36,14 @@ export function GenerateIV() {
 
 export function GenerateSessionKey() {
   return window['go']['main']['App']['GenerateSessionKey']();
+}
+
+export function GetCategoryList() {
+  return window['go']['main']['App']['GetCategoryList']();
+}
+
+export function GetPasswordList() {
+  return window['go']['main']['App']['GetPasswordList']();
 }
 
 export function Greet(arg1) {
@@ -60,4 +76,8 @@ export function RegisterUser(arg1, arg2) {
 
 export function SimplePOC(arg1) {
   return window['go']['main']['App']['SimplePOC'](arg1);
+}
+
+export function ToggleBookmark(arg1, arg2) {
+  return window['go']['main']['App']['ToggleBookmark'](arg1, arg2);
 }

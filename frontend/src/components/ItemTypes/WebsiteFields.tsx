@@ -114,6 +114,65 @@ export function WebsiteFields({
     </div>
   );
 
+  // Helper component for copyable textarea
+  const CopyableTextarea = ({ 
+    label, 
+    value, 
+    fieldName,
+    placeholder = ""
+  }: { 
+    label: string;
+    value: string | undefined;
+    fieldName: string;
+    placeholder?: string;
+  }) => (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-muted-foreground">{label}</label>
+      <div className="relative group">
+        <Textarea
+          name={fieldName}
+          placeholder={placeholder}
+          className={`
+            ${!isEditing ? 'bg-background' : 'bg-secondary'} 
+            ${!isEditing && value ? 'cursor-pointer hover:border-primary/50 transition-colors duration-200' : ''}
+            border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background min-h-[80px] pr-10
+          `}
+          value={value || ''}
+          onChange={handleChange(fieldName)}
+          readOnly={!isEditing}
+          onClick={() => !isEditing && value && copyToClipboard(fieldName, value)}
+        />
+        {!isEditing && value && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div 
+                className={`
+                  absolute right-3 top-3 
+                  text-muted-foreground hover:text-primary transition-all duration-200
+                  ${copiedField === fieldName ? 'opacity-100' : 'opacity-0 group-hover:opacity-80'} 
+                  cursor-pointer
+                `}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(fieldName, value);
+                }}
+              >
+                {copiedField === fieldName ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="bg-primary text-primary-foreground">
+              <p>{copiedField === fieldName ? "Copied!" : "Click to copy"}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <CopyableInput
@@ -121,14 +180,6 @@ export function WebsiteFields({
         value={formData.username}
         fieldName="username"
         placeholder="Enter username"
-      />
-
-      <CopyableInput
-        label="Email"
-        value={formData.email}
-        fieldName="email"
-        placeholder="Enter email"
-        type="email"
       />
 
       <div className="space-y-2 relative">
@@ -187,9 +238,17 @@ export function WebsiteFields({
       {/* URL field with copy functionality */}
       <CopyableInput
         label="URL"
-        value={formData.website}
-        fieldName="website"
+        value={formData.url}
+        fieldName="url"
         placeholder="Enter website URL"
+      />
+      
+      {/* Notes field with copyable textarea */}
+      <CopyableTextarea
+        label="Notes"
+        value={formData.notes}
+        fieldName="notes"
+        placeholder="Enter notes"
       />
     </>
   );

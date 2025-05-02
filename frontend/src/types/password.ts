@@ -1,65 +1,52 @@
-export type PasswordType = "website" | "card" | "crypto" | "identity" | "memo";
+export type PasswordType = "website" | "identity" | "card" | "crypto" | "memo";
 
 export interface BaseEntry {
   id: string;
-  type: PasswordType;
   title: string;
-  isBookmarked?: boolean;
+  type: PasswordType;
+  isBookmarked: boolean;
+  dateCreated: Date;
+  dateModified: Date;
   notes?: string;
   category?: string | null;
 }
 
 export interface WebsiteEntry extends BaseEntry {
   type: "website";
-  website?: string;
-  username?: string;
+  username: string;
+  password: string;
+  url?: string;
+}
+
+export interface IdentityEntry extends BaseEntry {
+  type: "identity";
+  firstName: string;
+  lastName: string;
   email?: string;
-  password?: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface CardEntry extends BaseEntry {
   type: "card";
-  cardHolderName: string;
+  cardholderName: string;
   cardNumber: string;
-  validFrom?: string;
-  expirationDate: string;
+  expirationMonth: string;
+  expirationYear: string;
   cvv: string;
 }
 
 export interface CryptoEntry extends BaseEntry {
   type: "crypto";
-  walletAddress: string;
-  password?: string;
-  recoveryPhrase: string;
-}
-
-export interface IdentityEntry extends BaseEntry {
-  type: "identity";
-  initial: string;
-  firstName: string;
-  lastName: string;
-  nickname?: string;
-  phoneNumber: string;
-  gender: string;
-  birthDay: string;
-  occupation: string;
+  walletName: string;
   address: string;
+  privateKey: string;
 }
 
 export interface MemoEntry extends BaseEntry {
   type: "memo";
-  notes: string;
+  content: string;
 }
 
-export type PasswordEntry = 
-  | WebsiteEntry 
-  | CardEntry 
-  | CryptoEntry 
-  | IdentityEntry 
-  | MemoEntry;
-
-export interface Category {
-  name: string;
-  count: number;
-}
+export type PasswordEntry = WebsiteEntry | IdentityEntry | CardEntry | CryptoEntry | MemoEntry;
 

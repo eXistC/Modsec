@@ -4,9 +4,13 @@ import {service} from '../models';
 
 export function CheckSession():Promise<{[key: string]: any}>;
 
+export function CreateCategoryClient(arg1:string):Promise<service.CreateCategoryResponse>;
+
 export function CreateItemClient(arg1:string,arg2:string,arg3:{[key: string]: any}):Promise<service.CreateItemResponse>;
 
 export function DecryptAES256GCM(arg1:Array<number>,arg2:Array<number>,arg3:Array<number>):Promise<Array<number>>;
+
+export function DeleteCategoryClient(arg1:number):Promise<service.DeleteCategoryResponse>;
 
 export function EmailToSHA256(arg1:string):Promise<string>;
 
@@ -15,6 +19,10 @@ export function EncryptAES256GCM(arg1:Array<number>,arg2:Array<number>,arg3:Arra
 export function GenerateIV():Promise<Array<number>>;
 
 export function GenerateSessionKey():Promise<Array<number>>;
+
+export function GetCategoryList():Promise<Array<{[key: string]: any}>>;
+
+export function GetPasswordList():Promise<any>;
 
 export function Greet(arg1:string):Promise<string>;
 
@@ -31,3 +39,5 @@ export function RecoverySetup(arg1:string):Promise<string>;
 export function RegisterUser(arg1:string,arg2:string):Promise<string>;
 
 export function SimplePOC(arg1:string):Promise<void>;
+
+export function ToggleBookmark(arg1:number,arg2:boolean):Promise<service.BookmarkResponse>;

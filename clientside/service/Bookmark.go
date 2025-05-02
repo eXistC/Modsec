@@ -28,7 +28,7 @@ func SendBookmarkToBackend(payload *BookmarkPayload, backendURL string) (*Bookma
 	}
 
 	// Send data to backend server
-	req, err := http.NewRequest("DELETE", backendURL, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", backendURL, bytes.NewBuffer(jsonData)) // Change DELETE to POST
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
@@ -45,7 +45,7 @@ func SendBookmarkToBackend(payload *BookmarkPayload, backendURL string) (*Bookma
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("DeleteCategory failed with status: %d", resp.StatusCode)
+		return nil, fmt.Errorf("Bookmark update failed with status: %d", resp.StatusCode) // Update error message
 	}
 
 	// Parse response

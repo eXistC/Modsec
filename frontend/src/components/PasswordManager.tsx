@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PasswordList } from './PasswordList';
 import { PasswordEditor } from './PasswordEditor';
 import { PasswordEntry } from '@/types/password';
-import { mockPasswords } from '@/data/mockPasswords';
+import { useToast } from './ui/use-toast';
 
 interface PasswordManagerProps {
   currentView: string;
@@ -15,16 +15,16 @@ export function PasswordManager({
   onSelectPassword,
   selectedPassword 
 }: PasswordManagerProps) {
-  const [passwords, setPasswords] = useState<PasswordEntry[]>(mockPasswords);
+  const { toast } = useToast();
 
-  const handleToggleBookmark = (id: string) => {
-    setPasswords(prev =>
-      prev.map(entry =>
-        entry.id === id
-          ? { ...entry, isBookmarked: !entry.isBookmarked }
-          : entry
-      )
-    );
+  const handleToggleBookmark = (id: number) => {
+    console.log(`Bookmark toggled for item ${id}`);
+    
+    toast({
+      title: "Bookmark Updated",
+      description: "Your changes have been saved.",
+      duration: 2000,
+    });
   };
 
   return (
@@ -32,7 +32,6 @@ export function PasswordManager({
       <PasswordList 
         currentView={currentView}
         onSelectPassword={onSelectPassword}
-        passwords={passwords}
         onToggleBookmark={handleToggleBookmark}
       />
     </div>

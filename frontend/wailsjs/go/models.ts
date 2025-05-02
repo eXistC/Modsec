@@ -1,5 +1,33 @@
 export namespace service {
 	
+	export class BookmarkResponse {
+	    item_id: number;
+	    status: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BookmarkResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.item_id = source["item_id"];
+	        this.status = source["status"];
+	    }
+	}
+	export class CreateCategoryResponse {
+	    Category: string;
+	    status: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateCategoryResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Category = source["Category"];
+	        this.status = source["status"];
+	    }
+	}
 	export class CreateItemResponse {
 	    item_id: number;
 	    title: string;
@@ -36,6 +64,20 @@ export namespace service {
 		    }
 		    return a;
 		}
+	}
+	export class DeleteCategoryResponse {
+	    category_id: number;
+	    status: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteCategoryResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.category_id = source["category_id"];
+	        this.status = source["status"];
+	    }
 	}
 
 }

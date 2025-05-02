@@ -15,7 +15,7 @@ import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useColorSettings } from "@/context/ColorSettingsContext";
-import { GetCategoryList } from "@/wailsjs/go/main/App";
+import { GetCategoryList, UpdateItemClient } from "@/wailsjs/go/main/App";
 
 interface PasswordEditorProps {
   password: PasswordEntry;
@@ -70,15 +70,88 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
     }
   }, [password]);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Add code to save the changes to your data store
-    console.log("Saving updated entry:", formData);
-    
-    toast({
-      title: "Changes saved",
-      description: "Your item has been updated successfully.",
-    });
+  const handleSave = async () => {
+    try {
+      // Extract the data appropriate for this item type
+      const itemData: Record<string, any> = {};
+      
+      // Common fields first
+      if (formData.notes) {
+        itemData.notes = formData.notes;
+      }
+      
+      // Type-specific data fields
+      switch (formData.type) {
+        case "website":
+          const websiteData = formData as WebsiteEntry;
+          if (websiteData.username) itemData.username = websiteData.username;
+          if (websiteData.password) itemData.password = websiteData.password;
+          if (websiteData.url) itemData.url = websiteData.url;
+          break;
+          
+        case "card":
+          const cardData = formData as CardEntry;
+          if (cardData.cardholderName) itemData.cardholderName = cardData.cardholderName;
+          if (cardData.cardNumber) itemData.cardNumber = cardData.cardNumber;
+          if (cardData.expirationMonth) itemData.expirationMonth = cardData.expirationMonth;
+          if (cardData.expirationYear) itemData.expirationYear = cardData.expirationYear;
+          if (cardData.cvv) itemData.cvv = cardData.cvv;
+          break;
+          
+        case "crypto":
+          const cryptoData = formData as CryptoEntry;
+          if (cryptoData.walletName) itemData.walletName = cryptoData.walletName;
+          if (cryptoData.address) itemData.address = cryptoData.address;
+          if (cryptoData.privateKey) itemData.privateKey = cryptoData.privateKey;
+          break;
+          
+        case "identity":
+          const identityData = formData as IdentityEntry;
+          if (identityData.firstName) itemData.firstName = identityData.firstName;
+          if (identityData.lastName) itemData.lastName = identityData.lastName;
+          if (identityData.email) itemData.email = identityData.email;
+          if (identityData.phone) itemData.phone = identityData.phone;
+          if (identityData.address) itemData.address = identityData.address;
+          break;
+          
+        case "memo":
+          const memoData = formData as MemoEntry;
+          if (memoData.content) itemData.content = memoData.content;
+          break;
+      }
+      
+      // Add category if it exists
+      if (formData.category && formData.category !== NO_CATEGORY) {
+        itemData.category = formData.category;
+      }
+      
+      // Call the UpdateItemClient function from your Go backend
+      const response = await UpdateItemClient(
+        parseInt(formData.id), // Convert string ID to uint
+        formData.title,
+        itemData
+      );
+      
+      console.log("Item updated successfully:", response);
+      
+      // Show success toast
+      toast({
+        title: "Changes saved",
+        description: "Your item has been updated successfully.",
+      });
+      
+      // Exit editing mode
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating item:", error);
+      
+      // Show error toast
+      toast({
+        title: "Update failed",
+        description: "Failed to save your changes. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEdit = () => {

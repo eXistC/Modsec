@@ -293,3 +293,8 @@ func (a *App) CreateCategoryClient(categoryName string) (*service.CreateCategory
 func (a *App) DeleteCategoryClient(categoryId uint) (*service.DeleteCategoryResponse, error) {
 	return service.DeleteCategoryClient(categoryId)
 }
+
+// Function to update an existing category
+func (a *App) UpdateItemClient(itemId uint, title string, ItemData map[string]interface{}) (*service.UpdateItemResponse, error) {
+	return service.UpdateItemClient(itemId, title, ItemData)
+}

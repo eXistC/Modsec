@@ -41,3 +41,5 @@ export function RegisterUser(arg1:string,arg2:string):Promise<string>;
 export function SimplePOC(arg1:string):Promise<void>;
 
 export function ToggleBookmark(arg1:number,arg2:boolean):Promise<service.BookmarkResponse>;
+
+export function UpdateItemClient(arg1:number,arg2:string,arg3:{[key: string]: any}):Promise<service.UpdateItemResponse>;

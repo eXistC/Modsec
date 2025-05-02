@@ -79,6 +79,20 @@ export namespace service {
 	        this.status = source["status"];
 	    }
 	}
+	export class UpdateItemResponse {
+	    item_id: number;
+	    message: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateItemResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.item_id = source["item_id"];
+	        this.message = source["message"];
+	    }
+	}
 
 }
 

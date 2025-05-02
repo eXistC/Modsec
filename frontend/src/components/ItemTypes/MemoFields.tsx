@@ -24,6 +24,7 @@ export function MemoFields({
       <label className="text-sm font-medium text-muted-foreground">Notes</label>
       <div className="relative group">
         <Textarea
+          name="notes" // Added name attribute to maintain focus
           placeholder="Enter secure notes"
           className={`
             ${!isEditing ? 'bg-background' : 'bg-secondary'}

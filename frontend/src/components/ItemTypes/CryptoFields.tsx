@@ -41,6 +41,7 @@ export function CryptoFields({
         <label className="text-sm font-medium text-muted-foreground">Wallet Address</label>
         <div className="relative group">
           <Input
+            name="walletAddress" // Added name attribute to maintain focus
             placeholder="Enter wallet address"
             className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
               ${!isEditing && formData.walletAddress ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
@@ -84,6 +85,7 @@ export function CryptoFields({
         <label className="text-sm font-medium text-muted-foreground">Password</label>
         <div className="relative group">
           <PasswordInput 
+            name="password" // Added name attribute to maintain focus
             placeholder="Enter password"
             value={formData.password || ''}
             onChange={handlePasswordChange('password')}
@@ -128,6 +130,7 @@ export function CryptoFields({
         <label className="text-sm font-medium text-muted-foreground">Recovery Phrase</label>
         <div className="relative group">
           <Textarea
+            name="recoveryPhrase" // Added name attribute to maintain focus
             placeholder="Enter recovery phrase"
             className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
               ${!isEditing && formData.recoveryPhrase ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}

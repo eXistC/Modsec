@@ -1,7 +1,7 @@
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
-import { useState } from "react";
 import { CardEntry, CryptoEntry, IdentityEntry, MemoEntry, PasswordEntry, PasswordType, WebsiteEntry } from "@/types/password";
 import { WebsiteFields } from "../ItemTypes/WebsiteFields";
 import { IdentityFields } from "../ItemTypes/IdentityFields";
@@ -23,19 +23,48 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = true;
-  
+
+  // Add this to track the currently focused input
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
   // Dummy copy function for creation mode
   const dummyCopyToClipboard = (_field: string, _value: string) => {};
   const copiedField = null;
 
+  // Modified handleChange to preserve focus
   const handleChange = (field: string) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    // Record which field is being edited
+    setFocusedField(field);
+
+    // Update form data as before
     setFormData(prev => ({
       ...prev,
       [field]: e.target.value
     }));
   };
+
+  // Focus management effect
+  useEffect(() => {
+    // If we have a focused field, find it and refocus
+    if (focusedField) {
+      // Use a small timeout to ensure the DOM is updated
+      const timer = setTimeout(() => {
+        const element = document.querySelector(`[name="${focusedField}"]`) as HTMLElement;
+        if (element) {
+          element.focus();
+          // For input elements, try to preserve cursor position
+          if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+            const length = element.value.length;
+            element.setSelectionRange(length, length);
+          }
+        }
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [formData, focusedField]);
 
   // Map frontend type name to backend type name
   const mapTypeNameToBackend = (frontendType: PasswordType): string => {
@@ -51,7 +80,7 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title) {
       toast({
         title: "Error",
@@ -60,37 +89,37 @@ export function NewItemCreateOverlay({ type, onSave, onClose }: NewItemCreateOve
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Extract title and type, map type to backend format
       const { title } = formData;
       const backendType = mapTypeNameToBackend(type);
-      
+
       // Remove type and id properties from the data to send
       const { type: _, id: __, ...itemData } = formData;
-      
+
       // Call Go CreateItemClient function through Wails
       const response = await CreateItemClient(title as string, backendType, itemData);
-      
+
       // Create the complete item with response data
       const savedItem = {
         ...formData,
         id: String(response.item_id) // Convert the numeric ID to string
       } as PasswordEntry;
-      
+
       // Pass the saved item to parent component
       onSave(savedItem);
-      
+
       toast({
         title: "Success",
         description: response.message || "Item created successfully"
       });
-      
+
       // Close the overlay
       onClose();
-      
+
     } catch (error) {
       console.error("Failed to create item:", error);
       toast({

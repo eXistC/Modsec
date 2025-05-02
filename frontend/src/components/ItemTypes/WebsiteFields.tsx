@@ -70,6 +70,7 @@ export function WebsiteFields({
       <label className="text-sm font-medium text-muted-foreground">{label}</label>
       <div className="relative group">
         <Input
+          name={fieldName} // Added name attribute to maintain focus
           type={type}
           placeholder={placeholder}
           className={`
@@ -134,6 +135,7 @@ export function WebsiteFields({
         <label className="text-sm font-medium text-muted-foreground">Password</label>
         <div className="relative group">
           <PasswordInput 
+            name="password" // Added name attribute to maintain focus
             placeholder="Enter password"
             value={formData.password || ''}
             onChange={handlePasswordChange}

@@ -41,6 +41,7 @@ export function IdentityFields({
       <label className="text-sm font-medium text-muted-foreground">{label}</label>
       <div className="relative group">
         <Input
+          name={fieldName} // Added name attribute to maintain focus
           type={type}
           placeholder={placeholder}
           className={`
@@ -131,10 +132,12 @@ export function IdentityFields({
               disabled={!isEditing}
               value={formData.gender}
               onValueChange={(value) => handleChange('gender')({ target: { value } } as any)}
+              name="gender" // Added name attribute to maintain focus
             >
-              <SelectTrigger className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
-                ${!isEditing && formData.gender ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
-                pr-10`}
+              <SelectTrigger 
+                className={`${!isEditing ? 'bg-background' : 'bg-secondary'} 
+                  ${!isEditing && formData.gender ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}
+                  pr-10`}
                 onClick={() => !isEditing && formData.gender && copyToClipboard('gender', formData.gender)}
               >
                 <SelectValue placeholder="Select gender" />
@@ -195,6 +198,7 @@ export function IdentityFields({
         <label className="text-sm font-medium text-muted-foreground">Address</label>
         <div className="relative group">
           <Textarea
+            name="address" // Added name attribute to maintain focus
             placeholder="Enter address"
             className={`
               ${!isEditing ? 'bg-background' : 'bg-secondary'} 

@@ -53,6 +53,7 @@ export function CardFields({
       <label className="text-sm font-medium text-muted-foreground">{label}</label>
       <div className="relative group">
         <Input
+          name={fieldName} // Added name attribute to maintain focus
           placeholder={placeholder}
           className={`
             ${!isEditing ? 'bg-background' : 'bg-secondary'} 
@@ -108,6 +109,7 @@ export function CardFields({
         <label className="text-sm font-medium text-muted-foreground">Card Number</label>
         <div className="relative group">
           <PasswordInput 
+            name="cardNumber" // Added name attribute to maintain focus
             placeholder="Enter card number"
             value={formData.cardNumber || ''}
             onChange={handlePasswordChange('cardNumber')}
@@ -167,6 +169,7 @@ export function CardFields({
         <label className="text-sm font-medium text-muted-foreground">CVV</label>
         <div className="relative group">
           <PasswordInput 
+            name="cvv" // Added name attribute to maintain focus
             placeholder="Enter CVV"
             value={formData.cvv || ''}
             onChange={handlePasswordChange('cvv')}

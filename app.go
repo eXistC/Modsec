@@ -298,3 +298,8 @@ func (a *App) DeleteCategoryClient(categoryId uint) (*service.DeleteCategoryResp
 func (a *App) UpdateItemClient(itemId uint, title string, ItemData map[string]interface{}) (*service.UpdateItemResponse, error) {
 	return service.UpdateItemClient(itemId, title, ItemData)
 }
+
+// Add this function to your App struct methods in app.go
+func (a *App) DeleteItemClient(itemId uint) (*service.DeleteItemResponse, error) {
+	return service.DeleteItemClient(itemId)
+}

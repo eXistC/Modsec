@@ -12,9 +12,10 @@ import (
 )
 
 type UpdateItemPayload struct {
-	Item_id uint   `json:"item_id"`
-	Title   string `json:"title"`
-	Data    []byte `json:"data"`
+	Item_id     uint   `json:"item_id"`
+	Title       string `json:"title"`
+	Category_id *uint  `json:"category_id"`
+	Data        []byte `json:"data"`
 }
 
 type UpdateItemResponse struct {
@@ -22,7 +23,7 @@ type UpdateItemResponse struct {
 	Message string `json:"message"`
 }
 
-func ProcessUpdateItem(Item_id uint, title string, itemdata map[string]interface{}) (*UpdateItemPayload, error) {
+func ProcessUpdateItem(Item_id uint, category_id *uint, title string, itemdata map[string]interface{}) (*UpdateItemPayload, error) {
 
 	//Encode JSON to byte
 	itemdatabyte, err := json.Marshal(itemdata)
@@ -45,9 +46,10 @@ func ProcessUpdateItem(Item_id uint, title string, itemdata map[string]interface
 
 	// Update login payload
 	payload := &UpdateItemPayload{
-		Item_id: Item_id,
-		Title:   StrencryptedTitle,
-		Data:    encryptedItemdata,
+		Item_id:     Item_id,
+		Category_id: category_id,
+		Title:       StrencryptedTitle,
+		Data:        encryptedItemdata,
 	}
 
 	return payload, nil
@@ -94,9 +96,9 @@ func SendUpdateItemToBackend(payload *UpdateItemPayload, backendURL string) (*Up
 	return &result, nil
 }
 
-func UpdateItemClient(item_id uint, title string, ItemData map[string]interface{}) (*UpdateItemResponse, error) {
+func UpdateItemClient(item_id uint, category_id *uint, title string, ItemData map[string]interface{}) (*UpdateItemResponse, error) {
 	//Update a item payload
-	payload, err := ProcessUpdateItem(item_id, title, ItemData)
+	payload, err := ProcessUpdateItem(item_id, nil, title, ItemData)
 	if err != nil {
 		log.Printf("UpdateItem processing failed: %v", err)
 		return nil, err

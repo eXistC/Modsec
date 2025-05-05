@@ -44,4 +44,4 @@ export function SimplePOC(arg1:string):Promise<void>;
 
 export function ToggleBookmark(arg1:number,arg2:boolean):Promise<service.BookmarkResponse>;
 
-export function UpdateItemClient(arg1:number,arg2:string,arg3:{[key: string]: any}):Promise<service.UpdateItemResponse>;
+export function UpdateItemClient(arg1:number,arg2:any,arg3:string,arg4:{[key: string]: any}):Promise<service.UpdateItemResponse>;

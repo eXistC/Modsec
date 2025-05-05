@@ -295,8 +295,8 @@ func (a *App) DeleteCategoryClient(categoryId uint) (*service.DeleteCategoryResp
 }
 
 // Function to update an existing category
-func (a *App) UpdateItemClient(itemId uint, title string, ItemData map[string]interface{}) (*service.UpdateItemResponse, error) {
-	return service.UpdateItemClient(itemId, title, ItemData)
+func (a *App) UpdateItemClient(itemId uint, categoryId *uint, title string, ItemData map[string]interface{}) (*service.UpdateItemResponse, error) {
+	return service.UpdateItemClient(itemId, categoryId, title, ItemData)
 }
 
 // Add this function to your App struct methods in app.go

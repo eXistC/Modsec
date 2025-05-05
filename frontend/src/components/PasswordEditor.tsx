@@ -20,6 +20,7 @@ import { GetCategoryList, UpdateItemClient } from "@/wailsjs/go/main/App";
 interface PasswordEditorProps {
   password: PasswordEntry;
   isOpen: boolean;
+  onDelete: (deletedItemId: number) => void;
 }
 
 // Define a constant for the "no category" value to use consistently throughout
@@ -121,15 +122,17 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       }
       
       // Add category if it exists
+      let categoryId: number | null = null;
       if (formData.category && formData.category !== NO_CATEGORY) {
         itemData.category = formData.category;
       }
       
-      // Call the UpdateItemClient function from your Go backend
+      // Call the UpdateItemClient function from your Go backend with all required arguments
       const response = await UpdateItemClient(
-        parseInt(formData.id), // Convert string ID to uint
-        formData.title,
-        itemData
+        parseInt(formData.id), // arg1: item_id (number)
+        null, // arg2: category_id (any - can be null if no category)
+        formData.title, // arg3: title (string)
+        itemData  // arg4: ItemData (object)
       );
       
       console.log("Item updated successfully:", response);

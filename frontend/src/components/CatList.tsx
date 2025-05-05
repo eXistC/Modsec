@@ -20,35 +20,34 @@ export function CatList() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Fetch categories when component mounts
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
+  // Add the missing loadCategories function
   const loadCategories = async () => {
     setIsLoading(true);
     try {
       const categoryData = await GetCategoryList();
-      if (categoryData) {
-        // Transform backend data to the format we need
-        const formattedCategories = categoryData.map(cat => ({
-          id: cat.CategoryID,
-          name: cat.CategoryName,
-          count: cat.ItemCount || 0
-        }));
-        setCategories(formattedCategories);
-      }
+      // Transform the data to match our Category interface
+      const transformedData: Category[] = categoryData.map(category => ({
+        id: category.CategoryID,
+        name: category.CategoryName,
+        count: category.ItemCount
+      }));
+      setCategories(transformedData);
     } catch (error) {
-      console.error("Failed to load categories:", error);
+      console.error('Failed to fetch categories:', error);
       toast({
-        title: "Error loading categories",
-        description: "Could not fetch your categories. Please try again.",
         variant: "destructive",
+        title: "Failed to load categories",
+        description: "There was a problem loading your categories."
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Fetch categories when component mounts
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return;

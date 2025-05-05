@@ -124,6 +124,9 @@ export function Layout() {
                 <PasswordEditor
                   password={selectedPassword}
                   isOpen={true}
+                  onDelete={(deletedItemId: number) => { 
+                    setSelectedPassword(undefined);
+                  }}
                 />
               )}
             </div>

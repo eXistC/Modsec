@@ -255,33 +255,45 @@ func (a *App) ToggleBookmark(itemId uint, bookmark bool) (*service.BookmarkRespo
 
 // Add these functions to your App struct methods
 
-// Function to get the list of categories with their counts - placeholder implementation
+// Function to get the list of categories with their counts
 func (a *App) GetCategoryList() ([]map[string]interface{}, error) {
-	// Placeholder data for testing
-	categories := []map[string]interface{}{
-		{
-			"CategoryID":   uint(1),
-			"CategoryName": "Personal",
-			"ItemCount":    5,
-		},
-		{
-			"CategoryID":   uint(2),
-			"CategoryName": "Work",
-			"ItemCount":    3,
-		},
-		{
-			"CategoryID":   uint(3),
-			"CategoryName": "Finance",
-			"ItemCount":    2,
-		},
-		{
-			"CategoryID":   uint(4),
-			"CategoryName": "Uncategorized",
-			"ItemCount":    1,
-		},
+	// Get actual category data from the service
+	items, categories, err := service.GetListItemClient()
+	if err != nil {
+		log.Printf("Error getting category list: %v", err)
+		return nil, err
 	}
 
-	return categories, nil
+	// If no categories were found, return an empty array
+	if categories == nil {
+		return []map[string]interface{}{}, nil
+	}
+
+	// Create a map to store item counts for each category
+	categoryCounts := make(map[uint]int)
+
+	// Count items per category
+	if items != nil {
+		for _, item := range *items {
+			// Looking at the error, AfterItem doesn't have CategoryID field
+			// Need to access it from the item's Data map instead
+			if categoryID, ok := item.Data["CategoryID"].(float64); ok {
+				categoryCounts[uint(categoryID)]++
+			}
+		}
+	}
+
+	// Build the response in the format expected by the frontend
+	result := make([]map[string]interface{}, 0, len(*categories))
+	for _, cat := range *categories {
+		result = append(result, map[string]interface{}{
+			"CategoryID":   cat.CategoryID,
+			"CategoryName": cat.CategoryName,
+			"ItemCount":    categoryCounts[cat.CategoryID], // Get count from our map
+		})
+	}
+
+	return result, nil
 }
 
 // Function to create a new category

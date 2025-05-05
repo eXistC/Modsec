@@ -31,8 +31,19 @@ type Item struct {
 	IsBookmark bool      `json:"IsBookmark"`
 }
 
+type AfterCategory struct {
+	CategoryID   uint   `json:"CategoryID"`
+	CategoryName string `json:"CategoryName"`
+}
+
+type Category struct {
+	CategoryID   uint   `json:"CategoryID"`
+	CategoryName string `json:"CategoryName"`
+}
+
 type GetListItemResponse struct {
-	Items []Item `json:"Items"`
+	Items     []Item     `json:"Items"`
+	Categorys []Category `json:"categorys"`
 }
 
 func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
@@ -162,6 +173,73 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 	return &result, nil
 }
 
+func ProcessGetListCategory(resp *GetListItemResponse) (*[]AfterCategory, error) {
+	var result []AfterCategory
+
+	for _, category := range resp.Categorys {
+		// Add some debugging to check the raw title value
+		log.Printf("Processing categroy with ID %d, name: %s", category.CategoryID, category.CategoryName)
+
+		// Check if title is empty or contains raw non-base64 data
+		if category.CategoryName == "" || !isBase64(category.CategoryName) {
+			log.Printf("Category %d has non-base64 or empty category, using as-is", category.CategoryID)
+
+			// Use the title as-is or a placeholder if empty
+			categoryname := category.CategoryName
+			if categoryname == "" {
+				categoryname = fmt.Sprintf("[Category %d]", category.CategoryID)
+			}
+
+			eachcategory := AfterCategory{
+				CategoryID:   category.CategoryID,
+				CategoryName: categoryname,
+			}
+
+			result = append(result, eachcategory)
+			continue
+		}
+
+		// Title is base64-encoded, try to decode it
+		bytecategory, err := utils.Ba64ToByt(category.CategoryName)
+		if err != nil {
+			log.Printf("Error decoding categoryname for item ID %d: %v", category.CategoryID, err)
+
+			// Create entry with placeholder title
+			eachcategory := AfterCategory{
+				CategoryID:   category.CategoryID,
+				CategoryName: fmt.Sprintf("[Category %d]", category.CategoryID),
+			}
+
+			result = append(result, eachcategory)
+			continue
+		}
+
+		// Try to decrypt the title
+		decryptedCategoryName, err := utils.DecryptAES256GCM(bytecategory, keymaster.Vaultkey)
+		if err != nil {
+			log.Printf("Error decrypting title for category ID %d: %v", category.CategoryID, err)
+
+			// Create entry with placeholder title
+			eachcategory := AfterCategory{
+				CategoryID:   category.CategoryID,
+				CategoryName: fmt.Sprintf("[Category %d]", category.CategoryID),
+			}
+
+			result = append(result, eachcategory)
+			continue
+		}
+
+		// Create the category with all processed data
+		eachcategory := AfterCategory{
+			CategoryID:   category.CategoryID,
+			CategoryName: string(decryptedCategoryName),
+		}
+		result = append(result, eachcategory)
+	}
+
+	return &result, nil
+}
+
 // Helper function to check if a string is valid base64
 func isBase64(s string) bool {
 	// Quick check for characters that shouldn't be in base64
@@ -244,23 +322,29 @@ func SendGetListItemToBackend(backendURL string) (*GetListItemResponse, error) {
 }
 
 // LoginUser combines processing and backend communication
-func GetListItemClient() (*[]AfterItem, error) {
+func GetListItemClient() (*[]AfterItem, *[]AfterCategory, error) {
 
 	// Send to backend server
 	backendURL := "http://localhost:8080/getItemList"
 	response, err := SendGetListItemToBackend(backendURL)
 	if err != nil {
 		log.Printf("GetListItem communication failed: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	resptofront, err := ProcessGetListItem(response)
 	if err != nil {
 		log.Printf("GetListItem communication failed: %v", err)
-		return nil, err
+		return nil, nil, err
+	}
+
+	respcategoryfront, err := ProcessGetListCategory(response)
+	if err != nil {
+		log.Printf("GetListCategory communication failed: %v", err)
+		return resptofront, nil, err
 	}
 
 	// Log success and return result
 	log.Printf("GetListItem result: All good")
-	return resptofront, nil
+	return resptofront, respcategoryfront, nil
 }

@@ -243,7 +243,7 @@ func (a *App) CreateItemClient(title, typename string, ItemData map[string]inter
 
 // Add this function to your App struct methods
 
-func (a *App) GetPasswordList() (*[]service.AfterItem, error) {
+func (a *App) GetPasswordList() (*[]service.AfterItem, *[]service.AfterCategory, error) {
 	return service.GetListItemClient()
 }
 

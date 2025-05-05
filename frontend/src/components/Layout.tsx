@@ -46,23 +46,6 @@ export function Layout() {
   const handleSelectPassword = (password: PasswordEntry) => {
     setSelectedPassword(password);
   };
-  
-  // Handle item deletion
-  const handleDeletePassword = (itemId: number) => {
-    // Clear selection if the deleted item was selected
-    if (selectedPassword && 
-      (typeof selectedPassword.id === 'string' 
-        ? parseInt(selectedPassword.id) === itemId 
-        : selectedPassword.id === itemId)) {
-      setSelectedPassword(undefined);
-    }
-    
-    // We don't need to update the password list here, as PasswordManager will handle that
-    toast({
-      title: "Item deleted",
-      description: "The item has been successfully deleted."
-    });
-  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -132,6 +115,7 @@ export function Layout() {
                 <PasswordManager 
                   currentView={currentView}
                   onSelectPassword={handleSelectPassword}
+                  selectedPassword={selectedPassword}
                 />
               )}
             </div>
@@ -140,7 +124,6 @@ export function Layout() {
                 <PasswordEditor
                   password={selectedPassword}
                   isOpen={true}
-                  onDelete={handleDeletePassword}
                 />
               )}
             </div>

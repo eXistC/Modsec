@@ -79,20 +79,6 @@ export namespace service {
 	        this.status = source["status"];
 	    }
 	}
-	export class DeleteItemResponse {
-	    item_id: number;
-	    status: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new DeleteItemResponse(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.item_id = source["item_id"];
-	        this.status = source["status"];
-	    }
-	}
 	export class UpdateItemResponse {
 	    item_id: number;
 	    message: string;

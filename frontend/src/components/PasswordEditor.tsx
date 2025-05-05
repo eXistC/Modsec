@@ -15,24 +15,17 @@ import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useColorSettings } from "@/context/ColorSettingsContext";
-import { GetCategoryList, UpdateItemClient, DeleteItemClient } from "@/wailsjs/go/main/App";
+import { GetCategoryList, UpdateItemClient } from "@/wailsjs/go/main/App";
 
 interface PasswordEditorProps {
   password: PasswordEntry;
   isOpen: boolean;
-  onDelete?: (itemId: number) => void; // Add this line
-}
-
-interface PasswordManagerProps {
-  currentView: string;
-  onSelectPassword: (password: PasswordEntry) => void;
-  selectedPassword?: PasswordEntry; // Add this line
 }
 
 // Define a constant for the "no category" value to use consistently throughout
 const NO_CATEGORY = "uncategorized";
 
-export function PasswordEditor({ password, isOpen, onDelete }: PasswordEditorProps) {
+export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const { toast } = useToast();
   const { getIconBackgroundClass } = useColorSettings();
   const [isEditing, setIsEditing] = useState(false);
@@ -199,49 +192,15 @@ export function PasswordEditor({ password, isOpen, onDelete }: PasswordEditorPro
     }));
   };
 
-  const handleDelete = async () => {
-    try {
-      if (!confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
-        return;
-      }
-      
-      // Get numeric ID from formData
-      let itemId: number;
-      if (typeof formData.id === "string") {
-        itemId = parseInt(formData.id);
-      } else {
-        itemId = Number(formData.id);
-      }
-      
-      if (isNaN(itemId)) {
-        throw new Error(`Invalid item ID: ${formData.id}`);
-      }
-      
-      // Call the DeleteItemClient function
-      const response = await DeleteItemClient(itemId);
-      
-      if (response) {
-        toast({
-          title: "Item deleted",
-          description: "Your item has been deleted successfully.",
-          variant: "destructive",
-        });
-        
-        // Close the editor or navigate back to list view
-        // You might want to trigger a refresh of the password list after deletion
-        // This could be done via a callback passed to the PasswordEditor component
-        if (onDelete) {
-          onDelete(itemId);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to delete item:", error);
-      toast({
-        title: "Delete failed",
-        description: "Could not delete the item. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handleDelete = () => {
+    // Add delete logic here
+    console.log("Deleting item...");
+    
+    toast({
+      title: "Item deleted",
+      description: "Your item has been removed successfully.",
+      variant: "destructive",
+    });
   };
 
   // Enhanced function to copy field content to clipboard with toast notification

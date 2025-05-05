@@ -22,10 +22,6 @@ export function DeleteCategoryClient(arg1) {
   return window['go']['main']['App']['DeleteCategoryClient'](arg1);
 }
 
-export function DeleteItemClient(arg1) {
-  return window['go']['main']['App']['DeleteItemClient'](arg1);
-}
-
 export function EmailToSHA256(arg1) {
   return window['go']['main']['App']['EmailToSHA256'](arg1);
 }

@@ -71,6 +71,6 @@ func DeleteCategoryClient(category_id uint) (*DeleteCategoryResponse, error) {
 	}
 
 	// Log success and return result
-	log.Printf("DeleteCategory result: ItemID:%d, %s", response.CategoryID, response.Status)
+	log.Printf("DeleteCategory result: CategoryID:%d, %s", response.CategoryID, response.Status)
 	return response, nil
 }

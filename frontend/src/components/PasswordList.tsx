@@ -413,7 +413,10 @@ export function PasswordList({
                         ${entry.isBookmarked 
                           ? 'hover:bg-primary/10' 
                           : 'opacity-0 group-hover:opacity-100 hover:bg-secondary'}`}
-                      onClick={toggleBookmark(entry.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering the parent button click
+                        toggleBookmark(entry.id)(e);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();

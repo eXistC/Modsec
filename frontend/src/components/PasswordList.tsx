@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Globe, Plus, Search, User, CreditCard, Wallet, File, AlertCircle, Loader2, Bookmark } from "lucide-react";
+import { Globe, Plus, Search, User, CreditCard, Wallet, File, AlertCircle, Loader2, Bookmark, ChevronDown, SortAsc, SortDesc, ArrowDownAZ, ArrowUpZA, CalendarClock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { IdentityEntry, PasswordEntry, PasswordType } from "@/types/password";
 import { NewItemTypeOverlay } from "./Overlays/NewItemTypeOverlay";
@@ -9,6 +9,7 @@ import { NewItemCreateOverlay } from "./Overlays/NewItemCreateOverlay";
 import { useColorSettings } from "@/context/ColorSettingsContext";
 import { GetPasswordList, ToggleBookmark } from "@/wailsjs/go/main/App";
 import { useToast } from "./ui/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Export the interface separately
 export interface PasswordListProps {
@@ -152,6 +153,10 @@ const convertToPasswordEntry = (item: any): PasswordEntry => {
   }
 };
 
+// Add these types near your other types
+type SortField = 'title' | 'dateCreated' | 'dateModified' | 'type';
+type SortDirection = 'asc' | 'desc';
+
 export function PasswordList({ 
   currentView, 
   onSelectPassword,
@@ -165,6 +170,8 @@ export function PasswordList({
   const [error, setError] = useState<string | null>(null);
   const { colors } = useColorSettings();
   const { toast } = useToast();
+  const [sortField, setSortField] = useState<SortField>('dateModified');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Load passwords on component mount
   useEffect(() => {
@@ -258,8 +265,31 @@ export function PasswordList({
     }
   };
 
-  const filteredPasswords = passwords
-    .filter(entry => 
+  const getSortedPasswords = (passwords: PasswordEntry[]) => {
+    return [...passwords].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'dateCreated':
+          comparison = new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
+          break;
+        case 'dateModified':
+          comparison = new Date(a.dateModified).getTime() - new Date(b.dateModified).getTime();
+          break;
+        case 'type':
+          comparison = a.type.localeCompare(b.type);
+          break;
+      }
+      
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  };
+
+  const filteredPasswords = getSortedPasswords(
+    passwords.filter(entry => 
       // First apply bookmark filter if we're in bookmarks view
       (currentView === "bookmarks" ? entry.isBookmarked : true) &&
       // Then apply search filter
@@ -270,7 +300,15 @@ export function PasswordList({
          entry.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
          entry.lastName?.toLowerCase().includes(searchQuery.toLowerCase())
        )))
-    );
+    )
+  );
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' ? 
+      <SortAsc className="h-3 w-3 ml-1" /> : 
+      <SortDesc className="h-3 w-3 ml-1" />;
+  };
 
   const handleNewItem = () => {
     setShowTypeOverlay(true);
@@ -347,6 +385,131 @@ export function PasswordList({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+        </div>
+        {/* Enhanced sorting UI */}
+        <div className="flex items-center justify-between mt-2 px-1">
+          <div className="text-xs font-medium text-muted-foreground">
+            {filteredPasswords.length} {filteredPasswords.length === 1 ? 'item' : 'items'}
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 gap-1.5 text-xs px-2 hover:bg-secondary/80"
+              >
+                <span className="text-muted-foreground">Sort:</span>
+                <span className="font-medium">
+                  {sortField === 'title' && 'Title'}
+                  {sortField === 'dateCreated' && 'Created'}
+                  {sortField === 'dateModified' && 'Modified'}
+                  {sortField === 'type' && 'Type'}
+                </span>
+                {sortField === 'title' && (sortDirection === 'asc' ? 
+                  <ArrowDownAZ className="h-3.5 w-3.5 text-primary" /> : 
+                  <ArrowUpZA className="h-3.5 w-3.5 text-primary" />
+                )}
+                {(sortField === 'dateCreated' || sortField === 'dateModified') && (
+                  <CalendarClock className={`h-3.5 w-3.5 text-primary ${sortDirection === 'desc' ? 'rotate-0' : 'rotate-180'}`} />
+                )}
+                {sortField === 'type' && (sortDirection === 'asc' ? 
+                  <SortAsc className="h-3.5 w-3.5 text-primary" /> : 
+                  <SortDesc className="h-3.5 w-3.5 text-primary" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            
+            <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuItem 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => {
+                  if (sortField === 'title') {
+                    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('title');
+                    setSortDirection('asc');
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowDownAZ className={`h-3.5 w-3.5 ${sortField === 'title' ? 'text-primary' : 'text-muted-foreground opacity-70'}`} />
+                  <span>Title</span>
+                </div>
+                {sortField === 'title' && (
+                  <span className="text-xs font-medium text-primary">
+                    {sortDirection === 'asc' ? 'A → Z' : 'Z → A'}
+                  </span>
+                )}
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => {
+                  if (sortField === 'dateModified') {
+                    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('dateModified');
+                    setSortDirection('desc'); // Default to newest first
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <CalendarClock className={`h-3.5 w-3.5 ${sortField === 'dateModified' ? 'text-primary' : 'text-muted-foreground opacity-70'}`} />
+                  <span>Last modified</span>
+                </div>
+                {sortField === 'dateModified' && (
+                  <span className="text-xs font-medium text-primary">
+                    {sortDirection === 'desc' ? 'Newest' : 'Oldest'}
+                  </span>
+                )}
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => {
+                  if (sortField === 'dateCreated') {
+                    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('dateCreated');
+                    setSortDirection('desc'); // Default to newest first
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <CalendarClock className={`h-3.5 w-3.5 ${sortField === 'dateCreated' ? 'text-primary' : 'text-muted-foreground opacity-70'}`} />
+                  <span>Date created</span>
+                </div>
+                {sortField === 'dateCreated' && (
+                  <span className="text-xs font-medium text-primary">
+                    {sortDirection === 'desc' ? 'Newest' : 'Oldest'}
+                  </span>
+                )}
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => {
+                  if (sortField === 'type') {
+                    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('type');
+                    setSortDirection('asc');
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <File className={`h-3.5 w-3.5 ${sortField === 'type' ? 'text-primary' : 'text-muted-foreground opacity-70'}`} />
+                  <span>Type</span>
+                </div>
+                {sortField === 'type' && (
+                  <span className="text-xs font-medium text-primary">
+                    {sortDirection === 'asc' ? 'A → Z' : 'Z → A'}
+                  </span>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <ScrollArea className="h-[calc(100vh-150px)]">

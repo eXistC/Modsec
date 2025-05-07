@@ -489,18 +489,6 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
               Edit
             </Button>
           )}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8"
-            onClick={() => console.log("Toggle bookmark")}
-          >
-            {password.isBookmarked ? (
-              <Bookmark className="h-4 w-4 text-primary" />
-            ) : (
-              <Bookmark className="h-4 w-4" />
-            )}
-          </Button>
           <SettingsDropdown 
             variant="more"
             onDelete={handleDelete}

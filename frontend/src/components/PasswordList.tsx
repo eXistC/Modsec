@@ -178,7 +178,7 @@ export function PasswordList({
     try {
       console.log("Calling GetPasswordList...");
       
-      // Simplest approach - direct function call
+      // Call the API to get password list
       const items = await GetPasswordList();
       console.log("Raw GetPasswordList response:", items);
       
@@ -199,46 +199,11 @@ export function PasswordList({
         
         console.log(`Successfully processed ${convertedPasswords.length} items`);
         setPasswords(convertedPasswords);
-        return;
       } else {
-        console.log("No items found or invalid response structure:", items);
+        // Set empty array if no items found
+        console.log("No items found in response");
+        setPasswords([]);
       }
-      
-      // If we get here, use dummy data
-      console.log("Using dummy data as fallback");
-      const dummyData = [
-        {
-          ItemID: 1,
-          Title: "Example Website",
-          TypeName: "login",
-          DateCreate: new Date().toISOString(),
-          DateModify: new Date().toISOString(),
-          IsBookmark: false,
-          Data: {
-            username: "user@example.com",
-            password: "********",
-            url: "https://example.com"
-          }
-        },
-        {
-          ItemID: 2,
-          Title: "Personal Info",
-          TypeName: "identity",
-          DateCreate: new Date().toISOString(),
-          DateModify: new Date().toISOString(),
-          IsBookmark: true,
-          Data: {
-            firstName: "John",
-            lastName: "Doe",
-            email: "john@example.com",
-            phone: "555-123-4567"
-          }
-        }
-      ];
-      
-      const convertedDummyData = dummyData.map(item => convertToPasswordEntry(item));
-      setPasswords(convertedDummyData);
-      
     } catch (err) {
       console.error("Failed to load passwords:", err);
       setError("Failed to load passwords. Please try again.");
@@ -247,6 +212,8 @@ export function PasswordList({
         description: "Failed to load passwords. Please try again.",
         variant: "destructive",
       });
+      // Set empty array on error
+      setPasswords([]);
     } finally {
       setIsLoading(false);
     }

@@ -240,20 +240,9 @@ func (a *App) CreateItemClient(title, typename string, ItemData map[string]inter
 	log.Printf("CreateItemClient called with title: %s, type: %s", title, typename)
 	return service.CreateItemClient(title, typename, ItemData)
 }
-
-// Add this function to your App struct methods
-
-func (a *App) GetPasswordList() (*[]service.AfterItem, *[]service.AfterCategory, error) {
-	return service.GetListItemClient()
-}
-
-// Add this function to your App struct methods
-
 func (a *App) ToggleBookmark(itemId uint, bookmark bool) (*service.BookmarkResponse, error) {
 	return service.BookmarkClient(itemId, bookmark)
 }
-
-// Add these functions to your App struct methods
 
 // Function to get the list of categories with their counts
 func (a *App) GetCategoryList() ([]map[string]interface{}, error) {
@@ -309,4 +298,28 @@ func (a *App) DeleteCategoryClient(categoryId uint) (*service.DeleteCategoryResp
 // Function to update an existing category
 func (a *App) UpdateItemClient(itemId uint, categoryId *uint, title string, ItemData map[string]interface{}) (*service.UpdateItemResponse, error) {
 	return service.UpdateItemClient(itemId, categoryId, title, ItemData)
+}
+
+// GetPasswordList exposes the GetListItemClient function to the frontend for password listing
+func (a *App) GetPasswordList() ([]service.AfterItem, error) {
+	log.Println("GetPasswordList called from frontend")
+
+	// Call the actual function that does the work
+	items, _, err := service.GetListItemClient()
+
+	// Check for errors
+	if err != nil {
+		log.Printf("GetPasswordList error: %v", err)
+		return nil, err
+	}
+
+	// Make sure we don't return nil
+	if items == nil {
+		log.Println("GetPasswordList: items is nil, returning empty array")
+		return []service.AfterItem{}, nil
+	}
+
+	// Return just the items array directly (not a pointer) for simpler JS binding
+	log.Printf("GetPasswordList returning %d items", len(*items))
+	return *items, nil
 }

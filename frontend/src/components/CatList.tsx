@@ -44,18 +44,36 @@ export function CatList() {
     }
   };
 
+  // Add this function to check for duplicate category names
+  const isDuplicateCategoryName = (name: string): boolean => {
+    return categories.some(category => 
+      category.name.toLowerCase() === name.toLowerCase()
+    );
+  };
+
   // Fetch categories when component mounts
   useEffect(() => {
     loadCategories();
   }, []);
 
   const handleAddCategory = async () => {
-    if (!newCategory.trim()) return;
+    const trimmedName = newCategory.trim();
+    if (!trimmedName) return;
+    
+    // Check for duplicate category name
+    if (isDuplicateCategoryName(trimmedName)) {
+      toast({
+        title: "Category already exists",
+        description: "Please use a unique category name.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     try {
       // Call the Go function to create a new category
-      const response = await CreateCategoryClient(newCategory.trim());
+      const response = await CreateCategoryClient(trimmedName);
       if (response) {
         toast({
           title: "Category created",

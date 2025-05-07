@@ -11,11 +11,13 @@ import { GetPasswordList, ToggleBookmark } from "@/wailsjs/go/main/App";
 import { useToast } from "./ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-// Export the interface separately
+// Update the PasswordListProps interface
 export interface PasswordListProps {
   currentView: string;
   onSelectPassword: (password: PasswordEntry) => void;
   onToggleBookmark: (id: number) => void;
+  // Add this new prop
+  refreshTrigger?: number; // A counter that triggers refresh when it changes
 }
 
 // Helper function for credit card formatting
@@ -160,7 +162,8 @@ type SortDirection = 'asc' | 'desc';
 export function PasswordList({ 
   currentView, 
   onSelectPassword,
-  onToggleBookmark 
+  onToggleBookmark,
+  refreshTrigger = 0 // Default to 0
 }: PasswordListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showTypeOverlay, setShowTypeOverlay] = useState(false);
@@ -177,6 +180,12 @@ export function PasswordList({
   useEffect(() => {
     loadPasswords();
   }, []);
+
+  // Add dependency to the useEffect to reload when refreshTrigger changes
+  useEffect(() => {
+    loadPasswords();
+    // Add refreshTrigger as a dependency
+  }, [refreshTrigger]);
 
   const loadPasswords = async () => {
     setIsLoading(true);

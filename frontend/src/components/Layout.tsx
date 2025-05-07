@@ -17,6 +17,7 @@ export function Layout() {
   const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | undefined>();
   const [showRegister, setShowRegister] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshCounter, setRefreshCounter] = useState(0);
   const { toast } = useToast();
 
   // Check for existing session on load
@@ -82,6 +83,14 @@ export function Layout() {
     }
   };
 
+  const handlePasswordUpdate = (updatedPassword: PasswordEntry) => {
+    // Update the selected password
+    setSelectedPassword(updatedPassword);
+    
+    // Trigger a refresh of the password list
+    setRefreshCounter(prev => prev + 1);
+  };
+
   return (
     <ColorSettingsProvider>
       {!isAuthenticated ? (
@@ -116,6 +125,7 @@ export function Layout() {
                   currentView={currentView}
                   onSelectPassword={handleSelectPassword}
                   selectedPassword={selectedPassword}
+                  refreshTrigger={refreshCounter}
                 />
               )}
             </div>
@@ -126,7 +136,10 @@ export function Layout() {
                   isOpen={true}
                   onDelete={(deletedItemId: number) => { 
                     setSelectedPassword(undefined);
+                    // Also trigger refresh on delete
+                    setRefreshCounter(prev => prev + 1);
                   }}
+                  onUpdate={handlePasswordUpdate}
                 />
               )}
             </div>

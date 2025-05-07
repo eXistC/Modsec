@@ -20,6 +20,7 @@ interface PasswordEditorProps {
   password: PasswordEntry;
   isOpen: boolean;
   onDelete: (deletedItemId: number) => void;
+  onUpdate?: (updatedPassword: PasswordEntry) => void; // Make it optional
 }
 
 // Define a constant for the "no category" value to use consistently throughout
@@ -36,7 +37,7 @@ const formatDate = (date: Date | string | undefined): string => {
   });
 };
 
-export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
+export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: PasswordEditorProps) {
   const { toast } = useToast();
   const { getIconBackgroundClass } = useColorSettings();
   const [isEditing, setIsEditing] = useState(false);
@@ -141,10 +142,10 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       
       // Call the UpdateItemClient function with the correct category ID
       const response = await UpdateItemClient(
-        parseInt(formData.id),           // arg1: item_id (number)
-        formData.categoryId || null,     // arg2: category_id (can be null)
-        formData.title,                 // arg3: title (string)
-        itemData                        // arg4: ItemData (object)
+        parseInt(formData.id),
+        formData.categoryId || null,
+        formData.title,
+        itemData
       );
       
       console.log("Item updated successfully:", response);
@@ -154,6 +155,19 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
         title: "Changes saved",
         description: "Your item has been updated successfully.",
       });
+      
+      // IMPORTANT: Make sure to call onUpdate if it exists
+      if (onUpdate) {
+        // Create a copy with updated dateModified
+        const updatedPassword = {
+          ...formData,
+          dateModified: new Date() // Update the modification date
+        };
+        
+        onUpdate(updatedPassword);
+      } else {
+        console.warn("onUpdate is not defined - changes won't reflect until page refresh");
+      }
       
       // Exit editing mode
       setIsEditing(false);

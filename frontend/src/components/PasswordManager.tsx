@@ -4,16 +4,19 @@ import { PasswordEntry } from '@/types/password';
 import { useToast } from './ui/use-toast';
 import { ToggleBookmark } from '@/wailsjs/go/main/App'; 
 
+// Update the interface to include refreshTrigger
 interface PasswordManagerProps {
   currentView: string;
   onSelectPassword: (password: PasswordEntry) => void;
   selectedPassword?: PasswordEntry; 
+  refreshTrigger?: number; // Add refreshTrigger prop
 }
 
 export function PasswordManager({ 
   currentView, 
   onSelectPassword,
-  selectedPassword 
+  selectedPassword,
+  refreshTrigger = 0 // Default to 0
 }: PasswordManagerProps) {
   const { toast } = useToast();
   // Initialize with the selectedPassword from props, or null if not provided
@@ -99,6 +102,20 @@ export function PasswordManager({
     }
   };
 
+  const handleUpdatePassword = (updatedPassword: PasswordEntry) => {
+    // Update the passwords state with the new password data
+    setPasswords(prevPasswords => 
+      prevPasswords.map(pw => 
+        pw.id === updatedPassword.id ? updatedPassword : pw
+      )
+    );
+    
+    // Also update the selected password if it's the one being edited
+    if (localSelectedPassword && localSelectedPassword.id === updatedPassword.id) {
+      setLocalSelectedPassword(updatedPassword);
+    }
+  };
+
   // Handle local selection while also notifying parent
   const handleSelectPassword = (password: PasswordEntry) => {
     setLocalSelectedPassword(password);
@@ -111,6 +128,7 @@ export function PasswordManager({
         currentView={currentView}
         onSelectPassword={handleSelectPassword}
         onToggleBookmark={handleToggleBookmark}
+        refreshTrigger={refreshTrigger} // Pass the refreshTrigger prop
       />
     </div>
   );

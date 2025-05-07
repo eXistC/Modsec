@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet, Tag, Copy, Check, File } from "lucide-react";
+import { Bookmark, Globe, MoreVertical, Pencil, User, CreditCard, Pen, Eye, EyeOff, Wallet, Tag, Copy, Check, File, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CardEntry, CryptoEntry, IdentityEntry, MemoEntry, PasswordEntry, WebsiteEntry } from "@/types/password";
-import { Calendar } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardFields } from './ItemTypes/CardFields';
 import { CryptoFields } from './ItemTypes/CryptoFields';
@@ -25,6 +24,17 @@ interface PasswordEditorProps {
 
 // Define a constant for the "no category" value to use consistently throughout
 const NO_CATEGORY = "uncategorized";
+
+// Replace the formatDateTime function with this simpler formatDate function:
+const formatDate = (date: Date | string | undefined): string => {
+  if (!date) return 'Unknown';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString(undefined, { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric'
+  });
+};
 
 export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const { toast } = useToast();
@@ -652,6 +662,29 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
                   </span>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Enhanced timestamps section with better styling */}
+          <div className="space-y-2 mt-4 pt-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <label className="text-sm font-medium text-muted-foreground">Timestamps</label>
+            </div>
+            <div className="pl-6 space-y-3">
+              <div className="flex flex-col space-y-1">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">Created</div>
+                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary inline-block">
+                  {formatDate(formData.dateCreated)}
+                </div>
+              </div>
+              
+              <div className="flex flex-col space-y-1">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">Last modified</div>
+                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary inline-block">
+                  {formatDate(formData.dateModified)}
+                </div>
+              </div>
             </div>
           </div>
         </div>

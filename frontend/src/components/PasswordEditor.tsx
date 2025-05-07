@@ -46,6 +46,7 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
   const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Load categories from the backend using the app.go binding
   useEffect(() => {
@@ -89,6 +90,27 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
       setShowPassword(false);
     }
   }, [password]);
+
+  // Add an effect to maintain focus after re-render
+  useEffect(() => {
+    // If we have a focused field, find it and refocus
+    if (focusedField) {
+      // Use a small timeout to ensure the DOM is updated
+      const timer = setTimeout(() => {
+        const element = document.querySelector(`[name="${focusedField}"]`) as HTMLElement;
+        if (element) {
+          element.focus();
+          // For input elements, try to preserve cursor position
+          if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+            const length = element.value.length;
+            element.setSelectionRange(length, length);
+          }
+        }
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [formData, focusedField]);
 
   const handleSave = async () => {
     try {
@@ -207,6 +229,8 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     console.log(`Updating field: ${field} with value: ${e.target.value}`);
+    // Track which field is being edited
+    setFocusedField(field);
     setFormData(prev => ({
       ...prev,
       [field]: e.target.value

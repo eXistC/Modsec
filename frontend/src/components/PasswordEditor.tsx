@@ -549,8 +549,12 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
             />
           )}
 
-          {/* Notes field with improved design - only show for non-memo types */}
-          {formData.notes !== undefined && formData.type !== "memo" && (
+          {/* Notes field - only show for non-memo types and when not included in the component */}
+          {formData.notes !== undefined && 
+           formData.type !== "memo" && // MemoFields already shows notes
+           formData.type !== "identity" && // IdentityFields already shows notes
+           formData.type !== "website" && // WebsiteFields already shows notes
+           (
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Notes</label>
               <div className="relative group">

@@ -98,7 +98,7 @@ func SendUpdateItemToBackend(payload *UpdateItemPayload, backendURL string) (*Up
 
 func UpdateItemClient(item_id uint, category_id *uint, title string, ItemData map[string]interface{}) (*UpdateItemResponse, error) {
 	//Update a item payload
-	payload, err := ProcessUpdateItem(item_id, nil, title, ItemData)
+	payload, err := ProcessUpdateItem(item_id, category_id, title, ItemData)
 	if err != nil {
 		log.Printf("UpdateItem processing failed: %v", err)
 		return nil, err

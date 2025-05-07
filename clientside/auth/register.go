@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 )
@@ -148,12 +147,6 @@ func SendRegistrationToBackend(payload *RegisterPayload, backendURL string) (*Re
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Access-Control-Allow-Credentials", "true")
 
-	// token := "your-jwt-token-here" // replace with actual token
-	// req.AddCookie(&http.Cookie{
-	// 	Name:  "auth_token",
-	// 	Value: token,
-	// })
-
 	// Added this part in theory it will share cookie
 	resp, err := client.HMClient.Do(req)
 	if err != nil {
@@ -161,18 +154,6 @@ func SendRegistrationToBackend(payload *RegisterPayload, backendURL string) (*Re
 	}
 	defer resp.Body.Close()
 
-	///////////////////////////////// Server side /////////////////////////////////
-	u, err := url.Parse(backendURL)
-	if err != nil {
-		fmt.Println("Invalid URL:", err)
-		return nil, err
-	}
-
-	cookies := client.HMClient.Jar.Cookies(u)
-	fmt.Println("Cookies for", backendURL)
-	for _, c := range cookies {
-		fmt.Printf(" Here %s = %s (Path=%s, HttpOnly=%t)\n", c.Name, c.Value, c.Path, c.HttpOnly)
-	}
 	///////////////////////////////// Server side /////////////////////////////////
 
 	///////////////////////////////// Client side /////////////////////////////////
@@ -188,17 +169,6 @@ func SendRegistrationToBackend(payload *RegisterPayload, backendURL string) (*Re
 	// Using DevServer URL: http://localhost:34115
 	// Using Frontend DevServer URL: http://localhost:5173/
 	// Using reload debounce setting of 100 milliseconds
-	sigma, err := url.Parse("http://localhost:5173") //Or maybe http://localhost:34115
-	if err != nil {
-		fmt.Println("Invalid URL:", err)
-		return nil, err
-	}
-
-	cookies2 := client.HMClient.Jar.Cookies(sigma)
-	fmt.Println("Cookies for", sigma)
-	for _, c := range cookies2 {
-		fmt.Printf(" Here %s = %s (Path=%s, HttpOnly=%t)\n", c.Name, c.Value, c.Path, c.HttpOnly)
-	}
 	//////////////////////////////// Client side /////////////////////////////////
 
 	// Check response status

@@ -30,9 +30,9 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
   const { toast } = useToast();
   const { getIconBackgroundClass } = useColorSettings();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<PasswordEntry & { category?: string | null }>(password);
+  const [formData, setFormData] = useState<PasswordEntry & { category?: string | null, categoryId?: number | null }>(password);
   const [showPassword, setShowPassword] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
@@ -43,14 +43,22 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
       try {
         const categoryData = await GetCategoryList();
         if (categoryData) {
-          // Extract category names from the response
-          const categoryNames = categoryData.map(cat => cat.CategoryName as string);
-          setCategories(categoryNames);
+          // Transform the response to include both ID and name
+          const formattedCategories = categoryData.map(cat => ({
+            id: cat.CategoryID,
+            name: cat.CategoryName as string
+          }));
+          setCategories(formattedCategories);
         }
       } catch (error) {
         console.error("Failed to load categories:", error);
         // Fallback to some defaults in case of error
-        setCategories(["Personal", "Work", "Finance", "Uncategorized"]);
+        setCategories([
+          { id: 0, name: "Personal" },
+          { id: 0, name: "Work" },
+          { id: 0, name: "Finance" },
+          { id: 0, name: "Uncategorized" }
+        ]);
       } finally {
         setIsLoadingCategories(false);
       }
@@ -121,18 +129,12 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
           break;
       }
       
-      // Add category if it exists
-      let categoryId: number | null = null;
-      if (formData.category && formData.category !== NO_CATEGORY) {
-        itemData.category = formData.category;
-      }
-      
-      // Call the UpdateItemClient function from your Go backend with all required arguments
+      // Call the UpdateItemClient function with the correct category ID
       const response = await UpdateItemClient(
-        parseInt(formData.id), // arg1: item_id (number)
-        null, // arg2: category_id (any - can be null if no category)
-        formData.title, // arg3: title (string)
-        itemData  // arg4: ItemData (object)
+        parseInt(formData.id),           // arg1: item_id (number)
+        formData.categoryId || null,     // arg2: category_id (can be null)
+        formData.title,                 // arg3: title (string)
+        itemData                        // arg4: ItemData (object)
       );
       
       console.log("Item updated successfully:", response);
@@ -189,10 +191,25 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
 
   const handleCategoryChange = (value: string) => {
     console.log(`Updating category with: ${value}`);
-    setFormData(prev => ({
-      ...prev,
-      category: value === NO_CATEGORY ? null : value
-    }));
+    
+    if (value === NO_CATEGORY) {
+      // If "None" was selected, set category to null
+      setFormData(prev => ({
+        ...prev,
+        category: null,
+        categoryId: null
+      }));
+    } else {
+      // Find the selected category object to get both name and ID
+      const selectedCategory = categories.find(cat => cat.name === value);
+      if (selectedCategory) {
+        setFormData(prev => ({
+          ...prev,
+          category: selectedCategory.name,
+          categoryId: selectedCategory.id
+        }));
+      }
+    }
   };
 
   const handleDelete = () => {
@@ -620,7 +637,7 @@ export function PasswordEditor({ password, isOpen }: PasswordEditorProps) {
                   <SelectContent>
                     <SelectItem value={NO_CATEGORY}>None</SelectItem>
                     {categories.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                      <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

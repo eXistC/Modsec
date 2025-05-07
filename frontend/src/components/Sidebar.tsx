@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Bookmark, FileText, Infinity, Settings, Trash2 } from "lucide-react";
+import { Bookmark, FileText, Infinity } from "lucide-react";
 import { CatList } from "@/components/CatList";
 import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { useAuth } from "@/context/AuthContext";
@@ -68,13 +68,6 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
             >
               <Infinity className="mr-2 h-4 w-4" />
               Generator
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-sm h-9"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Trash
             </Button>
           </div>
         </div>

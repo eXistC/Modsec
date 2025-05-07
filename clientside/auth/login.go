@@ -15,7 +15,7 @@ import (
 
 // LoginPayload represents login data sent to the backend
 type LoginPayload struct {
-	Email      string `json:"email"`
+	Email      string `json:"email"` //Encrypt with Publickey
 	HqT        string `json:"hqt"`
 	Hq1_HqR    string `json:"hq1-hqr"`
 	Timestamp  string `json:"timestamp"`
@@ -77,9 +77,21 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
 	}
 
+	publickey, err := PubKeyRequest()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch Publickey: %v", err)
+	}
+
+	encryptedEmail, err := utils.EncryptWithPublicKey(publickey, []byte(email))
+	if err != nil {
+		return nil, fmt.Errorf("failed to Encrpyt with Publickey: %v", err)
+	}
+
+	ConvertedEnEmail := utils.BytToBa64(encryptedEmail)
+
 	// Create login payload
 	payload := &LoginPayload{
-		Email:      email,
+		Email:      ConvertedEnEmail,
 		HqT:        finalHqT,
 		Hq1_HqR:    comHq1_HqR,
 		Timestamp:  timestamp,

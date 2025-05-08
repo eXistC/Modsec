@@ -9,12 +9,17 @@ import { RecoveryProcess } from "../../../wailsjs/go/main/App";
 import { PasswordStrengthMeter, isPasswordValid } from "@/components/PasswordStrength/PasswordStrengthMeter";
 import { cn } from "@/lib/utils";
 import { RecoverySeedPhraseConfirmation } from "./RecoverySeedPhraseConfirmation";
+import { Dialog, DialogPortal, DialogOverlay, DialogContent } from "@/components/ui/dialog";
 
 interface RecoveryFormProps {
   onBack: () => void;
+  onSeedPhraseConfirmation?: (seedPhrase: string) => void;
 }
 
-export function RecoveryForm({ onBack }: RecoveryFormProps) {
+export function RecoveryForm({ 
+  onBack, 
+  onSeedPhraseConfirmation 
+}: RecoveryFormProps) {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -82,14 +87,13 @@ export function RecoveryForm({ onBack }: RecoveryFormProps) {
   };
 
   const handleSeedPhraseConfirmed = () => {
-    // This is called when the seed phrase is confirmed in SeedPhraseConfirmationPage
     setRecoveryMessage({
       type: "success",
       message: "Account recovery complete! Your account is now secured with the new seed phrase."
     });
     
     setTimeout(() => {
-      // Reset form and return to login
+      // Reset form and return to previous screen
       setEmail("");
       setNewPassword("");
       setConfirmPassword("");
@@ -102,13 +106,19 @@ export function RecoveryForm({ onBack }: RecoveryFormProps) {
 
   // If recovery is complete and we have a new seed phrase, show the confirmation page
   if (recoveryComplete && newSeedPhrase) {
+    // This will create a portal that renders outside of any parent containers
     return (
-      <div className="fixed inset-0 z-50 bg-background">
-        <RecoverySeedPhraseConfirmation 
-          seedPhrase={newSeedPhrase}
-          onConfirmed={handleSeedPhraseConfirmed}
-        />
-      </div>
+      <Dialog open={true} modal={true} onOpenChange={() => {}}>
+        <DialogPortal>
+          <DialogOverlay className="backdrop-blur-sm" />
+          <DialogContent className="w-screen h-screen p-0 border-none bg-transparent max-w-none">
+            <RecoverySeedPhraseConfirmation 
+              seedPhrase={newSeedPhrase}
+              onConfirmed={handleSeedPhraseConfirmed}
+            />
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
     );
   }
 

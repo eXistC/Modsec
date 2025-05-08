@@ -9,6 +9,7 @@ export interface BaseEntry {
   dateModified: Date;
   notes?: string;
   category?: string | null;
+  categoryId?: number | null;
 }
 
 export interface WebsiteEntry extends BaseEntry {

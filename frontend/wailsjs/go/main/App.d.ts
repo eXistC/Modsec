@@ -22,7 +22,7 @@ export function GenerateSessionKey():Promise<Array<number>>;
 
 export function GetCategoryList():Promise<Array<{[key: string]: any}>>;
 
-export function GetPasswordList():Promise<Array<service.AfterItem>>;
+export function GetPasswordList():Promise<Array<{[key: string]: any}>>;
 
 export function Greet(arg1:string):Promise<string>;
 

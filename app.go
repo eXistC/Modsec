@@ -300,14 +300,12 @@ func (a *App) UpdateItemClient(itemId uint, categoryId *uint, title string, Item
 	return service.UpdateItemClient(itemId, categoryId, title, ItemData)
 }
 
-// GetPasswordList exposes the GetListItemClient function to the frontend for password listing
-func (a *App) GetPasswordList() ([]service.AfterItem, error) {
+// GetPasswordList returns password items with their complete information including categories
+func (a *App) GetPasswordList() ([]map[string]interface{}, error) {
 	log.Println("GetPasswordList called from frontend")
 
-	// Call the actual function that does the work
-	items, _, err := service.GetListItemClient()
-
-	// Check for errors
+	// Get both items and categories from the client service
+	items, categories, err := service.GetListItemClient()
 	if err != nil {
 		log.Printf("GetPasswordList error: %v", err)
 		return nil, err
@@ -316,10 +314,47 @@ func (a *App) GetPasswordList() ([]service.AfterItem, error) {
 	// Make sure we don't return nil
 	if items == nil {
 		log.Println("GetPasswordList: items is nil, returning empty array")
-		return []service.AfterItem{}, nil
+		return []map[string]interface{}{}, nil
 	}
 
-	// Return just the items array directly (not a pointer) for simpler JS binding
-	log.Printf("GetPasswordList returning %d items", len(*items))
-	return *items, nil
+	// Create a map of category ID to name for easy lookup
+	categoryMap := make(map[uint]string)
+	if categories != nil {
+		for _, cat := range *categories {
+			categoryMap[cat.CategoryID] = cat.CategoryName
+		}
+	}
+
+	// Build response with items including their category names
+	result := make([]map[string]interface{}, 0, len(*items))
+	for _, item := range *items {
+		// Create a map with all item fields
+		itemMap := map[string]interface{}{
+			"ItemID":     item.ItemID,
+			"Title":      item.Title,
+			"TypeName":   item.TypeName,
+			"DateCreate": item.DateCreate,
+			"DateModify": item.DateModify,
+			"Data":       item.Data,
+			"IsBookmark": item.IsBookmark,
+		}
+
+		// Add category information if available
+		if item.CategoryID != nil {
+			itemMap["CategoryID"] = *item.CategoryID
+			if catName, ok := categoryMap[*item.CategoryID]; ok {
+				itemMap["CategoryName"] = catName
+			} else {
+				itemMap["CategoryName"] = ""
+			}
+		} else {
+			itemMap["CategoryID"] = nil
+			itemMap["CategoryName"] = ""
+		}
+
+		result = append(result, itemMap)
+	}
+
+	log.Printf("GetPasswordList returning %d items", len(result))
+	return result, nil
 }

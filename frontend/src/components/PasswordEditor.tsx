@@ -14,13 +14,13 @@ import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useColorSettings } from "@/context/ColorSettingsContext";
-import { GetCategoryList, UpdateItemClient } from "@/wailsjs/go/main/App";
+import { GetCategoryList, UpdateItemClient, GetPasswordList } from "@/wailsjs/go/main/App";
 
 interface PasswordEditorProps {
   password: PasswordEntry;
   isOpen: boolean;
   onDelete: (deletedItemId: number) => void;
-  onUpdate?: (updatedPassword: PasswordEntry) => void; // Make it optional
+  onUpdate?: (updatedPassword: PasswordEntry) => void;
 }
 
 // Define a constant for the "no category" value to use consistently throughout
@@ -28,7 +28,7 @@ const NO_CATEGORY = "uncategorized";
 
 // Replace the formatDateTime function with this simpler formatDate function:
 const formatDate = (date: Date | string | undefined): string => {
-  if (!date) return 'Unknown';
+  if (!date) return "";
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return dateObj.toLocaleDateString(undefined, { 
     year: 'numeric', 
@@ -47,6 +47,7 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [isLoadingItemCategory, setIsLoadingItemCategory] = useState(false);
 
   // Load categories from the backend using the app.go binding
   useEffect(() => {
@@ -54,23 +55,18 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
       setIsLoadingCategories(true);
       try {
         const categoryData = await GetCategoryList();
-        if (categoryData) {
+        if (categoryData && Array.isArray(categoryData)) {
           // Transform the response to include both ID and name
           const formattedCategories = categoryData.map(cat => ({
             id: cat.CategoryID,
-            name: cat.CategoryName as string
+            name: cat.CategoryName
           }));
           setCategories(formattedCategories);
+          console.log("Categories loaded:", formattedCategories);
         }
       } catch (error) {
         console.error("Failed to load categories:", error);
         // Fallback to some defaults in case of error
-        setCategories([
-          { id: 0, name: "Personal" },
-          { id: 0, name: "Work" },
-          { id: 0, name: "Finance" },
-          { id: 0, name: "Uncategorized" }
-        ]);
       } finally {
         setIsLoadingCategories(false);
       }
@@ -79,13 +75,61 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
     fetchCategories();
   }, []);
 
+  // New effect to fetch the current item's category information from GetPasswordList
+  useEffect(() => {
+    const fetchItemCategoryInfo = async () => {
+      // Only proceed if we have a valid password with ID
+      if (!password || !password.id) return;
+      
+      try {
+        setIsLoadingItemCategory(true);
+        
+        // Get the complete list of items with their category information
+        const items = await GetPasswordList();
+        
+        if (!items || !Array.isArray(items)) return;
+        
+        // Find the current item in the items list by ID
+        const currentItem = items.find(item => 
+          parseInt(String(item.ItemID)) === parseInt(String(password.id))
+        );
+        
+        if (currentItem) {
+          console.log("Found item with category data:", {
+            id: currentItem.ItemID,
+            title: currentItem.Title,
+            categoryId: currentItem.CategoryID,
+            categoryName: currentItem.CategoryName
+          });
+          
+          // Update formData with the accurate category info from the backend
+          setFormData(prev => ({
+            ...prev,
+            category: currentItem.CategoryName || null,
+            categoryId: currentItem.CategoryID || null
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch item's category details:", error);
+      } finally {
+        setIsLoadingItemCategory(false);
+      }
+    };
+    
+    fetchItemCategoryInfo();
+  }, [password.id]); // Re-run when the password ID changes
+
   // Make sure password changes are properly reflected in the component
   useEffect(() => {
     if (password) {
+      // Set basic password data, but DON'T overwrite category info that was loaded from the API
       setFormData(prev => ({
         ...password,
-        category: password.category || prev.category
+        // Preserve any category info that was loaded from the API
+        category: prev.category !== undefined ? prev.category : password.category,
+        categoryId: prev.categoryId !== undefined ? prev.categoryId : password.categoryId,
       }));
+      
       setIsEditing(false);
       setShowPassword(false);
     }
@@ -162,10 +206,17 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
           break;
       }
       
-      // Call the UpdateItemClient function with the correct category ID
+      // Convert category information to the format expected by the backend
+      const categoryId = formData.categoryId !== undefined 
+        ? (formData.categoryId === null ? null : Number(formData.categoryId)) 
+        : null;
+      
+      console.log(`Saving item with category ID: ${categoryId}, title: ${formData.title}`);
+      
+      // Call the UpdateItemClient function with the proper parameters
       const response = await UpdateItemClient(
         parseInt(formData.id),
-        formData.categoryId || null,
+        categoryId,
         formData.title,
         itemData
       );
@@ -178,25 +229,19 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
         description: "Your item has been updated successfully.",
       });
       
-      // IMPORTANT: Make sure to call onUpdate if it exists
+      // Call onUpdate callback if provided
       if (onUpdate) {
-        // Create a copy with updated dateModified
-        const updatedPassword = {
+        const updatedPassword: PasswordEntry = {
           ...formData,
-          dateModified: new Date() // Update the modification date
+          dateModified: new Date()
         };
-        
         onUpdate(updatedPassword);
-      } else {
-        console.warn("onUpdate is not defined - changes won't reflect until page refresh");
       }
       
       // Exit editing mode
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating item:", error);
-      
-      // Show error toast
       toast({
         title: "Update failed",
         description: "Failed to save your changes. Please try again.",
@@ -238,24 +283,25 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
   };
 
   const handleCategoryChange = (value: string) => {
-    console.log(`Updating category with: ${value}`);
+    console.log(`Selected category: ${value}`);
     
     if (value === NO_CATEGORY) {
-      // If "None" was selected, set category to null
+      // If "None" was selected, set category to null and categoryId to null
       setFormData(prev => ({
         ...prev,
         category: null,
         categoryId: null
       }));
     } else {
-      // Find the selected category object to get both name and ID
+      // Find the category object with this name to get its ID
       const selectedCategory = categories.find(cat => cat.name === value);
       if (selectedCategory) {
         setFormData(prev => ({
           ...prev,
-          category: selectedCategory.name,
+          category: value,
           categoryId: selectedCategory.id
         }));
+        console.log(`Set category: ${value}, id: ${selectedCategory.id}`);
       }
     }
   };
@@ -654,7 +700,7 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
             </div>
           )}
 
-          {/* Category selector - moved to bottom */}
+          {/* Category selector - with improved loading state */}
           <div className="space-y-2 mt-8 border-t border-border pt-6">
             <div className="flex items-center gap-2">
               <Tag className="h-4 w-4 text-muted-foreground" />
@@ -668,7 +714,7 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
                   disabled={isLoadingCategories}
                 >
                   <SelectTrigger className="w-full bg-secondary border-[1px] border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background">
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder={isLoadingItemCategory ? "Loading..." : "Select a category"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NO_CATEGORY}>None</SelectItem>
@@ -679,13 +725,17 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
                 </Select>
               ) : (
                 <div className="flex items-center h-10">
-                  <span className="text-sm">
-                    {formData.category ? (
-                      <span className="px-2 py-1 bg-secondary/50 rounded-md">{formData.category}</span>
-                    ) : (
-                      <span className="text-muted-foreground">Uncategorized</span>
-                    )}
-                  </span>
+                  {isLoadingItemCategory ? (
+                    <span className="text-sm text-muted-foreground">Loading category...</span>
+                  ) : (
+                    <span className="text-sm">
+                      {formData.category ? (
+                        <span className="px-2 py-1 bg-secondary/50 rounded-md">{formData.category}</span>
+                      ) : (
+                        <span className="text-muted-foreground">Uncategorized</span>
+                      )}
+                    </span>
+                  )}
                 </div>
               )}
             </div>

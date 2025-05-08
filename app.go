@@ -372,3 +372,17 @@ func (a *App) DeleteItemClient(itemId uint) (*service.DeleteItemResponse, error)
 	log.Printf("Successfully deleted item %d, response: %+v", itemId, response)
 	return response, nil
 }
+
+// UpdateCategoryClient exposes the category update functionality to the frontend
+func (a *App) UpdateCategoryClient(categoryId uint, categoryName string) (*service.UpdateCategoryResponse, error) {
+	log.Printf("UpdateCategoryClient called with categoryId: %d, name: %s", categoryId, categoryName)
+
+	response, err := service.UpdateCategoryClient(categoryId, categoryName)
+	if err != nil {
+		log.Printf("Error updating category %d: %v", categoryId, err)
+		return nil, err
+	}
+
+	log.Printf("Successfully updated category %d, response: %+v", categoryId, response)
+	return response, nil
+}

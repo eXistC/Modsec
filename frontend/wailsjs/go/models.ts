@@ -93,6 +93,20 @@ export namespace service {
 	        this.status = source["status"];
 	    }
 	}
+	export class UpdateCategoryResponse {
+	    category_id: number;
+	    status: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateCategoryResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.category_id = source["category_id"];
+	        this.status = source["status"];
+	    }
+	}
 	export class UpdateItemResponse {
 	    item_id: number;
 	    message: string;

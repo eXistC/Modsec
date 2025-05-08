@@ -1,10 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { CreateCategoryClient, DeleteCategoryClient, GetCategoryList } from "@/wailsjs/go/main/App";
+import { 
+  CreateCategoryClient, 
+  DeleteCategoryClient, 
+  GetCategoryList,
+  UpdateCategoryClient 
+} from "@/wailsjs/go/main/App";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 export interface Category {
   id: number;
@@ -18,14 +31,24 @@ export function CatList() {
   const [newCategory, setNewCategory] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editName, setEditName] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
 
-  // Add the missing loadCategories function
+  useEffect(() => {
+    if (editingCategory && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingCategory]);
+
   const loadCategories = async () => {
     setIsLoading(true);
     try {
       const categoryData = await GetCategoryList();
-      // Transform the data to match our Category interface
       const transformedData: Category[] = categoryData.map(category => ({
         id: category.CategoryID,
         name: category.CategoryName,
@@ -44,14 +67,13 @@ export function CatList() {
     }
   };
 
-  // Add this function to check for duplicate category names
-  const isDuplicateCategoryName = (name: string): boolean => {
+  const isDuplicateCategoryName = (name: string, excludeId?: number): boolean => {
     return categories.some(category => 
-      category.name.toLowerCase() === name.toLowerCase()
+      category.name.toLowerCase() === name.toLowerCase() &&
+      (excludeId === undefined || category.id !== excludeId)
     );
   };
 
-  // Fetch categories when component mounts
   useEffect(() => {
     loadCategories();
   }, []);
@@ -60,7 +82,6 @@ export function CatList() {
     const trimmedName = newCategory.trim();
     if (!trimmedName) return;
     
-    // Check for duplicate category name
     if (isDuplicateCategoryName(trimmedName)) {
       toast({
         title: "Category already exists",
@@ -72,15 +93,12 @@ export function CatList() {
     
     setIsLoading(true);
     try {
-      // Call the Go function to create a new category
       const response = await CreateCategoryClient(trimmedName);
       if (response) {
         toast({
           title: "Category created",
           description: "Your new category has been created successfully.",
         });
-        
-        // Refresh the category list
         await loadCategories();
       }
     } catch (error) {
@@ -97,25 +115,73 @@ export function CatList() {
     }
   };
 
-  const handleDeleteCategory = async (categoryId: number) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+  const handleRenameCategory = async () => {
+    if (!editingCategory) return;
+    
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      toast({
+        title: "Invalid name",
+        description: "Category name cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (isDuplicateCategoryName(trimmedName, editingCategory.id)) {
+      toast({
+        title: "Category already exists",
+        description: "Please use a unique category name.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     try {
-      // Call the Go function to delete the category
-      const response = await DeleteCategoryClient(categoryId);
+      const response = await UpdateCategoryClient(editingCategory.id, trimmedName);
+      if (response) {
+        toast({
+          title: "Category renamed",
+          description: "Your category has been updated successfully.",
+        });
+        
+        if (activeCategory === editingCategory.name) {
+          setActiveCategory(trimmedName);
+        }
+        
+        await loadCategories();
+      }
+    } catch (error) {
+      console.error("Failed to rename category:", error);
+      toast({
+        title: "Error renaming category",
+        description: "Could not update the category. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setEditingCategory(null);
+      setEditName("");
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await DeleteCategoryClient(categoryToDelete.id);
       if (response) {
         toast({
           title: "Category deleted",
           description: "The category has been removed successfully.",
         });
         
-        // If the deleted category was active, clear the active selection
-        if (activeCategory === categories.find(c => c.id === categoryId)?.name) {
+        if (activeCategory === categoryToDelete.name) {
           setActiveCategory(null);
         }
         
-        // Refresh the category list
         await loadCategories();
       }
     } catch (error) {
@@ -127,6 +193,31 @@ export function CatList() {
       });
     } finally {
       setIsLoading(false);
+      setCategoryToDelete(null);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  const confirmDeleteCategory = (category: Category) => {
+    setCategoryToDelete(category);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const startEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setEditName(category.name);
+  };
+
+  const cancelEdit = () => {
+    setEditingCategory(null);
+    setEditName("");
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !isLoading) {
+      handleRenameCategory();
+    } else if (e.key === "Escape") {
+      cancelEdit();
     }
   };
 
@@ -183,43 +274,91 @@ export function CatList() {
           </div>
         ) : (
           <div className="space-y-0.5">
-            {categories.map(({ id, name, count }) => (
-              <Button
-                key={id}
-                variant={activeCategory === name ? "secondary" : "ghost"}
-                className={`group w-full justify-start text-[13px] h-8 font-medium
-                  relative overflow-hidden transition-all duration-200
-                  ${activeCategory === name 
-                    ? 'bg-secondary/50 text-primary before:absolute before:left-0 before:top-[15%] before:h-[70%] before:w-[2px] before:bg-primary' 
-                    : 'text-muted-foreground hover:text-primary hover:bg-secondary/30'}`}
-                onClick={() => setActiveCategory(name)}
-              >
-                <div className="flex items-center w-full">
-                  <span>{name}</span>
-                  <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full transition-colors duration-200
-                    ${activeCategory === name
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'}`}>
-                    {count}
-                  </span>
-                </div>
-                {/* Delete button that appears on hover */}
-                <button
-                  className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded-full transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteCategory(id);
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-destructive">
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </svg>
-                </button>
-              </Button>
+            {categories.map((category) => (
+              <div key={category.id}>
+                {editingCategory?.id === category.id ? (
+                  <div className="px-1 mb-1 flex gap-1">
+                    <Input
+                      ref={editInputRef}
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="h-8 text-xs"
+                      disabled={isLoading}
+                      onKeyDown={handleEditKeyDown}
+                    />
+                    <Button 
+                      size="sm" 
+                      className="h-8 px-2"
+                      onClick={handleRenameCategory}
+                      disabled={isLoading || !editName.trim()}
+                    >
+                      {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      className="h-8 px-2"
+                      onClick={cancelEdit}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <ContextMenu>
+                    <ContextMenuTrigger asChild>
+                      <Button
+                        variant={activeCategory === category.name ? "secondary" : "ghost"}
+                        className={`group w-full justify-start text-[13px] h-8 font-medium
+                          relative overflow-hidden transition-all duration-200
+                          ${activeCategory === category.name 
+                            ? 'bg-secondary/50 text-primary before:absolute before:left-0 before:top-[15%] before:h-[70%] before:w-[2px] before:bg-primary' 
+                            : 'text-muted-foreground hover:text-primary hover:bg-secondary/30'}`}
+                        onClick={() => setActiveCategory(category.name)}
+                      >
+                        <div className="flex items-center w-full">
+                          <span>{category.name}</span>
+                          <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full transition-colors duration-200
+                            ${activeCategory === category.name
+                              ? 'bg-primary/10 text-primary'
+                              : 'bg-muted text-muted-foreground'}`}>
+                            {category.count}
+                          </span>
+                        </div>
+                      </Button>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-48">
+                      <ContextMenuItem 
+                        onClick={() => startEditCategory(category)}
+                        className="flex items-center gap-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                        <span>Rename</span>
+                      </ContextMenuItem>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem 
+                        onClick={() => confirmDeleteCategory(category)}
+                        className="flex items-center gap-2 text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Delete</span>
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                )}
+              </div>
             ))}
           </div>
         )}
       </ScrollArea>
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteCategory}
+        itemType="category"
+        itemName={categoryToDelete?.name}
+      />
     </div>
   );
 }

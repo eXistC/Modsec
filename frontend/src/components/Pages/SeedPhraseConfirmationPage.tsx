@@ -15,9 +15,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useRecoverySeedPhrase } from '../Recovery/RecoverySeedPhraseConfirmation';
 
-export function SeedPhraseConfirmationPage() {
-  const { seedPhrase, confirmSeedPhrase } = useAuth();
+interface SeedPhraseConfirmationPageProps {
+  isRecovery?: boolean;
+}
+
+export function SeedPhraseConfirmationPage({ isRecovery = false }: SeedPhraseConfirmationPageProps) {
+  // Get context from either Auth or RecoverySeedPhrase based on mode
+  const authContext = useAuth();
+  const recoveryContext = useRecoverySeedPhrase();
+  
+  // Use the appropriate context based on isRecovery
+  const { seedPhrase, confirmSeedPhrase } = isRecovery ? recoveryContext : authContext;
+
   const [hasConfirmed, setHasConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
@@ -109,8 +120,10 @@ export function SeedPhraseConfirmationPage() {
   const handleContinue = () => {
     if (hasConfirmed && hasAcknowledged) {
       toast({
-        title: "Account secured",
-        description: "Your recovery phrase has been verified and saved.",
+        title: isRecovery ? "Recovery complete" : "Account secured",
+        description: isRecovery 
+          ? "Your account has been recovered with a new recovery phrase." 
+          : "Your recovery phrase has been verified and saved.",
         duration: 3000,
       });
       confirmSeedPhrase();
@@ -145,7 +158,7 @@ export function SeedPhraseConfirmationPage() {
       };
     } else {
       return {
-        label: "Continue to ModSec",
+        label: isRecovery ? "Complete Recovery" : "Continue to ModSec",
         action: handleContinue,
         disabled: !hasAcknowledged || !hasConfirmed
       };
@@ -161,9 +174,13 @@ export function SeedPhraseConfirmationPage() {
           <div className="w-full flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary animate-pulse" />
           </div>
-          <CardTitle className="text-xl font-bold">Secure Your ModSec Account</CardTitle>
+          <CardTitle className="text-xl font-bold">
+            {isRecovery ? "Secure Your New Recovery Phrase" : "Secure Your ModSec Account"}
+          </CardTitle>
           <CardDescription className="text-sm mt-2">
-            Your recovery phrase is the only way to restore your account if you lose access.
+            {isRecovery 
+              ? "This new recovery phrase is the only way to restore your account in the future." 
+              : "Your recovery phrase is the only way to restore your account if you lose access."}
           </CardDescription>
         </CardHeader>
         
@@ -180,7 +197,9 @@ export function SeedPhraseConfirmationPage() {
           {activeStep === 1 && (
             <div className="space-y-4">
               <div className="bg-secondary/40 p-6 rounded-lg relative group border border-secondary/60">
-                <h3 className="text-sm font-medium mb-4">Your 12-word recovery phrase:</h3>
+                <h3 className="text-sm font-medium mb-4">
+                  {isRecovery ? "Your NEW 12-word recovery phrase:" : "Your 12-word recovery phrase:"}
+                </h3>
                 <div className="grid grid-cols-3 gap-x-4 gap-y-3">
                   {words.map((word, index) => (
                     <div key={index} className="flex items-center p-1.5 rounded-md bg-secondary/30">
@@ -294,7 +313,8 @@ export function SeedPhraseConfirmationPage() {
                   <CheckCircle2 className="h-8 w-8 text-green-500" />
                   <h3 className="text-lg font-medium text-green-500">Verification Successful</h3>
                   <p className="text-sm text-center text-muted-foreground">
-                    You've correctly verified your recovery phrase. Your account is now secured.
+                    You've correctly verified your recovery phrase. 
+                    Your account is now secured.
                   </p>
                 </div>
               ) : (
@@ -335,7 +355,8 @@ export function SeedPhraseConfirmationPage() {
                     "text-xs text-muted-foreground",
                     !hasConfirmed && "opacity-50"
                   )}>
-                    I understand that if I lose my recovery phrase, I will not be able to recover my account
+                    I understand that if I lose my recovery phrase, 
+                    I will not be able to recover my account
                   </p>
                 </div>
               </div>

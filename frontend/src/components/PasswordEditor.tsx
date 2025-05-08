@@ -14,8 +14,9 @@ import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useColorSettings } from "@/context/ColorSettingsContext";
-import { GetCategoryList, UpdateItemClient, GetPasswordList, DeleteItemClient } from "@/wailsjs/go/main/App";
+import { GetPasswordList, UpdateItemClient, DeleteItemClient } from "@/wailsjs/go/main/App";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { useCategories } from "@/context/CategoryContext";
 
 interface PasswordEditorProps {
   password: PasswordEntry | null;
@@ -56,38 +57,13 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
     }
   );
   const [showPassword, setShowPassword] = useState(false);
-  const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isLoadingItemCategory, setIsLoadingItemCategory] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  // Load categories from the backend using the app.go binding
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoadingCategories(true);
-      try {
-        const categoryData = await GetCategoryList();
-        if (categoryData && Array.isArray(categoryData)) {
-          // Transform the response to include both ID and name
-          const formattedCategories = categoryData.map(cat => ({
-            id: cat.CategoryID,
-            name: cat.CategoryName
-          }));
-          setCategories(formattedCategories);
-          console.log("Categories loaded:", formattedCategories);
-        }
-      } catch (error) {
-        console.error("Failed to load categories:", error);
-        // Fallback to some defaults in case of error
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  
+  // Use the shared categories context instead of managing categories locally
+  const { categories, isLoading: isLoadingCategories } = useCategories();
 
   // New effect to fetch the current item's category information from GetPasswordList
   useEffect(() => {

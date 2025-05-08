@@ -7,10 +7,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { 
   CreateCategoryClient, 
   DeleteCategoryClient, 
-  GetCategoryList,
   UpdateCategoryClient 
 } from "@/wailsjs/go/main/App";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { useCategories, Category } from "@/context/CategoryContext";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -19,24 +19,19 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 
-export interface Category {
-  id: number;
-  name: string;
-  count: number;
-}
-
 export function CatList() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [isAdding, setIsAdding] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editName, setEditName] = useState("");
   const editInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  
+  // Use the shared category context
+  const { categories, isLoading, refreshCategories } = useCategories();
 
   useEffect(() => {
     if (editingCategory && editInputRef.current) {
@@ -45,38 +40,12 @@ export function CatList() {
     }
   }, [editingCategory]);
 
-  const loadCategories = async () => {
-    setIsLoading(true);
-    try {
-      const categoryData = await GetCategoryList();
-      const transformedData: Category[] = categoryData.map(category => ({
-        id: category.CategoryID,
-        name: category.CategoryName,
-        count: category.ItemCount
-      }));
-      setCategories(transformedData);
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
-      toast({
-        variant: "destructive",
-        title: "Failed to load categories",
-        description: "There was a problem loading your categories."
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const isDuplicateCategoryName = (name: string, excludeId?: number): boolean => {
     return categories.some(category => 
       category.name.toLowerCase() === name.toLowerCase() &&
       (excludeId === undefined || category.id !== excludeId)
     );
   };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
 
   const handleAddCategory = async () => {
     const trimmedName = newCategory.trim();
@@ -91,7 +60,6 @@ export function CatList() {
       return;
     }
     
-    setIsLoading(true);
     try {
       const response = await CreateCategoryClient(trimmedName);
       if (response) {
@@ -99,7 +67,9 @@ export function CatList() {
           title: "Category created",
           description: "Your new category has been created successfully.",
         });
-        await loadCategories();
+        
+        // Refresh categories to update UI across all components
+        await refreshCategories();
       }
     } catch (error) {
       console.error("Failed to create category:", error);
@@ -111,7 +81,6 @@ export function CatList() {
     } finally {
       setNewCategory("");
       setIsAdding(false);
-      setIsLoading(false);
     }
   };
 
@@ -137,7 +106,6 @@ export function CatList() {
       return;
     }
     
-    setIsLoading(true);
     try {
       const response = await UpdateCategoryClient(editingCategory.id, trimmedName);
       if (response) {
@@ -150,7 +118,8 @@ export function CatList() {
           setActiveCategory(trimmedName);
         }
         
-        await loadCategories();
+        // Refresh categories to update UI across all components
+        await refreshCategories();
       }
     } catch (error) {
       console.error("Failed to rename category:", error);
@@ -162,14 +131,12 @@ export function CatList() {
     } finally {
       setEditingCategory(null);
       setEditName("");
-      setIsLoading(false);
     }
   };
 
   const handleDeleteCategory = async () => {
     if (!categoryToDelete) return;
     
-    setIsLoading(true);
     try {
       const response = await DeleteCategoryClient(categoryToDelete.id);
       if (response) {
@@ -182,7 +149,8 @@ export function CatList() {
           setActiveCategory(null);
         }
         
-        await loadCategories();
+        // Refresh categories to update UI across all components
+        await refreshCategories();
       }
     } catch (error) {
       console.error("Failed to delete category:", error);
@@ -192,7 +160,6 @@ export function CatList() {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
       setCategoryToDelete(null);
       setIsDeleteDialogOpen(false);
     }

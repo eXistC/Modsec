@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useToast } from "@/components/ui/use-toast";
 import { useColorSettings } from "@/context/ColorSettingsContext";
 import { GetCategoryList, UpdateItemClient, GetPasswordList, DeleteItemClient } from "@/wailsjs/go/main/App";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 
 interface PasswordEditorProps {
   password: PasswordEntry | null;
@@ -60,6 +61,7 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isLoadingItemCategory, setIsLoadingItemCategory] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Load categories from the backend using the app.go binding
   useEffect(() => {
@@ -334,11 +336,12 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
       return;
     }
     
-    // Confirm deletion with the user
-    if (!window.confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
-      return;
-    }
-    
+    // Open the confirmation dialog instead of using window.confirm
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Add a new function to handle the actual deletion after confirmation
+  const handleConfirmDelete = async () => {
     try {
       console.log(`Deleting item with ID: ${formData.id}...`);
       
@@ -367,6 +370,9 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
         description: "Failed to delete item. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      // Close the dialog
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -825,6 +831,15 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
           </div>
         </div>
       </div>
+
+      {/* Add the delete confirmation dialog */}
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        itemType={formData.type === 'memo' ? 'note' : formData.type}
+        itemName={formData.title}
+      />
     </div>
   );
 }

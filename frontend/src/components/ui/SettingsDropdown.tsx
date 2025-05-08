@@ -62,9 +62,13 @@ export function SettingsDropdown({
               </DropdownMenuItem>
             </>
           ) : (
-            <DropdownMenuItem
-              className="text-red-500 focus:text-red-500"
-              onClick={onDelete}
+            <DropdownMenuItem 
+              className="text-destructive focus:text-destructive" 
+              onClick={(e) => {
+                e.preventDefault(); 
+                e.stopPropagation();
+                onDelete && onDelete();
+              }}
             >
               <Trash2 className="mr-2 h-4 w-4" />
               <span>Delete</span>

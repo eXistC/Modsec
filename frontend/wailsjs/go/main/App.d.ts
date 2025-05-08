@@ -12,6 +12,8 @@ export function DecryptAES256GCM(arg1:Array<number>,arg2:Array<number>,arg3:Arra
 
 export function DeleteCategoryClient(arg1:number):Promise<service.DeleteCategoryResponse>;
 
+export function DeleteItemClient(arg1:number):Promise<service.DeleteItemResponse>;
+
 export function EmailToSHA256(arg1:string):Promise<string>;
 
 export function EncryptAES256GCM(arg1:Array<number>,arg2:Array<number>,arg3:Array<number>):Promise<Array<number>>;

@@ -358,3 +358,17 @@ func (a *App) GetPasswordList() ([]map[string]interface{}, error) {
 	log.Printf("GetPasswordList returning %d items", len(result))
 	return result, nil
 }
+
+// DeleteItemClient exposes the delete item functionality to the frontend
+func (a *App) DeleteItemClient(itemId uint) (*service.DeleteItemResponse, error) {
+	log.Printf("DeleteItemClient called with itemId: %d", itemId)
+
+	response, err := service.DeleteItemClient(itemId)
+	if err != nil {
+		log.Printf("Error deleting item %d: %v", itemId, err)
+		return nil, err
+	}
+
+	log.Printf("Successfully deleted item %d, response: %+v", itemId, response)
+	return response, nil
+}

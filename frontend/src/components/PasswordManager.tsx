@@ -3,6 +3,7 @@ import { PasswordList } from './PasswordList';
 import { PasswordEntry } from '@/types/password';
 import { useToast } from './ui/use-toast';
 import { ToggleBookmark } from '@/wailsjs/go/main/App'; 
+import { PasswordEditor } from './PasswordEditor';
 
 // Update the interface to include refreshTrigger
 interface PasswordManagerProps {
@@ -22,6 +23,7 @@ export function PasswordManager({
   // Initialize with the selectedPassword from props, or null if not provided
   const [localSelectedPassword, setLocalSelectedPassword] = useState<PasswordEntry | null>(selectedPassword || null);
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
+  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
 
   // Use useEffect to update localSelectedPassword when prop changes
   useEffect(() => {
@@ -29,6 +31,11 @@ export function PasswordManager({
       setLocalSelectedPassword(selectedPassword);
     }
   }, [selectedPassword]);
+
+  // Add this effect to synchronize detailPanelOpen with localSelectedPassword
+  useEffect(() => {
+    setDetailPanelOpen(!!localSelectedPassword);
+  }, [localSelectedPassword]);
 
   const handleToggleBookmark = async (id: number) => {
     try {
@@ -116,9 +123,25 @@ export function PasswordManager({
     }
   };
 
+  const handleDeletePassword = (deletedItemId: number) => {
+    // Remove the deleted item from local state
+    setPasswords(prevPasswords => 
+      prevPasswords.filter(password => parseInt(password.id) !== deletedItemId)
+    );
+    
+    // Clear selected password if it's the one that was deleted
+    if (selectedPassword && parseInt(selectedPassword.id) === deletedItemId) {
+      setLocalSelectedPassword(null);
+    }
+    
+    // Close the detail panel if needed
+    setDetailPanelOpen(false);
+  };
+
   // Handle local selection while also notifying parent
   const handleSelectPassword = (password: PasswordEntry) => {
     setLocalSelectedPassword(password);
+    setDetailPanelOpen(true);  // Open panel when a password is selected
     onSelectPassword(password);
   };
 
@@ -129,6 +152,12 @@ export function PasswordManager({
         onSelectPassword={handleSelectPassword}
         onToggleBookmark={handleToggleBookmark}
         refreshTrigger={refreshTrigger} // Pass the refreshTrigger prop
+      />
+      <PasswordEditor
+        password={localSelectedPassword}
+        isOpen={detailPanelOpen}
+        onDelete={handleDeletePassword}
+        onUpdate={handleUpdatePassword}
       />
     </div>
   );

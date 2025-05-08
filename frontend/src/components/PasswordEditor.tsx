@@ -14,10 +14,10 @@ import { SettingsDropdown } from "./ui/SettingsDropdown";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { useColorSettings } from "@/context/ColorSettingsContext";
-import { GetCategoryList, UpdateItemClient, GetPasswordList } from "@/wailsjs/go/main/App";
+import { GetCategoryList, UpdateItemClient, GetPasswordList, DeleteItemClient } from "@/wailsjs/go/main/App";
 
 interface PasswordEditorProps {
-  password: PasswordEntry;
+  password: PasswordEntry | null;
   isOpen: boolean;
   onDelete: (deletedItemId: number) => void;
   onUpdate?: (updatedPassword: PasswordEntry) => void;
@@ -37,11 +37,23 @@ const formatDate = (date: Date | string | undefined): string => {
   });
 };
 
+// Add null checking at the beginning of the component
 export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: PasswordEditorProps) {
   const { toast } = useToast();
   const { getIconBackgroundClass } = useColorSettings();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<PasswordEntry & { category?: string | null, categoryId?: number | null }>(password);
+  const [formData, setFormData] = useState<PasswordEntry & { category?: string | null, categoryId?: number | null }>(
+    password || {
+      id: "",
+      title: "",
+      type: "memo",
+      isBookmarked: false,
+      dateCreated: new Date(),
+      dateModified: new Date(),
+      content: "",
+      notes: ""
+    }
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -117,17 +129,18 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
     };
     
     fetchItemCategoryInfo();
-  }, [password.id]); // Re-run when the password ID changes
+  }, [password?.id]); // Re-run when the password ID changes
 
   // Make sure password changes are properly reflected in the component
   useEffect(() => {
+    // Only update if we have a valid password object
     if (password) {
       // Set basic password data, but DON'T overwrite category info that was loaded from the API
       setFormData(prev => ({
         ...password,
         // Preserve any category info that was loaded from the API
-        category: prev.category !== undefined ? prev.category : password.category,
-        categoryId: prev.categoryId !== undefined ? prev.categoryId : password.categoryId,
+        category: prev.category !== undefined ? prev.category : (password as any).category,
+        categoryId: prev.categoryId !== undefined ? prev.categoryId : (password as any).categoryId,
       }));
       
       setIsEditing(false);
@@ -258,7 +271,10 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
   };
 
   const handleDiscard = () => {
-    setFormData(password);
+    // Only update formData if password is not null
+    if (password) {
+      setFormData(password);
+    }
     setIsEditing(false);
     setShowPassword(false);
   };
@@ -306,15 +322,52 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
     }
   };
 
-  const handleDelete = () => {
-    // Add delete logic here
-    console.log("Deleting item...");
+  const handleDelete = async () => {
+    // Check if we have a valid ID before proceeding
+    if (!formData || !formData.id) {
+      console.error("Cannot delete: Invalid item ID");
+      toast({
+        title: "Delete failed",
+        description: "Cannot delete this item because it has no ID.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    toast({
-      title: "Item deleted",
-      description: "Your item has been removed successfully.",
-      variant: "destructive",
-    });
+    // Confirm deletion with the user
+    if (!window.confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
+      return;
+    }
+    
+    try {
+      console.log(`Deleting item with ID: ${formData.id}...`);
+      
+      // Call the DeleteItemClient function with the item ID
+      const response = await DeleteItemClient(parseInt(formData.id));
+      
+      console.log("Item deleted successfully:", response);
+      
+      // Show success toast
+      toast({
+        title: "Item deleted",
+        description: "Your item has been removed successfully.",
+        variant: "destructive",
+      });
+      
+      // Call the onDelete callback to update the parent component
+      if (onDelete) {
+        onDelete(parseInt(formData.id));
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      
+      // Show error toast
+      toast({
+        title: "Delete failed",
+        description: "Failed to delete item. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Enhanced function to copy field content to clipboard with toast notification
@@ -376,6 +429,11 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
   };
 
   const getIcon = () => {
+    // Check if password is null before accessing its properties
+    if (!password) {
+      return <File className="h-5 w-5" />;
+    }
+    
     switch (password.type) {
       case "website":
         return <Globe className="h-5 w-5" />;
@@ -386,6 +444,8 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
       case "crypto":
         return <Wallet className="h-5 w-5" />;
       case "memo":
+        return <File className="h-5 w-5" />;
+      default:
         return <File className="h-5 w-5" />;
     }
   };
@@ -445,8 +505,8 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
     }
   };
 
-  // Check for missing data
-  if (!isOpen) {
+  // Check for missing data or when panel is closed
+  if (!isOpen || !password) {
     return null;
   }
 

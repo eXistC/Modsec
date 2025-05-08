@@ -9,17 +9,17 @@ import (
 	"net/http"
 )
 
-type CopyFreqPayload struct {
+type CopyCountPayload struct {
 	Item_Id uint `json:"item_id"`
 }
 
-type CopyFreqResponse struct {
+type CopyCountResponse struct {
 	Item_Id uint   `json:"item_id"`
 	Status  string `json:"status"`
 }
 
 // SendLoginToBackend sends login data to the backend server
-func SendCopyFreqToBackend(payload *CopyFreqPayload, backendURL string) (*CopyFreqResponse, error) {
+func SendCopyCountToBackend(payload *CopyCountPayload, backendURL string) (*CopyCountResponse, error) {
 	// Convert payload to JSON
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
@@ -44,11 +44,11 @@ func SendCopyFreqToBackend(payload *CopyFreqPayload, backendURL string) (*CopyFr
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("CopyFreq update failed with status: %d", resp.StatusCode) // Update error message
+		return nil, fmt.Errorf("CopyCount update failed with status: %d", resp.StatusCode) // Update error message
 	}
 
 	// Parse response
-	var result CopyFreqResponse
+	var result CopyCountResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
@@ -56,21 +56,21 @@ func SendCopyFreqToBackend(payload *CopyFreqPayload, backendURL string) (*CopyFr
 	return &result, nil
 }
 
-func CopyFreqClient(item_id uint) (*CopyFreqResponse, error) {
+func CopyCountClient(item_id uint) (*CopyCountResponse, error) {
 	// Create a item payload
-	payload := &CopyFreqPayload{
+	payload := &CopyCountPayload{
 		Item_Id: item_id,
 	}
 
 	// Send to backend server
-	backendURL := "http://localhost:8080/copyFreq" // Change as needed
-	response, err := SendCopyFreqToBackend(payload, backendURL)
+	backendURL := "http://localhost:8080/copyCount" // Change as needed
+	response, err := SendCopyCountToBackend(payload, backendURL)
 	if err != nil {
-		log.Printf("CopyFreq communication failed: %v", err)
+		log.Printf("CopyCount communication failed: %v", err)
 		return nil, err
 	}
 
 	// Log success and return result
-	log.Printf("CopyFreq result: ItemID:%d, %s", response.Item_Id, response.Status)
+	log.Printf("CopyCount result: ItemID:%d, %s", response.Item_Id, response.Status)
 	return response, nil
 }

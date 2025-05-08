@@ -167,28 +167,108 @@ func (a *App) RegisterUser(email string, password string) (string, error) {
 	return auth.RegisterUser(email, password)
 }
 
-// LoginUser handles the user login process
-func (a *App) LoginUser(email string, password string) (map[string]interface{}, error) {
-	// Validate input
-	if !auth.ValidateEmailFormat(email) {
-		return nil, fmt.Errorf("invalid email format")
-	}
+// LoginUser is a wails-exported function to handle login
+func (a *App) LoginUser(email, password string) map[string]interface{} {
+	// Add more detailed logging at entry point
+	log.Printf("LoginUser called for email: %s", email)
 
-	// Call the modularized login function
+	// Call the auth.LoginUser function
 	response, err := auth.LoginUser(email, password)
-	if err != nil {
-		return nil, err
-	}
 
-	// Convert to a map for frontend consumption
 	result := map[string]interface{}{
-		"success":        response.Success,
-		"message":        response.Message,
-		"sessionToken":   response.SessionToken,
-		"encryptedVault": response.EncryptedVault,
+		"success": false,
+		"message": "",
 	}
 
-	return result, nil
+	if err != nil {
+		errMsg := err.Error()
+		log.Printf("LoginUser error: %v", errMsg)
+
+		// Check for "login communication failed" first since it may contain other error messages
+		if strings.Contains(errMsg, "login communication failed") {
+			// Look for "Password not match" within the communication failed message
+			if strings.Contains(errMsg, "Password not match") {
+				result["message"] = "Incorrect password"
+				return result
+			}
+
+			// Check for this specific error message from your backend
+			if strings.Contains(errMsg, "An error occurred during login") {
+				// When this error happens during login attempt with valid email,
+				// it's typically a password issue
+				result["message"] = "Incorrect password"
+				return result
+			}
+
+			// Extract more specific error message if available
+			parts := strings.Split(errMsg, "login communication failed: ")
+			if len(parts) > 1 && parts[1] != "" {
+				// Look for common error patterns within the extracted message
+				extractedMsg := parts[1]
+				if strings.Contains(extractedMsg, "Password not match") ||
+					strings.Contains(extractedMsg, "invalid password") {
+					result["message"] = "Incorrect password"
+				} else if strings.Contains(extractedMsg, "invalid email") ||
+					strings.Contains(extractedMsg, "email not found") {
+					result["message"] = "Email not found"
+				} else {
+					// Use the extracted message directly if it doesn't match known patterns
+					result["message"] = extractedMsg
+				}
+				return result
+			} else {
+				result["message"] = "Connection error"
+				return result
+			}
+		}
+
+		// Check for other specific error patterns
+		if strings.Contains(errMsg, "Password not match") {
+			result["message"] = "Incorrect password"
+		} else if strings.Contains(errMsg, "failed to decrypt vault key") {
+			result["message"] = "Incorrect password"
+		} else if strings.Contains(errMsg, "invalid password") {
+			result["message"] = "Incorrect password"
+		} else if strings.Contains(errMsg, "An error occurred during login") {
+			// Added this specific check for your error message
+			result["message"] = "Incorrect password"
+		} else if strings.Contains(errMsg, "invalid email") ||
+			strings.Contains(errMsg, "failed to find user") {
+			result["message"] = "Email not found"
+		} else if strings.Contains(errMsg, "login failed with status: 401") {
+			result["message"] = "Invalid email or password"
+		} else if strings.Contains(errMsg, "login failed with status: 500") {
+			// Status 500 often means password errors in your backend
+			result["message"] = "Incorrect password"
+		} else {
+			// Log the actual error for debugging but return a user-friendly message
+			log.Printf("Unrecognized login error: %v", errMsg)
+			result["message"] = "Server error. Please try again later"
+		}
+
+		return result
+	}
+
+	// If no error but the response indicates failure
+	if response != nil && !response.Success {
+		// Handle backend response failure cases
+		log.Printf("Backend returned success=false with message: %s", response.Message)
+
+		// Check for known error patterns in the response message
+		if strings.Contains(strings.ToLower(response.Message), "password") {
+			result["message"] = "Incorrect password"
+		} else {
+			result["message"] = response.Message
+		}
+		return result
+	}
+
+	// Success case
+	log.Println("Login successful")
+	result["success"] = true
+	result["message"] = "Login successful"
+
+	return result
 }
 
 // CheckSession verifies if the user has a valid session

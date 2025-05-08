@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -118,6 +119,30 @@ func SendLoginToBackend(payload *LoginPayload, backendURL string) (*LoginRespons
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
+		// Read the error response body for more information
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err == nil && len(bodyBytes) > 0 {
+			// Try to parse the error message
+			var errorResponse map[string]interface{}
+			if err := json.Unmarshal(bodyBytes, &errorResponse); err == nil {
+				if msg, ok := errorResponse["message"].(string); ok && msg != "" {
+					return nil, fmt.Errorf("%s", msg)
+				}
+			}
+
+			// If we couldn't parse it as JSON, check if it contains "Password not match"
+			bodyStr := string(bodyBytes)
+			if strings.Contains(bodyStr, "Password not match") {
+				return nil, fmt.Errorf("Password not match")
+			}
+
+			// Return the raw body as the error message if nothing else works
+			if len(bodyStr) > 0 {
+				return nil, fmt.Errorf(bodyStr)
+			}
+		}
+
+		// Fall back to status code error if we couldn't get anything better
 		return nil, fmt.Errorf("login failed with status: %d", resp.StatusCode)
 	}
 
@@ -140,7 +165,7 @@ func LoginUser(email, password string) (*LoginResponse, error) {
 	}
 
 	// Send to backend server
-	backendURL := "http://localhost:8080/login" // Change as needed
+	backendURL := "http://localhost:8080/login"
 	response, err := SendLoginToBackend(payload, backendURL)
 	if err != nil {
 		log.Printf("Login communication failed: %v", err)
@@ -153,9 +178,13 @@ func LoginUser(email, password string) (*LoginResponse, error) {
 		return nil, err
 	}
 
+	// This is where the wrong password error often occurs - add more detailed logging
+	log.Printf("Attempting to decrypt vault key with master key")
 	keymaster.Vaultkey, err = utils.DecryptAES256GCM(EncryptedVaultByte, keymaster.Masterkey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt vault key: %v", err)
+		log.Printf("Failed to decrypt vault key: %v", err)
+		// Return a clearer error message for wrong password
+		return nil, fmt.Errorf("incorrect password")
 	}
 
 	// Log success and return result

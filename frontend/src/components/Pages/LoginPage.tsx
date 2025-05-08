@@ -35,41 +35,29 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
       // Visual delay for animation
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Attempt login with proper error handling
+      // Attempt login
       const success = await onLogin(email, password);
       
       if (success) {
         setIsSuccess(true);
-        // Animation is handled by the success state
-      } else {
-        // Login returned false but no exception was thrown
-        setIsLoggingIn(false);
-        setError("Incorrect email or password");
       }
     } catch (error) {
       setIsLoggingIn(false);
       setIsSuccess(false);
       
-      // Extract the error message
-      let errorMessage = "Login failed";
-      
       if (error instanceof Error) {
-        // Parse error message to provide a more user-friendly message
-        const message = error.message.toLowerCase();
+        // Log the error for debugging
+        console.log("Login error:", error.message);
         
-        if (message.includes("status: 500")) {
-          errorMessage = "Server error. Please try again later.";
-        } else if (message.includes("status: 401") || message.includes("unauthorized")) {
-          errorMessage = "Incorrect email or password";
-        } else if (message.includes("network") || message.includes("connection")) {
-          errorMessage = "Network error. Please check your connection.";
-        } else {
-          // Use the actual error message if it's descriptive
-          errorMessage = error.message;
-        }
+        // Use the error message directly since it's already been transformed in app.go
+        setError(error.message);
+      } else {
+        setError("Login failed. Please try again.");
       }
-      
-      setError(errorMessage);
+    } finally {
+      if (!isSuccess) {
+        setIsLoggingIn(false);
+      }
     }
   };
   

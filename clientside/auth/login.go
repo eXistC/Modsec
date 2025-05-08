@@ -15,11 +15,10 @@ import (
 
 // LoginPayload represents login data sent to the backend
 type LoginPayload struct {
-	Email      string `json:"email"` //Encrypt with Publickey
-	HqT        string `json:"hqt"`
-	Hq1_HqR    string `json:"hq1-hqr"`
-	Timestamp  string `json:"timestamp"`
-	Sessionkey string `json:"sessionkey"`
+	Email     string `json:"email"` //Encrypt with Publickey
+	HqT       string `json:"hqt"`
+	Hq1_HqR   string `json:"hq1-hqr"`
+	Timestamp string `json:"timestamp"`
 }
 
 // LoginResponse represents the backend's response to login
@@ -67,16 +66,6 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 	sq := utils.SHA256Function([]byte(strings.Join(result, "|")))
 	fmt.Println("Salt/Key:", sq)
 
-	// Generate initialization vector
-
-	keymaster.Sessionkey, _ = utils.GenerateSessionKey()
-
-	// Encrypt session key with sq
-	encryptedSessionkey, err := utils.EncryptAES256GCM(keymaster.Sessionkey, sq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt iterations: %v", err)
-	}
-
 	publickey, err := PubKeyRequest()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Publickey: %v", err)
@@ -91,11 +80,10 @@ func ProcessLogin(email, password string) (*LoginPayload, error) {
 
 	// Create login payload
 	payload := &LoginPayload{
-		Email:      ConvertedEnEmail,
-		HqT:        finalHqT,
-		Hq1_HqR:    comHq1_HqR,
-		Timestamp:  timestamp,
-		Sessionkey: utils.BytToBa64(encryptedSessionkey),
+		Email:     ConvertedEnEmail,
+		HqT:       finalHqT,
+		Hq1_HqR:   comHq1_HqR,
+		Timestamp: timestamp,
 	}
 
 	return payload, nil

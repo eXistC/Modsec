@@ -3,7 +3,6 @@ import { PasswordList } from './PasswordList';
 import { PasswordEntry } from '@/types/password';
 import { useToast } from './ui/use-toast';
 import { ToggleBookmark } from '@/wailsjs/go/main/App'; 
-import { PasswordEditor } from './PasswordEditor';
 
 // Update the interface to include refreshTrigger
 interface PasswordManagerProps {
@@ -152,12 +151,6 @@ export function PasswordManager({
         onSelectPassword={handleSelectPassword}
         onToggleBookmark={handleToggleBookmark}
         refreshTrigger={refreshTrigger} // Pass the refreshTrigger prop
-      />
-      <PasswordEditor
-        password={localSelectedPassword}
-        isOpen={detailPanelOpen}
-        onDelete={handleDeletePassword}
-        onUpdate={handleUpdatePassword}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { GetCategoryList } from '@/wailsjs/go/main/App';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext'; // Add this import
 
 // Define the category interface
 export interface Category {
@@ -27,8 +28,14 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth(); // Get authentication state
 
   const loadCategories = async () => {
+    // Skip loading if not authenticated
+    if (!isAuthenticated) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       const categoryData = await GetCategoryList();
@@ -40,20 +47,29 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
       setCategories(transformedData);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
-      toast({
-        variant: "destructive",
-        title: "Failed to load categories",
-        description: "There was a problem loading your categories."
-      });
+      // Only show toast if authenticated
+      if (isAuthenticated) {
+        toast({
+          variant: "destructive",
+          title: "Failed to load categories",
+          description: "There was a problem loading your categories."
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Load categories on initial mount
+  // Load categories on initial mount OR when auth state changes
   useEffect(() => {
-    loadCategories();
-  }, []);
+    if (isAuthenticated) {
+      loadCategories();
+    } else {
+      // Clear categories when logged out
+      setCategories([]);
+      setActiveCategory(null);
+    }
+  }, [isAuthenticated]);
 
   const refreshCategories = async () => {
     await loadCategories();

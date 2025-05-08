@@ -45,7 +45,7 @@ func SendBookmarkToBackend(payload *BookmarkPayload, backendURL string) (*Bookma
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Bookmark update failed with status: %d", resp.StatusCode) // Update error message
+		return nil, fmt.Errorf("bookmark update failed with status: %d", resp.StatusCode) // Update error message
 	}
 
 	// Parse response

@@ -13,6 +13,7 @@ import (
 
 type AfterItem struct {
 	ItemID     uint                   `json:"ItemID"`
+	CategoryID *uint                  `json:"CategoryID,omitempty"`
 	Title      string                 `json:"Title"`
 	TypeName   string                 `json:"TypeName"`
 	DateCreate time.Time              `json:"DateCreate"`
@@ -23,6 +24,7 @@ type AfterItem struct {
 
 type Item struct {
 	ItemID     uint      `json:"ItemID"`
+	CategoryID *uint     `json:"CategoryID,omitempty"`
 	Title      string    `json:"Title"`
 	TypeName   string    `json:"TypeName"`
 	DateCreate time.Time `json:"DateCreate"`
@@ -87,6 +89,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 
 			eachitem := AfterItem{
 				ItemID:     item.ItemID,
+				CategoryID: item.CategoryID,
 				Title:      titleValue,
 				TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 				Data:       dataMap,
@@ -107,6 +110,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 			// Create entry with placeholder title
 			eachitem := AfterItem{
 				ItemID:     item.ItemID,
+				CategoryID: item.CategoryID,
 				Title:      fmt.Sprintf("[Item %d]", item.ItemID),
 				TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 				Data:       make(map[string]interface{}),
@@ -126,6 +130,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 			// Create entry with placeholder title
 			eachitem := AfterItem{
 				ItemID:     item.ItemID,
+				CategoryID: item.CategoryID,
 				Title:      fmt.Sprintf("[Item %d]", item.ItemID),
 				TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 				Data:       make(map[string]interface{}),
@@ -160,6 +165,7 @@ func ProcessGetListItem(resp *GetListItemResponse) (*[]AfterItem, error) {
 		// Create the item with all processed data
 		eachitem := AfterItem{
 			ItemID:     item.ItemID,
+			CategoryID: item.CategoryID,
 			Title:      string(decryptedTitle),
 			TypeName:   mapTypeNameToFrontend(item.TypeName), // Map the type name
 			Data:       dataMap,

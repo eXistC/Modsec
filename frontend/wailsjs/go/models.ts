@@ -2,6 +2,7 @@ export namespace service {
 	
 	export class AfterItem {
 	    ItemID: number;
+	    CategoryID?: number;
 	    Title: string;
 	    TypeName: string;
 	    // Go type: time
@@ -18,6 +19,7 @@ export namespace service {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ItemID = source["ItemID"];
+	        this.CategoryID = source["CategoryID"];
 	        this.Title = source["Title"];
 	        this.TypeName = source["TypeName"];
 	        this.DateCreate = this.convertValues(source["DateCreate"], null);

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { LockKeyhole, ArrowRightCircle, Check } from "lucide-react";
 import { AnimatedCard } from "../ui/animated-card";
+import { RecoveryForm } from "../Recovery/RecoveryForm";
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => void;
@@ -16,6 +17,7 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +39,17 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
       setIsSuccess(false);
     }
   };
+  
+  // Return the recovery form if in recovery mode
+  if (showRecovery) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#1E1E1E] overflow-hidden">
+        <div className="w-full max-w-md p-6 bg-card rounded-lg shadow-lg border">
+          <RecoveryForm onBack={() => setShowRecovery(false)} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex items-center justify-center bg-[#1E1E1E] overflow-hidden">
@@ -92,12 +105,23 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
                 </div>
               </div>
               <div className="space-y-2 animate-in slide-in-from-bottom-1 duration-700 delay-300">
-                <Label 
-                  htmlFor="masterPassword"
-                  className="animate-[subtle-bounce_2s_ease-in-out_infinite]"
-                >
-                  Master Password
-                </Label>
+                <div className="flex justify-between items-center">
+                  <Label 
+                    htmlFor="masterPassword"
+                    className="animate-[subtle-bounce_2s_ease-in-out_infinite]"
+                  >
+                    Master Password
+                  </Label>
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    size="sm" 
+                    className="text-xs text-muted-foreground font-normal px-0 h-auto hover:text-primary"
+                    onClick={() => setShowRecovery(true)}
+                  >
+                    Forgot password?
+                  </Button>
+                </div>
                 <div className="relative group">
                   <Input
                     id="masterPassword"
@@ -105,7 +129,6 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your master password"
-                    autoFocus
                     disabled={isLoggingIn}
                     className={`
                       pr-10
@@ -116,55 +139,74 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
                       ${isSuccess ? 'border-green-500 ring-green-500' : ''}
                     `}
                   />
-    <Button 
-      type="submit"
-      size="icon"
-      variant="ghost"
-      disabled={isLoggingIn}
-      className="
-        absolute
-        right-0
-        top-0
-        h-full
-        px-2
-        hover:bg-transparent
-        group
-        transition-all
-        duration-300
-        hover:scale-110
-      "
-    >
-      <ArrowRightCircle className={`
-        h-5
-        w-5
-        transition-all
-        duration-300
-        ${isSuccess 
-          ? 'text-green-500 scale-110 rotate-90' 
-          : 'text-muted-foreground/70 group-hover:text-primary group-hover:translate-x-1'
-        }
-      `} />
-    </Button>
-  </div>
-</div>
-            <Button
-              type="button"
-              variant="link"
-              onClick={onRegisterClick}
-              className="
-                text-sm 
-                text-muted-foreground 
-                hover:text-primary 
-                transition-all 
-                duration-300 
-                hover:scale-105
-              "
-            >
-              Don't have an account? Register here
-            </Button>
-          </div>
-        </CardContent>
-      </form>
-    </AnimatedCard>
-  </div>
-  )};
+                  <Button 
+                    type="submit"
+                    size="icon"
+                    variant="ghost"
+                    disabled={isLoggingIn}
+                    className="
+                      absolute
+                      right-0
+                      top-0
+                      h-full
+                      px-2
+                      hover:bg-transparent
+                      group
+                      transition-all
+                      duration-300
+                      hover:scale-110
+                    "
+                  >
+                    <ArrowRightCircle className={`
+                      h-5
+                      w-5
+                      transition-all
+                      duration-300
+                      ${isSuccess 
+                        ? 'text-green-500 scale-110 rotate-90' 
+                        : 'text-muted-foreground/70 group-hover:text-primary group-hover:translate-x-1'
+                      }
+                    `} />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-between items-center space-y-0 pt-2">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={onRegisterClick}
+                  className="
+                    text-sm 
+                    text-muted-foreground 
+                    hover:text-primary 
+                    transition-all 
+                    duration-300 
+                    hover:scale-105
+                  "
+                >
+                  Don't have an account?
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => setShowRecovery(true)}
+                  className="
+                    text-sm 
+                    text-muted-foreground 
+                    hover:text-primary 
+                    transition-all 
+                    duration-300 
+                    hover:scale-105
+                  "
+                >
+                  Recover account
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </form>
+      </AnimatedCard>
+    </div>
+  );
+}

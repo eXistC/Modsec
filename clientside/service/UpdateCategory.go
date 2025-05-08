@@ -13,12 +13,12 @@ import (
 
 type UpdateCategoryPayload struct {
 	Category_id  uint   `json:"category_id"`
-	CategoryName string `json:"title"`
+	CategoryName string `json:"categoryname"`
 }
 
 type UpdateCategoryResponse struct {
 	CategoryID uint   `json:"category_id"`
-	Message    string `json:"message"`
+	Status     string `json:"status"`
 }
 
 func ProcessUpdateCategory(category_id uint, categoryname string) (*UpdateCategoryPayload, error) {
@@ -96,6 +96,6 @@ func UpdateCategoryClient(category_id uint, categoryname string) (*UpdateCategor
 	}
 
 	// Log success and return result
-	log.Printf("UpdateCategory result: CategoryID:%d, %s", response.CategoryID, response.Message)
+	log.Printf("UpdateCategory result: CategoryID:%d, %s", response.CategoryID, response.Status)
 	return response, nil
 }

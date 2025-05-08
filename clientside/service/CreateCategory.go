@@ -22,10 +22,9 @@ type CreateCategoryResponse struct {
 
 func ProcessCreateCategory(categoryname string) (*CreateCategoryPayload, error) {
 
-	// Encrypt data with sq
 	encryptedCategory, err := utils.EncryptAES256GCM([]byte(categoryname), keymaster.Vaultkey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt Itemdata: %v", err)
+		return nil, fmt.Errorf("failed to encrypt categoryname: %v", err)
 	}
 
 	StrencryptedCategory := utils.BytToBa64(encryptedCategory)

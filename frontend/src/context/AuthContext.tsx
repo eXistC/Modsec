@@ -39,17 +39,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      const success = await LoginUser(email, password);
-      if (success) {
+      const response = await LoginUser(email, password);
+      if (response && response.success) {
         setIsAuthenticated(true);
         setUserEmail(email);
         localStorage.setItem('userEmail', email);
         return true;
       }
+      // If we get a response but success is false
+      if (response) {
+        throw new Error(response.message || "Login failed");
+      }
       return false;
     } catch (error) {
       console.error('Login failed:', error);
-      return false;
+      throw error; // Re-throw to allow the component to handle it
     }
   }, []);
 

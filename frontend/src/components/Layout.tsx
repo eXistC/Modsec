@@ -48,20 +48,25 @@ export function Layout() {
     setSelectedPassword(password);
   };
 
+  // Update login handler to properly return a boolean and propagate errors
   const handleLogin = async (email: string, password: string) => {
     try {
-      await login(email, password);
-      toast({
-        title: "Login successful",
-        description: "Welcome to ModSec!"
-      });
+      const success = await login(email, password);
+      if (success) {
+        // Optional: show success toast
+        toast({
+          title: "Login successful",
+          description: "Welcome back to ModSec",
+        });
+        return true;
+      } else {
+        // Login function returned false
+        return false;
+      }
     } catch (error) {
       console.error("Login failed:", error);
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: "Invalid email or password. Please try again."
-      });
+      // Re-throw the error to be caught by the LoginPage
+      throw error;
     }
   };
 

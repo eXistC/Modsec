@@ -264,10 +264,18 @@ func (a *App) GetCategoryList() ([]map[string]interface{}, error) {
 	// Count items per category
 	if items != nil {
 		for _, item := range *items {
-			// Looking at the error, AfterItem doesn't have CategoryID field
-			// Need to access it from the item's Data map instead
-			if categoryID, ok := item.Data["CategoryID"].(float64); ok {
-				categoryCounts[uint(categoryID)]++
+			// Check the item's Data map for CategoryID
+			if categoryID, ok := item.Data["CategoryID"]; ok {
+				if floatID, isFloat := categoryID.(float64); isFloat {
+					// Convert float64 to uint
+					categoryCounts[uint(floatID)]++
+				} else if intID, isInt := categoryID.(int); isInt {
+					// Handle int type
+					categoryCounts[uint(intID)]++
+				} else if uintID, isUint := categoryID.(uint); isUint {
+					// Handle uint type directly
+					categoryCounts[uintID]++
+				}
 			}
 		}
 	}

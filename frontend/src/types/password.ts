@@ -1,25 +1,23 @@
 export type PasswordType = "website" | "identity" | "card" | "crypto" | "memo";
 
-export interface BaseEntry {
+export interface PasswordEntryBase {
   id: string;
   title: string;
-  type: PasswordType;
   isBookmarked: boolean;
   dateCreated: Date;
   dateModified: Date;
   notes?: string;
-  category?: string | null;
   categoryId?: number | null;
 }
 
-export interface WebsiteEntry extends BaseEntry {
+export interface WebsiteEntry extends PasswordEntryBase {
   type: "website";
   username: string;
   password: string;
   url?: string;
 }
 
-export interface IdentityEntry extends BaseEntry {
+export interface IdentityEntry extends PasswordEntryBase {
   type: "identity";
   firstName: string;
   lastName: string;
@@ -28,7 +26,7 @@ export interface IdentityEntry extends BaseEntry {
   address?: string;
 }
 
-export interface CardEntry extends BaseEntry {
+export interface CardEntry extends PasswordEntryBase {
   type: "card";
   cardholderName: string;
   cardNumber: string;
@@ -37,14 +35,14 @@ export interface CardEntry extends BaseEntry {
   cvv: string;
 }
 
-export interface CryptoEntry extends BaseEntry {
+export interface CryptoEntry extends PasswordEntryBase {
   type: "crypto";
   walletName: string;
   address: string;
   privateKey: string;
 }
 
-export interface MemoEntry extends BaseEntry {
+export interface MemoEntry extends PasswordEntryBase {
   type: "memo";
   content: string;
 }

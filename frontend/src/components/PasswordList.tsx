@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Globe, Plus, Search, User, CreditCard, Wallet, File, AlertCircle, Loader2, Bookmark, ChevronDown, SortAsc, SortDesc, ArrowDownAZ, ArrowUpZA, CalendarClock } from "lucide-react";
+import { Globe, Plus, Search, User, CreditCard, Wallet, File, AlertCircle, Loader2, Bookmark, ChevronDown, SortAsc, SortDesc, ArrowDownAZ, ArrowUpZA, CalendarClock, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { IdentityEntry, PasswordEntry, PasswordType } from "@/types/password";
 import { NewItemTypeOverlay } from "./Overlays/NewItemTypeOverlay";
@@ -10,6 +10,8 @@ import { useColorSettings } from "@/context/ColorSettingsContext";
 import { GetPasswordList, ToggleBookmark } from "@/wailsjs/go/main/App";
 import { useToast } from "./ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useCategories } from "@/context/CategoryContext";
+import { Badge } from "@/components/ui/badge";
 
 // Update the PasswordListProps interface
 export interface PasswordListProps {
@@ -81,7 +83,8 @@ const convertToPasswordEntry = (item: any): PasswordEntry => {
       isBookmarked: Boolean(item.IsBookmark),
       dateCreated: new Date(item.DateCreate || Date.now()),
       dateModified: new Date(item.DateModify || Date.now()),
-      notes: ""
+      notes: "",
+      categoryId: item.CategoryID || null
     };
 
     // Make sure Data is an object
@@ -165,6 +168,9 @@ export function PasswordList({
   onToggleBookmark,
   refreshTrigger = 0 // Default to 0
 }: PasswordListProps) {
+  // Get the active category from context
+  const { activeCategory, clearActiveCategory } = useCategories();
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [showTypeOverlay, setShowTypeOverlay] = useState(false);
   const [selectedType, setSelectedType] = useState<PasswordType | null>(null);
@@ -181,11 +187,10 @@ export function PasswordList({
     loadPasswords();
   }, []);
 
-  // Add dependency to the useEffect to reload when refreshTrigger changes
+  // Add dependency to the useEffect to reload when refreshTrigger or activeCategory changes
   useEffect(() => {
     loadPasswords();
-    // Add refreshTrigger as a dependency
-  }, [refreshTrigger]);
+  }, [refreshTrigger, activeCategory]);
 
   const loadPasswords = async () => {
     setIsLoading(true);
@@ -297,20 +302,40 @@ export function PasswordList({
     });
   };
 
-  const filteredPasswords = getSortedPasswords(
-    passwords.filter(entry => 
-      // First apply bookmark filter if we're in bookmarks view
-      (currentView === "bookmarks" ? entry.isBookmarked : true) &&
-      // Then apply search filter
-      (entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       (entry.type === "website" && entry.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-       (entry.type === "card" && entry.cardNumber?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-       (entry.type === "identity" && (
-         entry.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         entry.lastName?.toLowerCase().includes(searchQuery.toLowerCase())
-       )))
-    )
-  );
+  const filterPasswords = (passwords: PasswordEntry[]) => {
+    return passwords.filter(password => {
+      // Apply bookmarks filter for bookmark view
+      if (currentView === "bookmarks" && !password.isBookmarked) {
+        return false;
+      }
+
+      // Apply category filter if an active category is set
+      if (activeCategory) {
+        // Simply use the categoryId property that exists on PasswordEntry
+        if (password.categoryId !== activeCategory.id) {
+          return false;
+        }
+      }
+
+      // Apply search filter
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        const titleMatch = password.title.toLowerCase().includes(searchLower);
+        const contentMatch = password.type === 'website' && password.username?.toLowerCase().includes(searchLower);
+        const cardMatch = password.type === 'card' && password.cardNumber?.toLowerCase().includes(searchLower);
+        const nameMatch = password.type === 'identity' && (
+          password.firstName?.toLowerCase().includes(searchLower) ||
+          password.lastName?.toLowerCase().includes(searchLower)
+        );
+        
+        return titleMatch || contentMatch || cardMatch || nameMatch;
+      }
+      
+      return true;
+    });
+  };
+
+  const filteredPasswords = getSortedPasswords(filterPasswords(passwords));
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return null;
@@ -372,9 +397,12 @@ export function PasswordList({
   return (
     <div className="h-full bg-[#1E1E1E]">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-4">
-        <h2 className="text-sm font-normal">
-          {currentView === "bookmarks" ? "Bookmarks" : "All Passwords"}
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-normal">
+            {currentView === "bookmarks" ? "Bookmarks" : "All Passwords"}
+          </h2>
+        </div>
+        
         <Button 
           size="sm" 
           variant="outline" 
@@ -609,7 +637,30 @@ export function PasswordList({
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                 <AlertCircle className="h-8 w-8 mb-2" />
-                <p className="text-sm">No items found</p>
+                <p className="text-sm">
+                  {activeCategory ? (
+                    <>No items in {activeCategory.name}</>
+                  ) : currentView === "bookmarks" ? (
+                    <>No bookmarked items</>
+                  ) : (
+                    <>No items found</>
+                  )}
+                </p>
+                
+                {/* Show clear filters button if we have an active filter */}
+                {(activeCategory || searchQuery) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => {
+                      setSearchQuery("");
+                      clearActiveCategory();
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
               </div>
             )}
           </div>

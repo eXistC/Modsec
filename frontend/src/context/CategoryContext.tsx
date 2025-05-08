@@ -13,12 +13,18 @@ interface CategoryContextType {
   categories: Category[];
   isLoading: boolean;
   refreshCategories: () => Promise<void>;
+  activeCategory: Category | null;
+  setActiveCategory: (category: Category | null) => void;
+  getCategoryNameById: (id: number | null) => string | null;
+  getCategoryIdByName: (name: string | null) => number | null;
+  clearActiveCategory: () => void;
 }
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
 export function CategoryProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -53,8 +59,34 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
     await loadCategories();
   };
 
+  // Utility functions to help with category lookup
+  const getCategoryNameById = (id: number | null): string | null => {
+    if (id === null) return null;
+    const category = categories.find(cat => cat.id === id);
+    return category?.name || null;
+  };
+
+  const getCategoryIdByName = (name: string | null): number | null => {
+    if (!name) return null;
+    const category = categories.find(cat => cat.name === name);
+    return category?.id || null;
+  };
+
+  const clearActiveCategory = () => {
+    setActiveCategory(null);
+  };
+
   return (
-    <CategoryContext.Provider value={{ categories, isLoading, refreshCategories }}>
+    <CategoryContext.Provider value={{
+      categories,
+      isLoading,
+      refreshCategories,
+      activeCategory,
+      setActiveCategory,
+      getCategoryNameById,
+      getCategoryIdByName,
+      clearActiveCategory
+    }}>
       {children}
     </CategoryContext.Provider>
   );

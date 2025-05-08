@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Plus, Loader2, Edit, Trash2 } from "lucide-react";
+import { Plus, Loader2, Edit, Trash2, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   CreateCategoryClient, 
@@ -18,9 +18,9 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Badge } from "@/components/ui/badge";
 
 export function CatList() {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -30,8 +30,14 @@ export function CatList() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
   
-  // Use the shared category context
-  const { categories, isLoading, refreshCategories } = useCategories();
+  const { 
+    categories, 
+    isLoading, 
+    refreshCategories,
+    activeCategory,
+    setActiveCategory,
+    clearActiveCategory
+  } = useCategories();
 
   useEffect(() => {
     if (editingCategory && editInputRef.current) {
@@ -68,7 +74,6 @@ export function CatList() {
           description: "Your new category has been created successfully.",
         });
         
-        // Refresh categories to update UI across all components
         await refreshCategories();
       }
     } catch (error) {
@@ -114,11 +119,13 @@ export function CatList() {
           description: "Your category has been updated successfully.",
         });
         
-        if (activeCategory === editingCategory.name) {
-          setActiveCategory(trimmedName);
+        if (activeCategory && activeCategory.id === editingCategory.id) {
+          setActiveCategory({
+            ...activeCategory,
+            name: trimmedName
+          });
         }
         
-        // Refresh categories to update UI across all components
         await refreshCategories();
       }
     } catch (error) {
@@ -145,11 +152,10 @@ export function CatList() {
           description: "The category has been removed successfully.",
         });
         
-        if (activeCategory === categoryToDelete.name) {
-          setActiveCategory(null);
+        if (activeCategory && activeCategory.id === categoryToDelete.id) {
+          clearActiveCategory();
         }
         
-        // Refresh categories to update UI across all components
         await refreshCategories();
       }
     } catch (error) {
@@ -185,6 +191,14 @@ export function CatList() {
       handleRenameCategory();
     } else if (e.key === "Escape") {
       cancelEdit();
+    }
+  };
+
+  const handleCategoryClick = (category: Category) => {
+    if (activeCategory && activeCategory.id === category.id) {
+      clearActiveCategory();
+    } else {
+      setActiveCategory(category);
     }
   };
 
@@ -275,18 +289,18 @@ export function CatList() {
                   <ContextMenu>
                     <ContextMenuTrigger asChild>
                       <Button
-                        variant={activeCategory === category.name ? "secondary" : "ghost"}
+                        variant={activeCategory?.id === category.id ? "secondary" : "ghost"}
                         className={`group w-full justify-start text-[13px] h-8 font-medium
                           relative overflow-hidden transition-all duration-200
-                          ${activeCategory === category.name 
+                          ${activeCategory?.id === category.id 
                             ? 'bg-secondary/50 text-primary before:absolute before:left-0 before:top-[15%] before:h-[70%] before:w-[2px] before:bg-primary' 
                             : 'text-muted-foreground hover:text-primary hover:bg-secondary/30'}`}
-                        onClick={() => setActiveCategory(category.name)}
+                        onClick={() => handleCategoryClick(category)}
                       >
                         <div className="flex items-center w-full">
                           <span>{category.name}</span>
                           <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full transition-colors duration-200
-                            ${activeCategory === category.name
+                            ${activeCategory?.id === category.id
                               ? 'bg-primary/10 text-primary'
                               : 'bg-muted text-muted-foreground'}`}>
                             {category.count}

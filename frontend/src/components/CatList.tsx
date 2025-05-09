@@ -301,15 +301,7 @@ export function CatList() {
                             : 'text-muted-foreground hover:text-primary hover:bg-secondary/30'}`}
                         onClick={() => handleCategoryClick(category)}
                       >
-                        <div className="flex items-center w-full">
-                          <span>{category.name}</span>
-                          <span className={`ml-auto text-[11px] px-1.5 py-0.5 rounded-full transition-colors duration-200
-                            ${activeCategory?.id === category.id
-                              ? 'bg-primary/10 text-primary'
-                              : 'bg-muted text-muted-foreground'}`}>
-                            {category.count}
-                          </span>
-                        </div>
+                        <span>{category.name}</span>
                       </Button>
                     </ContextMenuTrigger>
                     <ContextMenuContent className="w-48">

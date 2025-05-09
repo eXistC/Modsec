@@ -49,19 +49,23 @@ export function formatBangkokDate(date: Date | string | undefined): string {
   
   const dateObj = date instanceof Date ? date : parseBangkokDate(date);
   
-  // Format the date in Thai locale if possible, with Bangkok time
+  // Format the date with dd/mm/yyyy pattern
   try {
-    return dateObj.toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
+    // Format date as DD/MM/YYYY HH:MM:SS
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = dateObj.getFullYear();
+    const hours = String(dateObj.getHours()).padStart(2, '0');
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+    const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+    
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   } catch (e) {
-    // Fallback to a simpler format if locale is not supported
-    return dateObj.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
+    // Fallback to a simpler format if there's an error
+    const isoString = dateObj.toISOString();
+    const parts = isoString.split('T');
+    const datePart = parts[0].split('-').reverse().join('/');
+    const timePart = parts[1].split('.')[0];
+    return `${datePart} ${timePart}`;
   }
 }

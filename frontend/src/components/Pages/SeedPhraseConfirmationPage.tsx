@@ -209,25 +209,31 @@ export function SeedPhraseConfirmationPage({ isRecovery = false }: SeedPhraseCon
                   ))}
                 </div>
                 
+                {/* Improved reveal button with better visibility and clarity */}
+                <div className="mt-4 flex justify-center">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className={`w-full max-w-xs ${!isHidden ? "bg-secondary/60" : ""}`}
+                    onClick={() => setIsHidden(!isHidden)}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      {isHidden ? (
+                        <>
+                          <Eye className="h-4 w-4" />
+                          <span>Reveal Recovery Phrase</span>
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="h-4 w-4" />
+                          <span>Hide Recovery Phrase</span>
+                        </>
+                      )}
+                    </div>
+                  </Button>
+                </div>
+                
                 <div className="absolute right-3 top-3 flex space-x-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="opacity-90 hover:opacity-100 hover:bg-secondary/70"
-                          onClick={() => setIsHidden(!isHidden)}
-                        >
-                          {isHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{isHidden ? "Show" : "Hide"} recovery phrase</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>

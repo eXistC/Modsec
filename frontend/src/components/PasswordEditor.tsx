@@ -817,23 +817,30 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
             </div>
           </div>
 
-          {/* Enhanced timestamps section with better styling */}
-          <div className="space-y-2 mt-4 pt-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <label className="text-sm font-medium text-muted-foreground">Timestamps</label>
+          {/* Subtle timestamps section with stacked layout */}
+          <div className="space-y-2 mt-4 pt-3 border-t border-border/30">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
+              <label className="text-xs font-medium text-muted-foreground/70">Timestamps</label>
             </div>
-            <div className="pl-6 space-y-3">
-              <div className="flex flex-col space-y-1">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider">Created</div>
-                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary">
+            
+            <div className="space-y-2 pl-1">
+              {/* Created timestamp */}
+              <div className="flex items-baseline gap-2">
+                <div className="w-16 flex-shrink-0">
+                  <span className="text-[10px] text-muted-foreground/70 uppercase tracking-wide">Created</span>
+                </div>
+                <div className="font-mono text-xs text-muted-foreground/80">
                   {formatDateTime(formData.dateCreated)}
                 </div>
               </div>
               
-              <div className="flex flex-col space-y-1">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider">Last modified</div>
-                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary">
+              {/* Modified timestamp */}
+              <div className="flex items-baseline gap-2">
+                <div className="w-16 flex-shrink-0">
+                  <span className="text-[10px] text-muted-foreground/70 uppercase tracking-wide">Modified</span>
+                </div>
+                <div className="font-mono text-xs text-muted-foreground/80">
                   {formatDateTime(formData.dateModified)}
                 </div>
               </div>

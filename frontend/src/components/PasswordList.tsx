@@ -48,7 +48,9 @@ const mapTypeToFrontend = (backendType: string): PasswordType => {
       return 'identity';
     case 'card':
       return 'card';
-    // Add these additional mappings to handle any variant spellings
+    case 'credit':  
+      return 'card';
+    // Other mappings
     case 'website':
       return 'website';
     case 'crypto':
@@ -106,10 +108,10 @@ const convertToPasswordEntry = (item: any): PasswordEntry => {
         return {
           ...baseProps,
           type: 'card' as const,
-          cardholderName: data.cardholder || '',
-          cardNumber: data.cardNumber || '',
-          expirationMonth: data.expMonth || '',
-          expirationYear: data.expYear || '',
+          cardholderName: data.cardholder || data.cardholderName || '',
+          cardNumber: data.cardNumber || data.number || '',
+          expirationMonth: data.expMonth || data.expirationMonth || '',
+          expirationYear: data.expYear || data.expirationYear || '',
           cvv: data.cvv || '',
           notes: data.notes || ''
         };

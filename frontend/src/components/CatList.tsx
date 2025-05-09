@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Plus, Loader2, Edit, Trash2, X } from "lucide-react";
+import { Plus, Loader2, Edit, Trash2, X, FolderIcon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   CreateCategoryClient, 
@@ -202,6 +202,17 @@ export function CatList() {
     }
   };
 
+  // Empty categories placeholder component
+  const EmptyCategoriesPlaceholder = () => (
+    <div className="flex flex-col items-center justify-center py-5 px-3 text-center">
+      <FolderIcon className="h-8 w-8 text-muted-foreground/30 mb-2" />
+      <h3 className="text-xs font-medium text-muted-foreground/70 mb-0.5">No Categories Found</h3>
+      <p className="text-[10px] text-muted-foreground/50 mb-2">
+        Create categories to organize your passwords
+      </p>
+    </div>
+  );
+
   return (
     <div className="h-full flex flex-col px-3 py-2">
       {/* Header section - doesn't grow */}
@@ -254,9 +265,7 @@ export function CatList() {
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           </div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-4 text-sm text-muted-foreground">
-            No categories found
-          </div>
+          <EmptyCategoriesPlaceholder />
         ) : (
           <div className="space-y-0.5">
             {categories.map((category) => (

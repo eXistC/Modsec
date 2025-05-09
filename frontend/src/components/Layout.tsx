@@ -10,6 +10,7 @@ import { PasswordEntry } from "@/types/password";
 import { ColorSettingsProvider } from "@/context/ColorSettingsContext";
 import { useToast } from "@/components/ui/use-toast";
 import { SeedPhraseConfirmationPage } from './Pages/SeedPhraseConfirmationPage';
+import { ShieldIcon } from "lucide-react";
 
 export function Layout() {
   const { isAuthenticated, login, register, isRegistrationComplete, checkSession } = useAuth();
@@ -96,6 +97,19 @@ export function Layout() {
     setRefreshCounter(prev => prev + 1);
   };
 
+  // Placeholder component for when no password is selected
+  const EmptyPasswordPlaceholder = () => (
+    <div className="h-full flex flex-col items-center justify-center text-center px-3">
+      <div className="mb-3">
+        <ShieldIcon className="h-10 w-10 text-muted-foreground/30" />
+      </div>
+      <h2 className="text-lg font-medium text-muted-foreground/70 mb-1">No Password Selected</h2>
+      <p className="text-xs text-muted-foreground/50 max-w-xs">
+        Select a password from the list to view details or create a new password entry.
+      </p>
+    </div>
+  );
+
   return (
     <ColorSettingsProvider>
       {!isAuthenticated ? (
@@ -137,7 +151,7 @@ export function Layout() {
               )}
             </div>
             <div className="border-0 border-border h-screen overflow-hidden">
-              {selectedPassword && (
+              {selectedPassword ? (
                 <PasswordEditor
                   password={selectedPassword}
                   isOpen={true}
@@ -148,6 +162,8 @@ export function Layout() {
                   }}
                   onUpdate={handlePasswordUpdate}
                 />
+              ) : (
+                <EmptyPasswordPlaceholder />
               )}
             </div>
           </div>

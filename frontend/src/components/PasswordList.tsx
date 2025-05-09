@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Globe, Plus, Search, User, CreditCard, Wallet, File, AlertCircle, Loader2, Bookmark, ChevronDown, SortAsc, SortDesc, ArrowDownAZ, ArrowUpZA, CalendarClock, X } from "lucide-react";
+import { Globe, Plus, Search, User, CreditCard, Wallet, File, AlertCircle, Loader2, Bookmark, ChevronDown, SortAsc, SortDesc, ArrowDownAZ, ArrowUpZA, CalendarClock, X, FilterIcon, ShieldIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { IdentityEntry, PasswordEntry, PasswordType } from "@/types/password";
 import { NewItemTypeOverlay } from "./Overlays/NewItemTypeOverlay";
@@ -396,6 +396,55 @@ export function PasswordList({
     }
   };
 
+  // Empty password list placeholder component - smaller version
+  const EmptyPasswordPlaceholder = () => {
+    let title = "No items found";
+    let description = "Try adjusting your filters or create a new item.";
+    let icon = <AlertCircle className="h-10 w-10 mb-3 text-muted-foreground/30" />;
+
+    if (searchQuery) {
+      title = "No search results";
+      description = `No items found for "${searchQuery}".`;
+      icon = <Search className="h-10 w-10 mb-3 text-muted-foreground/30" />;
+    } else if (activeCategory) {
+      title = `No items in ${activeCategory.name}`;
+      description = "Add items to this category or choose a different one.";
+      icon = <FilterIcon className="h-10 w-10 mb-3 text-muted-foreground/30" />;
+    } else if (currentView === "bookmarks") {
+      title = "No bookmarked items";
+      description = "Bookmark items to see them here.";
+      icon = <Bookmark className="h-10 w-10 mb-3 text-muted-foreground/30" />;
+    } else if (passwords.length === 0) {
+      title = "Your vault is empty";
+      description = "Add your first item to get started.";
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+        {icon}
+        <h3 className="text-base font-medium text-muted-foreground/70 mb-1">{title}</h3>
+        <p className="text-xs text-muted-foreground/50 max-w-xs mb-4">{description}</p>
+        
+        <div className="flex gap-2">
+          {(activeCategory || searchQuery) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                clearActiveCategory();
+              }}
+              className="flex items-center gap-1 text-xs h-8 px-2"
+            >
+              <X className="h-3.5 w-3.5" />
+              Clear Filters
+            </Button>
+          )} 
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="h-full bg-[#1E1E1E]">
       <div className="flex h-[60px] items-center justify-between border-b border-border px-4">
@@ -637,33 +686,7 @@ export function PasswordList({
                 </Button>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                <AlertCircle className="h-8 w-8 mb-2" />
-                <p className="text-sm">
-                  {activeCategory ? (
-                    <>No items in {activeCategory.name}</>
-                  ) : currentView === "bookmarks" ? (
-                    <>No bookmarked items</>
-                  ) : (
-                    <>No items found</>
-                  )}
-                </p>
-                
-                {/* Show clear filters button if we have an active filter */}
-                {(activeCategory || searchQuery) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-4"
-                    onClick={() => {
-                      setSearchQuery("");
-                      clearActiveCategory();
-                    }}
-                  >
-                    Clear Filters
-                  </Button>
-                )}
-              </div>
+              <EmptyPasswordPlaceholder />
             )}
           </div>
         )}

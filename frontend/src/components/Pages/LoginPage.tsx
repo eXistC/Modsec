@@ -200,7 +200,7 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
                   </Button>
                 </div>
               </div>
-              <div className="flex justify-between items-center space-y-0 pt-2">
+              <div className="flex justify-center items-center space-y-0 pt-2">
                 <Button
                   type="button"
                   variant="link"
@@ -216,23 +216,6 @@ export function LoginPage({ onLogin, onRegisterClick }: LoginPageProps) {
                   "
                 >
                   Don't have an account?
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={() => setShowRecovery(true)}
-                  disabled={isLoggingIn}
-                  className="
-                    text-sm 
-                    text-muted-foreground 
-                    hover:text-primary 
-                    transition-all 
-                    duration-300 
-                    hover:scale-105
-                  "
-                >
-                  Recover account
                 </Button>
               </div>
             </div>

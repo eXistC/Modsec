@@ -28,15 +28,46 @@ interface PasswordEditorProps {
 // Define a constant for the "no category" value to use consistently throughout
 const NO_CATEGORY = "uncategorized";
 
-// Replace the formatDateTime function with this simpler formatDate function:
-const formatDate = (date: Date | string | undefined): string => {
-  if (!date) return "";
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString(undefined, { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric'
-  });
+// Update the formatDateTime function to display date and time without the UTC suffix
+
+const formatDateTime = (dateString: Date | string | undefined): string => {
+  if (!dateString) return "";
+  
+  // If it's already a string, check if it's in the expected backend format
+  if (typeof dateString === 'string') {
+    // Check if the date is in the backend format: 2025-05-09 15:17:22.137968+00
+    const backendFormatRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+\+\d{2}$/;
+    
+    if (backendFormatRegex.test(dateString)) {
+      // Parse date parts for better formatting
+      const [datePart, timePart] = dateString.split(' ');
+      const [year, month, day] = datePart.split('-');
+      // Extract time part (removing microseconds)
+      const timeWithoutMicroseconds = timePart.split('.')[0];
+      
+      // Format the date as: "2025-05-09 15:17:22" (without the UTC suffix)
+      return `${year}-${month}-${day} ${timeWithoutMicroseconds}`;
+    }
+    
+    // If not in backend format, try to parse it
+    try {
+      const parsedDate = new Date(dateString);
+      
+      // Format with ISO string but remove UTC and Z suffix
+      return parsedDate.toISOString()
+        .replace('T', ' ')
+        .replace(/\.\d+Z$/, '');
+    } catch {
+      console.warn("Invalid date format:", dateString);
+      return String(dateString);
+    }
+  } else {
+    // It's a Date object, convert to ISO string without UTC suffix
+    return dateString
+      .toISOString()
+      .replace('T', ' ')
+      .replace(/\.\d+Z$/, '');
+  }
 };
 
 // Update the PasswordEditor component structure
@@ -795,15 +826,15 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
             <div className="pl-6 space-y-3">
               <div className="flex flex-col space-y-1">
                 <div className="text-xs text-muted-foreground uppercase tracking-wider">Created</div>
-                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary inline-block">
-                  {formatDate(formData.dateCreated)}
+                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary">
+                  {formatDateTime(formData.dateCreated)}
                 </div>
               </div>
               
               <div className="flex flex-col space-y-1">
                 <div className="text-xs text-muted-foreground uppercase tracking-wider">Last modified</div>
-                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary inline-block">
-                  {formatDate(formData.dateModified)}
+                <div className="text-sm bg-secondary/40 px-3 py-1.5 rounded-md border border-secondary">
+                  {formatDateTime(formData.dateModified)}
                 </div>
               </div>
             </div>

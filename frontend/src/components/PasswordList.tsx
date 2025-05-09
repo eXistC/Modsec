@@ -12,6 +12,7 @@ import { useToast } from "./ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useCategories } from "@/context/CategoryContext";
 import { Badge } from "@/components/ui/badge";
+import { parseBangkokDate, formatBangkokDate } from "@/lib/utils";
 
 // Update the PasswordListProps interface
 export interface PasswordListProps {
@@ -83,8 +84,8 @@ const convertToPasswordEntry = (item: any): PasswordEntry => {
       id: String(item.ItemID || 0),
       title: item.Title || "[Untitled]",
       isBookmarked: Boolean(item.IsBookmark),
-      dateCreated: new Date(item.DateCreate || Date.now()),
-      dateModified: new Date(item.DateModify || Date.now()),
+      dateCreated: parseBangkokDate(item.DateCreate || Date.now()),
+      dateModified: parseBangkokDate(item.DateModify || Date.now()),
       notes: "",
       categoryId: item.CategoryID || null
     };

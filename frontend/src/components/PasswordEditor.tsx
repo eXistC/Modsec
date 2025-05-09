@@ -28,8 +28,8 @@ interface PasswordEditorProps {
 // Define a constant for the "no category" value to use consistently throughout
 const NO_CATEGORY = "uncategorized";
 
-// Update the formatDateTime function to properly handle Bangkok timezone
-import { formatBangkokDate } from "@/lib/utils";
+// Format dates using the user's local timezone
+import { formatBangkokDate, getUserTimezoneName } from "@/lib/utils";
 
 const formatDateTime = (dateString: Date | string | undefined): string => {
   return formatBangkokDate(dateString);
@@ -780,13 +780,16 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Subtle timestamps section with stacked layout */}
+          </div>          {/* Subtle timestamps section with stacked layout */}
           <div className="space-y-2 mt-4 pt-3 border-t border-border/30">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
-              <label className="text-xs font-medium text-muted-foreground/70">Timestamps</label>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
+                <label className="text-xs font-medium text-muted-foreground/70">Timestamps</label>
+              </div>
+              <div className="text-[10px] text-muted-foreground/50 italic">
+                {getUserTimezoneName()}
+              </div>
             </div>
             
             <div className="space-y-2 pl-1">

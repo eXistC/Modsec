@@ -6,10 +6,35 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Get the user's timezone offset in hours
+ * @returns The timezone offset in hours
+ */
+export function getUserTimezoneOffset(): number {
+  // Get local timezone offset in minutes and convert to hours
+  const offsetMinutes = new Date().getTimezoneOffset();
+  // Note: getTimezoneOffset returns minutes in the opposite direction
+  // e.g. Bangkok (UTC+7) returns -420 minutes, so we negate it
+  return -(offsetMinutes / 60);
+}
+
+/**
+ * Get the user's timezone name if available
+ * @returns The timezone name (e.g. 'Asia/Bangkok') or undefined
+ */
+export function getUserTimezoneName(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch (e) {
+    console.warn("Timezone detection not supported");
+    return "UTC";
+  }
+}
+
+/**
  * Parse a date string from the backend with proper timezone handling
- * Bangkok timezone is GMT+7
+ * Uses the client's local timezone instead of hardcoded values
  * @param dateString Date string from the backend
- * @returns JavaScript Date object correctly adjusted for Bangkok timezone
+ * @returns JavaScript Date object correctly adjusted for client timezone
  */
 export function parseBangkokDate(dateString: string | Date | undefined): Date {
   if (!dateString) return new Date();
@@ -25,12 +50,8 @@ export function parseBangkokDate(dateString: string | Date | undefined): Date {
     // Extract date and time parts
     const [_, datePart, timePart] = match;
     
-    // Parse the date in Bangkok timezone (GMT+7)
-    // This will handle the conversion from UTC to Bangkok timezone
-    const dateObj = new Date(`${datePart}T${timePart}Z`); // Parse as UTC
-    
-    // Adjust for Bangkok timezone (GMT+7 = +7 hours)
-    dateObj.setHours(dateObj.getHours() + 7);
+    // Parse as UTC - no timezone adjustment needed as we'll use the client's timezone
+    const dateObj = new Date(`${datePart}T${timePart}Z`);
     
     return dateObj;
   }
@@ -40,7 +61,7 @@ export function parseBangkokDate(dateString: string | Date | undefined): Date {
 }
 
 /**
- * Format a date for display with Bangkok timezone
+ * Format a date for display using the user's local timezone
  * @param date Date to format
  * @returns Formatted date string
  */
@@ -51,7 +72,20 @@ export function formatBangkokDate(date: Date | string | undefined): string {
   
   // Format the date with dd/mm/yyyy pattern
   try {
-    // Format date as DD/MM/YYYY HH:MM:SS
+    // Use Intl.DateTimeFormat for better localized formatting
+    const formatter = new Intl.DateTimeFormat(navigator.language, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false // 24-hour format
+    });
+    
+    return formatter.format(dateObj);
+  } catch (e) {
+    // Fallback to manual formatting if Intl API fails
     const day = String(dateObj.getDate()).padStart(2, '0');
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const year = dateObj.getFullYear();
@@ -60,12 +94,5 @@ export function formatBangkokDate(date: Date | string | undefined): string {
     const seconds = String(dateObj.getSeconds()).padStart(2, '0');
     
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-  } catch (e) {
-    // Fallback to a simpler format if there's an error
-    const isoString = dateObj.toISOString();
-    const parts = isoString.split('T');
-    const datePart = parts[0].split('-').reverse().join('/');
-    const timePart = parts[1].split('.')[0];
-    return `${datePart} ${timePart}`;
   }
 }

@@ -30,8 +30,9 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
   };
 
   return (
-    <div className={cn("border-r bg-[#1E1E1E]", className)}>
-      <div className="flex h-[60px] items-center px-6 border-b border-border">
+    <div className={cn("h-full flex flex-col bg-[#1E1E1E] border-r", className)}>
+      {/* Fixed header */}
+      <div className="flex-shrink-0 h-[60px] items-center px-6 border-b border-border flex">
         <span className="text-sm font-medium truncate" title={userEmail || ""}>
           {userEmail || "Not logged in"}
         </span>
@@ -42,8 +43,11 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
           />
         </div>
       </div>
-      <div className="space-y-4 py-4">
-        <div className="px-3">
+      
+      {/* Scrollable content */}
+      <div className="flex-grow flex flex-col overflow-hidden py-4">
+        {/* Fixed navigation buttons */}
+        <div className="px-3 flex-shrink-0">
           <div className="space-y-1">
             <Button 
               variant={currentView === "passwords" ? "secondary" : "ghost"}
@@ -71,7 +75,11 @@ export function Sidebar({ className, currentView = "passwords", onViewChange }: 
             </Button>
           </div>
         </div>
-        <CatList/>
+        
+        {/* Scrollable category list - apply custom-scrollbar class */}
+        <div className="flex-grow overflow-auto custom-scrollbar mt-4">
+          <CatList />
+        </div>
       </div>
     </div>
   );

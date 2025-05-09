@@ -116,13 +116,15 @@ export function Layout() {
         <SeedPhraseConfirmationPage />
       ) : (
         // Main application UI
-        <div className="h-screen bg-[#1E1E1E]">
+        <div className="h-screen bg-[#1E1E1E] overflow-hidden">
           <div className="grid h-full md:grid-cols-[240px_280px_1fr]">
-            <Sidebar 
-              currentView={currentView} 
-              onViewChange={setCurrentView} 
-            />
-            <div className="border-r border-border">
+            <div className="h-screen overflow-hidden">
+              <Sidebar 
+                currentView={currentView} 
+                onViewChange={setCurrentView} 
+              />
+            </div>
+            <div className="border-r border-border h-screen overflow-hidden">
               {currentView === "generator" ? (
                 <PasswordGenerator />
               ) : (
@@ -134,7 +136,7 @@ export function Layout() {
                 />
               )}
             </div>
-            <div className="border-0 border-border">
+            <div className="border-0 border-border h-screen overflow-hidden">
               {selectedPassword && (
                 <PasswordEditor
                   password={selectedPassword}

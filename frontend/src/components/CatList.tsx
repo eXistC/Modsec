@@ -203,48 +203,52 @@ export function CatList() {
   };
 
   return (
-    <div className="px-3 py-2">
-      <div className="flex justify-between items-center mb-2 px-4">
-        <h2 className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/70">
-          Categories
-        </h2>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-5 w-5" 
-          onClick={() => setIsAdding(!isAdding)}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Plus className="h-3.5 w-3.5" />
-          )}
-        </Button>
-      </div>
-
-      {isAdding && (
-        <div className="px-1 mb-2 flex gap-1">
-          <Input
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            placeholder="New category"
-            className="h-8 text-xs"
-            disabled={isLoading}
-            onKeyDown={(e) => e.key === "Enter" && !isLoading && handleAddCategory()}
-          />
+    <div className="h-full flex flex-col px-3 py-2">
+      {/* Header section - doesn't grow */}
+      <div className="flex-shrink-0">
+        <div className="flex justify-between items-center mb-2 px-4">
+          <h2 className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/70">
+            Categories
+          </h2>
           <Button 
-            size="sm" 
-            className="h-8" 
-            onClick={handleAddCategory}
-            disabled={isLoading || !newCategory.trim()}
+            variant="ghost" 
+            size="icon" 
+            className="h-5 w-5" 
+            onClick={() => setIsAdding(!isAdding)}
+            disabled={isLoading}
           >
-            {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Add"}
+            {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Plus className="h-3.5 w-3.5" />
+            )}
           </Button>
         </div>
-      )}
 
-      <ScrollArea className="px-1 max-h-[200px]">
+        {isAdding && (
+          <div className="px-1 mb-2 flex gap-1">
+            <Input
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="New category"
+              className="h-8 text-xs"
+              disabled={isLoading}
+              onKeyDown={(e) => e.key === "Enter" && !isLoading && handleAddCategory()}
+            />
+            <Button 
+              size="sm" 
+              className="h-8" 
+              onClick={handleAddCategory}
+              disabled={isLoading || !newCategory.trim()}
+            >
+              {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Add"}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Scrollable area - grows to fill available space */}
+      <ScrollArea className="flex-grow px-1 overflow-auto">
         {isLoading && categories.length === 0 ? (
           <div className="flex justify-center items-center py-4">
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

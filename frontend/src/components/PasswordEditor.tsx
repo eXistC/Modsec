@@ -39,7 +39,7 @@ const formatDate = (date: Date | string | undefined): string => {
   });
 };
 
-// Add null checking at the beginning of the component
+// Update the PasswordEditor component structure
 export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: PasswordEditorProps) {
   const { toast } = useToast();
   const { getIconBackgroundClass } = useColorSettings();
@@ -568,8 +568,9 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
   };
 
   return (
-    <div className="h-full bg-background">
-      <div className="flex h-[60px] items-center justify-between border-b border-border px-6">
+    <div className="h-full flex flex-col bg-background">
+      {/* Fixed header */}
+      <div className="flex-shrink-0 h-[60px] items-center justify-between border-b border-border px-6 flex">
         <h1 className="text-lg font-normal">{isEditing ? 'Editing' : 'Viewing'}</h1>
         <div className="flex items-center gap-2">
           {isEditing ? (
@@ -607,7 +608,9 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
           />
         </div>
       </div>
-      <div className="px-6 py-4">
+
+      {/* Scrollable content */}
+      <div className="flex-grow overflow-auto custom-scrollbar px-6 py-4">
         <div className="space-y-6">
           {/* Item name - enhanced with stylish icon and typography */}
           <div className="space-y-3">
@@ -808,7 +811,7 @@ export function PasswordEditor({ password, isOpen, onDelete, onUpdate }: Passwor
         </div>
       </div>
 
-      {/* Add the delete confirmation dialog */}
+      {/* Delete confirmation dialog */}
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}

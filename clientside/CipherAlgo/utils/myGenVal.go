@@ -71,7 +71,8 @@ func RandomInt(min, max int) int {
 }
 
 func GenerateTimestamp() string {
-	return time.Now().Format("20060102150405")
+	return time.Now().UTC().Format("20060102150405")
+
 }
 
 func RandomSeedPhrase() string {
